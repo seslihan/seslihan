@@ -1558,6 +1558,7 @@
   // ---------- JOIN GATE (auto-enter or name prompt) ----------
   const joinGate = $('joinGate');
   const joinGateBtn = $('joinGateBtn');
+  const joinGateSkipBtn = $('joinGateSkipBtn');
   const joinGateText = $('joinGateText');
   const joinGateSpinner = $('joinGateSpinner');
   const nameGate = $('nameGate');
@@ -1594,13 +1595,29 @@
       spawnChatWatermarks(document.getElementById('chatPanel'), 6);
     } catch (err) {
       let msg = 'Hata: ' + (err.message || err.name);
-      if (err.name === 'NotAllowedError') msg = 'İzin reddedildi. Tarayıcı ayarlarından mikrofonu etkinleştirip sayfayı yenileyin.';
+      if (err.name === 'NotAllowedError') msg = 'Mikrofon izni reddedildi.';
       else if (err.name === 'NotFoundError') msg = 'Mikrofon bulunamadı.';
       joinGateText.textContent = msg;
       joinGateBtn.hidden = false;
       joinGateBtn.disabled = false;
-      joinGateBtn.onclick = () => { joinGateBtn.hidden = true; doJoin(); };
-      toast('Mikrofon erişimi gerekli', 'error');
+      joinGateBtn.onclick = () => { joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; doJoin(); };
+      joinGateSkipBtn.hidden = false;
+      joinGateSkipBtn.onclick = () => {
+        joinGateBtn.hidden = true;
+        joinGateSkipBtn.hidden = true;
+        state.micOn = false;
+        state.localStream = new MediaStream();
+        if (state.camOn) {
+          try {
+            const vs = await navigator.mediaDevices.getUserMedia({ video: true });
+            vs.getVideoTracks().forEach(t => state.localStream.addTrack(t));
+          } catch (e) { state.camOn = false; }
+        }
+        joinGate.hidden = true;
+        init();
+        spawnChatWatermarks(document.getElementById('chatPanel'), 6);
+      };
+      toast('Mikrofon erişimi gerekli değil — sesli konuşamazsınız', 'warning');
     }
   }
 
