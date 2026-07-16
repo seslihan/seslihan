@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toplantıya Katıl — Seslihan</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="prejoin-body">
+  <header class="app-header">
+    <a href="/" class="app-brand">
+      <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
+    </a>
+    <div class="app-header-actions">
+      <a href="/" class="icon-btn" data-tooltip="Geri">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <main class="prejoin-container">
+    <section class="preview-card">
+      <div class="preview-video-wrap" id="previewWrap">
+        <video id="previewVideo" autoplay playsinline muted></video>
+        <div class="preview-overlay">
+          <div id="micMeter" class="preview-mic-meter">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-controls">
+        <button id="micToggle" class="ctrl" data-on="true" data-tooltip="Mikrofon">
+          <svg class="on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          <svg class="off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </button>
+        <button id="camToggle" class="ctrl no-track" data-on="false" data-tooltip="Kamerayı aç">
+          <svg class="on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          <svg class="off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3l2-3h6l2 3h3a2 2 0 0 1 2 2v8"/></svg>
+        </button>
+        <button id="testAudio" class="ctrl" data-tooltip="Ses testi">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <button id="blurToggle" class="ctrl" data-tooltip="Arka plan bulanıklaştırma">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <h2>Toplantıya katılmak üzere</h2>
+
+      <div class="field">
+        <label for="nameInput">Adınız</label>
+        <input id="nameInput" type="text" placeholder="Adınız" maxlength="32" />
+      </div>
+
+      <div class="field">
+        <label for="micSelect">Mikrofon</label>
+        <select id="micSelect"></select>
+      </div>
+
+      <div class="field">
+        <label for="camSelect">Kamera</label>
+        <select id="camSelect"></select>
+      </div>
+
+      <div class="field">
+        <label for="speakerSelect">Hoparlör</label>
+        <select id="speakerSelect"></select>
+      </div>
+
+      <div class="expandable-settings" id="expandableSettings">
+        <button class="expandable-header" id="expandableHeader" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Ayarlar</span>
+          <svg class="expand-arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="expandable-body" id="expandableBody">
+          <div class="toggle-row">
+            <div class="label">
+              <span class="label-title">Mikrofon kapalı katıl</span>
+              <span class="label-desc">Başlangıçta mikrofonun kapalı olsun</span>
+            </div>
+            <button id="startMicOff" class="switch" type="button"></button>
+          </div>
+          <div class="toggle-row">
+            <div class="label">
+              <span class="label-title">Kamera kapalı katıl</span>
+              <span class="label-desc">Başlangıçta kameran kapalı olsun</span>
+            </div>
+            <button id="startCamOff" class="switch" type="button"></button>
+          </div>
+          <div class="toggle-row">
+            <div class="label">
+              <span class="label-title">Gürültü azaltma</span>
+              <span class="label-desc">Tarayıcı tabanlı ses temizleme</span>
+            </div>
+            <button id="noiseToggle" class="switch on" type="button"></button>
+          </div>
+          <div class="toggle-row">
+            <div class="label">
+              <span class="label-title">Arka plan bulanıklaştırma</span>
+              <span class="label-desc">Kamerada hafif bulanıklık</span>
+            </div>
+            <button id="blurRowToggle" class="switch" type="button"></button>
+          </div>
+        </div>
+      </div>
+
+      <button id="joinBtn" class="btn primary large" style="margin-top:8px;">
+        Toplantıya katıl
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </section>
+  </main>
+
+  <div class="mic-test-modal" id="micTestModal" hidden>
+    <div class="mic-test-card">
+      <div class="mic-test-header">
+        <h3>Mikrofon Testi</h3>
+        <button class="mic-test-close" id="micTestClose">&times;</button>
+      </div>
+
+      <div class="mic-test-body">
+        <div class="mic-test-visual">
+          <canvas id="micWaveform" width="460" height="120"></canvas>
+        </div>
+
+        <div class="mic-test-volume">
+          <div class="mic-test-volume-bar-wrap">
+            <div class="mic-test-volume-fill" id="micVolumeFill"></div>
+          </div>
+          <span class="mic-test-volume-pct" id="micVolumePct">0%</span>
+        </div>
+
+        <div class="mic-test-info" id="micTestInfo">Cihaz seçilmedi</div>
+
+        <div class="mic-test-actions">
+          <button class="mic-test-btn" id="micLoopbackBtn" data-active="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            Dinle (Loopback)
+          </button>
+          <button class="mic-test-btn" id="micRecordBtn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            5sn Kaydet
+          </button>
+          <button class="mic-test-btn" id="micPlayBtn" disabled>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Kaydı Dinle
+          </button>
+        </div>
+
+        <div class="mic-test-devices">
+          <label>Cihaz seç:</label>
+          <select id="micTestSelect"></select>
+        </div>
+
+        <div class="mic-test-tips">
+          <p><strong>İpuçları:</strong></p>
+          <ul>
+            <li>Seviye çubuğunuza konuşarak test edin — yeşil/sarı idealdir</li>
+            <li><strong>Dinle</strong> ile kendi sesinizi duyabilirsiniz</li>
+            <li><strong>Kaydet</strong> ile 5 saniye kayıt alıp geri dinleyebilirsiniz</li>
+            <li>Farklı cihazlarla test ederek en iyisini seçebilirsiniz</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-host" id="toastHost"></div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/prejoin.js"></script>
+</body>
+</html>

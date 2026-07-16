@@ -1,0 +1,13 @@
+node_modules/
+public/uploads/
+public/uploads/.chunks/
+*.log
+tunnel.log
+tunnel_err.log
+url.txt
+run_tunnel.bat
+cloudflared.exe
+start.bat
+start-tunnel.bat
+tunnel.js
+seslihanlogo2-Photoroom.png

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toplantı sona erdi — Seslihan</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="post-body">
+  <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" height="112" style="border-radius:10px;margin-bottom:16px;" />
+  <main class="post-card">
+    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-3));color:white;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px;">
+      <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h1>Toplantıdan ayrıldınız</h1>
+    <p style="color:var(--muted);">Toplantı bilgileri aşağıda:</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-value" id="duration">--:--</div><div class="stat-label">Süre</div></div>
+      <div class="stat"><div class="stat-value" id="code">--</div><div class="stat-label">Kod</div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+      <button id="rejoinBtn" class="btn primary">Yeniden katıl</button>
+      <a href="/" class="btn">Ana sayfaya dön</a>
+    </div>
+    <p style="margin-top:16px;font-size:12px;color:var(--muted);">Teknik sorun mu var? <a href="#" onclick="alert('Sorun bildirimi gönderildi (mock)');return false;">Buradan bildirin</a></p>
+  </main>
+  <script src="/js/common.js"></script>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code') || '';
+      const duration = parseInt(params.get('duration') || '0', 10);
+      $ = (id) => document.getElementById(id);
+      $('code').textContent = code;
+      const sec = duration || 0;
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      $('duration').textContent = h > 0 ? h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0') : m + ':' + String(s).padStart(2, '0');
+      $('rejoinBtn').addEventListener('click', () => {
+        const n = localStorage.getItem('bs-name') || (getUser() && getUser().name) || '';
+        if (!n) { window.location.href = '/prejoin.html?code=' + encodeURIComponent(code); return; }
+        window.location.href = '/prejoin.html?code=' + encodeURIComponent(code) + '&name=' + encodeURIComponent(n);
+      });
+    })();
+  </script>
+</body>
+</html>

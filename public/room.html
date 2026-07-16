@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toplantı — Seslihan</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="room-body">
+  <div class="room-shell">
+    <aside class="stage">
+      <header class="stage-header">
+        <div class="stage-header-left">
+          <div class="stage-title">
+            <img src="/seslihanlogo2.png" alt="" height="18" style="border-radius:3px;" />
+            <span id="roomCodeLabel">------</span>
+            <button id="copyCode" class="icon-btn" data-tooltip="Kodu kopyala" style="width:28px;height:28px;padding:4px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <span id="securityPill" class="security-pill" title="E2EE benzeri şifreleme">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Güvenli
+          </span>
+          <span id="recordPill" class="security-pill" style="background:var(--danger);display:none;">
+            <span style="width:8px;height:8px;background:white;border-radius:50%;animation:rec-pulse 1s infinite;"></span> Kayıt
+          </span>
+        </div>
+        <div class="stage-header-center">
+          <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" style="border-radius:4px;" />
+        </div>
+        <div class="stage-header-right">
+          <span id="connQuality" class="conn-quality" title="Bağlantı kalitesi">
+            <span class="signal"><span class="b"></span><span class="b"></span><span class="b"></span><span class="b"></span></span>
+            <span id="connText">İyi</span>
+          </span>
+          <span id="meetTimer" class="stage-timer">00:00</span>
+          <span id="userCount" class="stage-timer">1 / 4</span>
+        </div>
+      </header>
+
+      <div id="videoGrid" class="video-grid"></div>
+
+      <div id="presentStage" class="present-stage" hidden>
+        <div class="present-header">
+          <div class="present-badge">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span id="presentLabel">Sen ekran paylaşıyorsun</span>
+          </div>
+          <button id="stopScreenBtn" class="btn small danger" style="margin-left:auto;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            Ekran paylaşımını durdur
+          </button>
+        </div>
+        <div class="present-content">
+          <video id="presentVideo" autoplay playsinline muted></video>
+        </div>
+        <div class="present-pip" id="presentPip" hidden>
+          <div class="present-pip-tile">
+            <video id="presentPipVideo" autoplay playsinline muted></video>
+            <div class="present-pip-label">Sen</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="toggleMic" class="ctrl" data-on="true" data-tooltip="Mikrofon (M)">
+          <svg class="on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          <svg class="off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </button>
+        <button id="toggleCam" class="ctrl no-track" data-on="false" data-tooltip="Kamera (C)">
+          <svg class="on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          <svg class="off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3l2-3h6l2 3h3a2 2 0 0 1 2 2v8"/></svg>
+        </button>
+        <button id="toggleScreen" class="ctrl" data-tooltip="Ekran paylaş">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </button>
+        <button id="toggleCaptions" class="ctrl" data-tooltip="Altyazılar">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="6" y1="11" x2="10" y2="11"/><line x1="14" y1="11" x2="18" y2="11"/><line x1="6" y1="15" x2="14" y2="15"/></svg>
+        </button>
+        <button id="raiseHand" class="ctrl" data-tooltip="El kaldır (H)">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+        </button>
+        <div class="ctrl-divider"></div>
+        <button id="reactionsBtn" class="ctrl" data-tooltip="Tepki gönder">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </button>
+        <button id="whiteboardBtn" class="ctrl" data-tooltip="Beyaz tahta">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+        </button>
+        <button id="moreBtn" class="ctrl" data-tooltip="Diğer">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+        <div class="ctrl-divider"></div>
+        <button id="leaveBtn" class="ctrl danger" data-tooltip="Ayrıl">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Ayrıl</span>
+        </button>
+      </div>
+
+      <div id="reactionsPopover" class="popover" hidden>
+        <div class="popover-section-title">Tepki gönder</div>
+        <button class="popover-item" data-emoji="👏">👏 Alkış</button>
+        <button class="popover-item" data-emoji="👍">👍 Beğeni</button>
+        <button class="popover-item" data-emoji="❤️">❤️ Kalp</button>
+        <button class="popover-item" data-emoji="😂">😂 Gülme</button>
+        <button class="popover-item" data-emoji="😮">😮 Şaşırma</button>
+        <button class="popover-item" data-emoji="🎉">🎉 Kutlama</button>
+      </div>
+
+      <div id="morePopover" class="popover" hidden>
+        <div class="popover-section-title">Yerleşim</div>
+        <button class="popover-item" data-layout="auto">Otomatik</button>
+        <button class="popover-item" data-layout="grid">Izgara</button>
+        <button class="popover-item" data-layout="speaker">Aktif konuşmacı</button>
+        <div class="popover-section-title">Diğer</div>
+        <button class="popover-item" id="testAudioPop">🔊 Ses testi</button>
+        <button class="popover-item" id="settingsPopBtn">⚙️ Ayarlar</button>
+        <button class="popover-item" id="fullscreenBtn">⛶ Tam ekran</button>
+        <div class="popover-section-title" id="hostSection" style="display:none;">Yönetici</div>
+        <button class="popover-item" id="muteAllBtn" style="display:none;">🔇 Tümünü sustur</button>
+        <button class="popover-item" id="lockMeetingBtn" style="display:none;">🔒 Toplantıyı kilitle</button>
+        <button class="popover-item" id="waitingRoomBtn" style="display:none;">⏳ Bekleme odası</button>
+        <button class="popover-item danger" id="endMeetingBtn" style="display:none;">🛑 Toplantıyı sonlandır</button>
+      </div>
+    </aside>
+
+    <aside class="chat">
+      <header class="chat-header">
+        <img src="/seslihanlogo2.png" alt="" class="logo-transparent" style="height:24px;border-radius:4px;margin-right:4px;" />
+        <h2>Toplantı</h2>
+        <button id="toggleChat" class="icon-btn mobile-only" data-tooltip="Gizle">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </header>
+
+      <div class="chat-tabs">
+        <button class="chat-tab active" data-tab="chat">Sohbet <span id="chatBadge" class="chat-tab-badge" hidden>0</span></button>
+        <button class="chat-tab" data-tab="participants">Kişiler <span id="partBadge" class="chat-tab-badge" hidden>0</span></button>
+      </div>
+
+      <div id="chatPanel" class="panel" style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;">
+        <div id="messages" class="messages"></div>
+        <div id="typing" class="typing"></div>
+        <form id="chatForm" class="chat-form" autocomplete="off">
+          <button type="button" id="emojiBtn" class="icon-btn" data-tooltip="Emoji">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
+          </button>
+          <button type="button" id="fileBtn" class="icon-btn" data-tooltip="Dosya (max 2 GB)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <input type="file" id="fileInput" hidden />
+          <input id="chatInput" type="text" placeholder="Mesaj yazın..." maxlength="500" />
+          <button type="submit" class="send-btn" data-tooltip="Gönder">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <div id="participantsPanel" class="panel" style="display:none;flex:1;flex-direction:column;min-height:0;">
+        <div id="participantsList" class="participants-list"></div>
+      </div>
+
+      <div id="emojiPanel" class="emoji-panel" hidden>
+        <div class="emoji-cats">
+          <button class="emoji-cat active" data-cat="0">😊</button>
+          <button class="emoji-cat" data-cat="1">👍</button>
+          <button class="emoji-cat" data-cat="2">❤️</button>
+          <button class="emoji-cat" data-cat="3">🐱</button>
+          <button class="emoji-cat" data-cat="4">🍎</button>
+          <button class="emoji-cat" data-cat="5">⚽</button>
+          <button class="emoji-cat" data-cat="6">🚗</button>
+          <button class="emoji-cat" data-cat="7">🎉</button>
+        </div>
+        <div id="emojiGrid" class="emoji-grid"></div>
+      </div>
+    </aside>
+  </div>
+
+  <div id="joinGate" class="join-gate">
+    <div class="join-gate-card">
+      <div class="spinner" id="joinGateSpinner"></div>
+      <h2>Seslihan</h2>
+      <p id="joinGateText">Odaya bağlanılıyor...</p>
+      <div id="nameGate" hidden style="margin-top:12px;width:100%;max-width:280px;">
+        <input id="nameGateInput" type="text" placeholder="Adınızı girin" maxlength="32" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;margin-bottom:10px;" />
+        <button id="nameGateBtn" class="btn primary large" style="width:100%;">
+          Katıl
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+      <button id="joinGateBtn" class="btn primary large" hidden>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+        Tekrar dene
+      </button>
+      <p class="join-gate-hint">Kamera isteğe bağlıdır — odada sonradan açabilirsiniz</p>
+    </div>
+  </div>
+
+  <div id="audioLock" class="audio-lock" hidden>
+    <button id="audioLockBtn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      Sesi aç
+    </button>
+  </div>
+
+  <div id="handPill" class="hand-raise-pill" hidden>
+    <span>✋</span>
+    <span>El kaldırdınız</span>
+    <button id="lowerHandBtn" style="background:rgba(0,0,0,0.2);border:none;color:white;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;margin-left:8px;">İndir</button>
+  </div>
+
+  <div id="reactionsHost" class="reactions-host"></div>
+  <div id="captionsHost" class="captions-host"></div>
+
+  <div id="whiteboardOverlay" class="whiteboard-overlay" hidden>
+    <div class="wb-camera-strip" id="wbCameraStrip"></div>
+    <div class="whiteboard-card">
+      <div class="whiteboard-toolbar">
+        <button class="wb-tool active" data-tool="pen" data-tooltip="Kalem">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+        </button>
+        <button class="wb-tool" data-tool="eraser" data-tooltip="Silgi">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16c-1.1-1.1-1.1-2.9 0-4L13 2c1.1-1.1 2.9-1.1 4 0l5 5c1.1 1.1 1.1 2.9 0 4l-9 9"/><line x1="18" y1="13" x2="9" y2="4"/></svg>
+        </button>
+        <button class="wb-tool" data-tool="rect" data-tooltip="Dikdörtgen">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+        </button>
+        <div class="wb-color-row">
+          <button class="wb-color active" style="background:#2d1810;" data-color="#2d1810"></button>
+          <button class="wb-color" style="background:#e63946;" data-color="#e63946"></button>
+          <button class="wb-color" style="background:#f7931e;" data-color="#f7931e"></button>
+          <button class="wb-color" style="background:#2a9d8f;" data-color="#2a9d8f"></button>
+          <button class="wb-color" style="background:#4a90e2;" data-color="#4a90e2"></button>
+          <button class="wb-color" style="background:#6c8cff;" data-color="#6c8cff"></button>
+        </div>
+        <div class="ctrl-divider"></div>
+        <button class="wb-tool" id="wbUndo" data-tooltip="Geri al">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6.7 2.97L3 13"/></svg>
+        </button>
+        <button class="wb-tool" id="wbClear" data-tooltip="Temizle">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+        <button class="wb-tool" id="wbExport" data-tooltip="PNG indir">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <div style="flex:1"></div>
+        <button class="btn small" id="wbClose">Kapat</button>
+      </div>
+      <div class="wb-canvas-wrap">
+        <canvas id="wbCanvas" class="wb-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div id="micTestModal" class="mic-test-modal" hidden>
+    <div class="mic-test-card">
+      <div class="mic-test-header">
+        <h3>Mikrofon Testi</h3>
+        <button class="mic-test-close" id="micTestClose">&times;</button>
+      </div>
+      <div class="mic-test-body">
+        <div class="mic-test-visual">
+          <canvas id="micWaveform" width="460" height="120"></canvas>
+        </div>
+        <div class="mic-test-volume">
+          <div class="mic-test-volume-bar-wrap">
+            <div class="mic-test-volume-fill" id="micVolumeFill"></div>
+          </div>
+          <span class="mic-test-volume-pct" id="micVolumePct">0%</span>
+        </div>
+        <div class="mic-test-info" id="micTestInfo">Cihaz seçilmedi</div>
+        <div class="mic-test-actions">
+          <button class="mic-test-btn" id="micLoopbackBtn" data-active="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            Dinle (Loopback)
+          </button>
+          <button class="mic-test-btn" id="micRecordBtn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            5sn Kaydet
+          </button>
+          <button class="mic-test-btn" id="micPlayBtn" disabled>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Kaydı Dinle
+          </button>
+        </div>
+        <div class="mic-test-devices">
+          <label>Cihaz seç:</label>
+          <select id="micTestSelect"></select>
+        </div>
+        <div class="mic-test-tips">
+          <p><strong>İpuçları:</strong></p>
+          <ul>
+            <li>Seviye çubuğunuza konuşarak test edin — yeşil/sarı idealdir</li>
+            <li><strong>Dinle</strong> ile kendi sesinizi duyabilirsiniz</li>
+            <li><strong>Kaydet</strong> ile 5 saniye kayıt alıp geri dinleyebilirsiniz</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastHost" class="toast-host"></div>
+  <div id="uploadProgress" class="upload-progress" hidden>
+    <div class="upload-progress-info">
+      <span id="uploadFileName">dosya.zip</span>
+      <span id="uploadPercent">0%</span>
+    </div>
+    <div class="upload-progress-bar"><div id="uploadProgressFill"></div></div>
+    <button id="uploadCancel" type="button">İptal</button>
+  </div>
+
+  <div id="preview" class="preview" hidden>
+    <div class="preview-inner">
+      <button id="previewClose" class="preview-close">&times;</button>
+      <div id="previewContent"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/room.js"></script>
+</body>
+</html>
