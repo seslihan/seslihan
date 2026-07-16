@@ -1474,9 +1474,7 @@
   // ---------- MISC ----------
   $('toggleChat').addEventListener('click', () => document.querySelector('.chat').classList.toggle('collapsed'));
   $('leaveBtn').addEventListener('click', () => {
-    if (confirm('Toplantıdan ayrılmak istiyor musunuz?')) {
-      window.location.href = '/post.html?code=' + state.roomCode + '&duration=' + Math.floor((Date.now() - state.meetStart) / 1000);
-    }
+    window.location.href = '/post.html?code=' + state.roomCode + '&duration=' + Math.floor((Date.now() - state.meetStart) / 1000);
   });
   $('copyCode').addEventListener('click', () => {
     const link = window.location.origin + '/room.html?code=' + state.roomCode;
@@ -1671,6 +1669,93 @@
   } else {
     doJoin();
   }
+
+  // ---------- ROOM SETTINGS MODAL ----------
+  function initToggle(btn, key) {
+    const s = getSettings();
+    btn.style.background = s[key] !== false ? 'var(--accent)' : 'var(--bg-3)';
+    btn.innerHTML = '<span style="display:block;width:18px;height:18px;background:white;border-radius:50%;transition:transform 0.2s;transform:translateX(' + (s[key] !== false ? '20px' : '2px') + ');"></span>';
+    btn.onclick = () => {
+      const cur = getSettings();
+      cur[key] = cur[key] === false ? true : false;
+      saveSettings(cur);
+      initToggle(btn, key);
+    };
+  }
+
+  $('settingsPopBtn').addEventListener('click', () => {
+    $('morePopover').hidden = true;
+    $('roomSettingsModal').hidden = false;
+    initToggle($('roomNoiseToggle'), 'noiseReduction');
+    initToggle($('roomEchoToggle'), 'echoCancellation');
+    initToggle($('roomAgcToggle'), 'autoGainControl');
+    initToggle($('roomReactToggle'), 'reactAnimations');
+    navigator.mediaDevices.enumerateDevices().then(devs => {
+      const sel = $('roomMicSelect');
+      sel.innerHTML = '';
+      devs.filter(d => d.kind === 'audioinput').forEach(d => {
+        const o = document.createElement('option');
+        o.value = d.deviceId;
+        o.textContent = d.label || 'Mikrofon ' + (sel.children.length + 1);
+        sel.appendChild(o);
+      });
+      const cur = getSettings();
+      if (cur.defaultMic) sel.value = cur.defaultMic;
+    }).catch(() => {});
+    $('roomMicSelect').onchange = () => {
+      const cur = getSettings();
+      cur.defaultMic = $('roomMicSelect').value;
+      saveSettings(cur);
+    };
+  });
+  $('roomSettingsClose').addEventListener('click', () => { $('roomSettingsModal').hidden = true; });
+
+  // ---------- WHITEBOARD DOC UPLOAD ----------
+  $('wbDocUpload').addEventListener('click', () => { $('wbDocInput').click(); });
+  $('wbDocInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = '';
+    $('wbDocTitle').textContent = file.name;
+    const content = $('wbDocContent');
+    content.innerHTML = '';
+
+    if (file.type === 'application/pdf') {
+      const url = URL.createObjectURL(file);
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.style.cssText = 'width:100%;height:100%;border:none;';
+      content.appendChild(iframe);
+      $('wbDocViewer').hidden = false;
+    } else if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;';
+      content.appendChild(img);
+      $('wbDocViewer').hidden = false;
+    } else {
+      const ext = file.name.split('.').pop().toLowerCase();
+      const url = URL.createObjectURL(file);
+      const info = document.createElement('div');
+      info.style.cssText = 'text-align:center;padding:40px;';
+      const iconMap = { ppt: '📊', pptx: '📊', xls: '📈', xlsx: '📈', csv: '📈', doc: '📝', docx: '📝', txt: '📄', odp: '📊', ods: '📈' };
+      info.innerHTML =
+        '<div style="font-size:64px;margin-bottom:16px;">' + (iconMap[ext] || '📄') + '</div>' +
+        '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">' + escapeHtml(file.name) + '</div>' +
+        '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;">' + (file.type || ext.toUpperCase()) + ' · ' + (file.size > 1024 * 1024 ? (file.size / 1024 / 1024).toFixed(1) + ' MB' : (file.size / 1024).toFixed(0) + ' KB') + '</div>' +
+        '<a href="' + url + '" download="' + escapeHtml(file.name) + '" class="btn primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;font-weight:600;">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+          'Dosyayı indir' +
+        '</a>';
+      content.appendChild(info);
+      $('wbDocViewer').hidden = false;
+    }
+  });
+  $('wbDocClose').addEventListener('click', () => {
+    $('wbDocViewer').hidden = true;
+    $('wbDocContent').innerHTML = '';
+  });
 
   window.addEventListener('beforeunload', () => {
     if (state.recognition) { try { state.recognition.stop(); } catch (_) {} }
