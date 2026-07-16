@@ -1866,7 +1866,8 @@ body.post-body { display: flex; align-items: center; justify-content: center; ba
   .chat.collapsed .typing,
   .chat.collapsed .chat-tabs { display: none; }
   .audio-lock { right: 16px; bottom: 64vh; }
-  .video-grid[data-count="1"] { grid-template-columns: 1fr; }
+.video-grid[data-count="1"] { grid-template-columns: 1fr; }
+.video-grid[data-count="1"] .tile { aspect-ratio: unset; }
   .video-grid[data-count="2"], .video-grid[data-count="3"], .video-grid[data-count="4"] { grid-template-columns: 1fr 1fr; }
   .video-grid[data-count="5"], .video-grid[data-count="6"], .video-grid[data-count="7"], .video-grid[data-count="8"] { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); }
   .ctrl { width: 44px; height: 44px; }
