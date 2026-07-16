@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Ayarlar — Seslihan</title>
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/style.css?v=4" />
 </head>
 <body class="settings-body">
   <header class="app-header">
@@ -19,7 +19,7 @@
   </header>
 
   <main class="settings-main">
-    <h1 style="margin:0 0 20px;">Ayarlar</h1>
+    <h1 class="settings-title">Ayarlar</h1>
 
     <div class="settings-section">
       <h3>Ses</h3>
@@ -86,8 +86,8 @@
 
     <div class="settings-section">
       <h3>Klavye kısayolları</h3>
-      <p style="margin:0 0 10px;color:var(--muted);font-size:13px;">Toplantı sırasında:</p>
-      <ul style="margin:0;padding-left:20px;color:var(--text-2);font-size:13px;line-height:1.8;">
+      <p class="settings-shortcuts-label">Toplantı sırasında:</p>
+      <ul class="settings-shortcuts-list">
         <li><kbd>M</kbd> — Mikrofon aç/kapat</li>
         <li><kbd>C</kbd> — Kamera aç/kapat</li>
         <li><kbd>H</kbd> — El kaldır</li>
@@ -99,7 +99,7 @@
       <h3>Gizlilik</h3>
       <p class="note">Engellenen kullanıcılar ve hesap verileri için henüz mock.</p>
       <button id="exportBtn" class="btn small">Hesap verilerini dışa aktar (mock)</button>
-      <button id="deleteBtn" class="btn small danger" style="margin-top:8px;">Hesabı sil (mock)</button>
+      <button id="deleteBtn" class="btn small danger settings-delete-btn">Hesabı sil (mock)</button>
     </div>
   </main>
 

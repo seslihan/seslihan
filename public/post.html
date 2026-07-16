@@ -4,25 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Toplantı sona erdi — Seslihan</title>
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/style.css?v=4" />
 </head>
 <body class="post-body">
-  <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" height="112" style="border-radius:10px;margin-bottom:16px;" />
+  <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent post-logo" height="112" />
   <main class="post-card">
-    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-3));color:white;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px;">
+    <div class="post-check-circle">
       <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <h1>Toplantıdan ayrıldınız</h1>
-    <p style="color:var(--muted);">Toplantı bilgileri aşağıda:</p>
+    <p class="post-subtitle">Toplantı bilgileri aşağıda:</p>
     <div class="stats">
       <div class="stat"><div class="stat-value" id="duration">--:--</div><div class="stat-label">Süre</div></div>
       <div class="stat"><div class="stat-value" id="code">--</div><div class="stat-label">Kod</div></div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+    <div class="post-actions">
       <button id="rejoinBtn" class="btn primary">Yeniden katıl</button>
       <a href="/" class="btn">Ana sayfaya dön</a>
     </div>
-    <p style="margin-top:16px;font-size:12px;color:var(--muted);">Teknik sorun mu var? <a href="#" onclick="alert('Sorun bildirimi gönderildi (mock)');return false;">Buradan bildirin</a></p>
+    <p class="post-footer-text">Teknik sorun mu var? <a href="#" onclick="alert('Sorun bildirimi gönderildi (mock)');return false;">Buradan bildirin</a></p>
   </main>
   <script src="/js/common.js"></script>
   <script>

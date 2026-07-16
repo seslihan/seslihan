@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Toplantı planla — Seslihan</title>
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/style.css?v=4" />
 </head>
 <body class="schedule-body">
   <header class="app-header">
@@ -19,8 +19,8 @@
   </header>
 
   <main class="schedule-main">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
-      <h1 style="margin:0;">Toplantıları planla</h1>
+    <div class="schedule-header-row">
+      <h1>Toplantıları planla</h1>
       <button id="newBtn" class="btn primary">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Yeni toplantı
@@ -29,16 +29,16 @@
 
     <div id="list" class="schedule-list"></div>
 
-    <div id="form" class="settings-section" hidden style="margin-top:20px;">
+    <div id="form" class="settings-section schedule-form" hidden>
       <h3 id="formTitle">Yeni toplantı</h3>
       <div class="field"><label>Toplantı adı</label><input id="mTitle" type="text" placeholder="Haftalık ekip toplantısı" /></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="schedule-form-grid">
         <div class="field"><label>Tarih</label><input id="mDate" type="date" /></div>
         <div class="field"><label>Saat</label><input id="mTime" type="time" /></div>
       </div>
       <div class="field"><label>Süre (dakika)</label><input id="mDuration" type="number" value="60" min="5" max="480" /></div>
-      <div class="field"><label>Açıklama (opsiyonel)</label><textarea id="mDesc" rows="2" style="width:100%;background:var(--panel-2);border:2px solid var(--line);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-size:14px;outline:none;resize:vertical;"></textarea></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div class="field"><label>Açıklama (opsiyonel)</label><textarea id="mDesc" rows="2" class="schedule-textarea"></textarea></div>
+      <div class="schedule-form-actions">
         <button id="saveBtn" class="btn primary">Kaydet</button>
         <button id="cancelBtn" class="btn">İptal</button>
         <button id="icsBtn" class="btn small">.ics indir</button>

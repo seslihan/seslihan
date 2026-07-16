@@ -1779,8 +1779,10 @@
   // ---------- ROOM SETTINGS MODAL ----------
   function initToggle(btn, key) {
     const s = getSettings();
-    btn.style.background = s[key] !== false ? 'var(--accent)' : 'var(--bg-3)';
-    btn.innerHTML = '<span style="display:block;width:18px;height:18px;background:white;border-radius:50%;transition:transform 0.2s;transform:translateX(' + (s[key] !== false ? '20px' : '2px') + ');"></span>';
+    const on = s[key] !== false;
+    btn.classList.toggle('on', on);
+    btn.classList.toggle('off', !on);
+    btn.innerHTML = '<span class="toggle-knob"></span>';
     btn.onclick = () => {
       const cur = getSettings();
       cur[key] = cur[key] === false ? true : false;

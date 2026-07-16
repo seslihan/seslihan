@@ -1951,6 +1951,9 @@ body.post-body {
 
 /* ---------- EXPANDABLE SETTINGS BAR ---------- */
 .expandable-settings { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-top: 4px; }
+
+/* --- Prejoin join button --- */
+#joinBtn { margin-top: 8px; }
 .expandable-header {
   display: flex; align-items: center; gap: 8px;
   width: 100%; padding: 12px 14px;
@@ -2193,4 +2196,572 @@ body.post-body {
   background: var(--accent); cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* ==========================================
+   RETRO / NOSTALJIK EFEKTLER
+   ========================================== */
+
+/* --- CRT Scanline overlay --- */
+.room-body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99998;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.015) 0px,
+    rgba(0, 0, 0, 0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  animation: scanline-scroll 8s linear infinite;
+}
+
+@keyframes scanline-scroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+
+/* --- Vignette on room --- */
+.room-body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99997;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(30, 20, 12, 0.15) 100%);
+}
+
+[data-theme="dark"] .room-body::after {
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+/* --- Tile hover glow (warm) --- */
+.tile:hover {
+  box-shadow: 0 0 20px rgba(196, 94, 44, 0.15);
+}
+
+.tile.speaking {
+  box-shadow: 0 0 24px rgba(90, 138, 106, 0.35);
+}
+
+/* --- Retro button press effect --- */
+.btn:active, .ctrl:active {
+  transform: translateY(1px) scale(0.97) !important;
+}
+
+/* --- Warm scrollbar --- */
+.messages::-webkit-scrollbar-track { background: var(--bg-2); }
+.messages::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 4px; }
+.messages::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* --- Join gate ambient glow --- */
+.join-gate::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(196, 94, 44, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  animation: gate-glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes gate-glow {
+  0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.9); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* --- Stage ambient warm overlay --- */
+.stage {
+  background-image: radial-gradient(ellipse at 50% 100%, rgba(196, 94, 44, 0.03) 0%, transparent 60%);
+}
+
+/* --- Hero card retro paper texture --- */
+.hero-card {
+  background-image: linear-gradient(180deg, var(--panel) 0%, rgba(196, 164, 126, 0.04) 100%);
+}
+
+/* --- Auth card retro --- */
+.auth-card {
+  background-image: linear-gradient(180deg, var(--panel) 0%, rgba(196, 164, 126, 0.04) 100%);
+}
+
+/* --- Chat msg bubble retro softness --- */
+.msg-bubble {
+  box-shadow: 0 1px 3px rgba(120, 80, 40, 0.06);
+}
+
+.msg-row.me .msg-bubble {
+  box-shadow: 0 3px 12px rgba(196, 94, 44, 0.2);
+}
+
+/* --- Controls retro warm glow on hover --- */
+.ctrl:hover {
+  box-shadow: 0 4px 16px rgba(196, 94, 44, 0.15);
+}
+
+/* --- Timer monospace retro --- */
+.stage-timer, .meeting-item-code, .mic-test-volume-pct {
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+}
+
+/* --- Send button retro pulse --- */
+.send-btn:active {
+  transform: scale(0.92);
+}
+
+/* --- Popover retro entrance --- */
+@keyframes popover-enter {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.popover:not([hidden]) {
+  animation: popover-enter 0.2s ease;
+}
+
+/* --- Toast retro slide --- */
+@keyframes toast-enter {
+  from { opacity: 0; transform: translateY(20px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.toast.show {
+  animation: toast-enter 0.3s ease;
+}
+
+/* --- Mic test retro waveform bg --- */
+.mic-test-visual {
+  background: linear-gradient(180deg, var(--bg-3) 0%, var(--bg-2) 100%);
+}
+
+/* --- Upload progress retro --- */
+.upload-progress {
+  background-image: linear-gradient(180deg, var(--panel) 0%, rgba(196, 164, 126, 0.04) 100%);
+}
+
+/* --- Settings section retro --- */
+.settings-section {
+  background-image: linear-gradient(180deg, var(--panel) 0%, rgba(196, 164, 126, 0.04) 100%);
+}
+
+/* --- Schedule item retro --- */
+.schedule-item {
+  background-image: linear-gradient(180deg, var(--panel) 0%, rgba(196, 164, 126, 0.03) 100%);
+  transition: all 0.2s;
+}
+.schedule-item:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(196, 94, 44, 0.1);
+}
+
+/* --- Post card retro --- */
+.post-card {
+  background-image: linear-gradient(180deg, var(--panel) 0%, rgba(196, 164, 126, 0.04) 100%);
+}
+
+/* --- Prejoin preview retro frame --- */
+.preview-card {
+  background-image: linear-gradient(180deg, var(--panel) 0%, rgba(196, 164, 126, 0.04) 100%);
+}
+
+/* --- Whiteboard card retro --- */
+.whiteboard-card {
+  background-image: linear-gradient(180deg, var(--panel) 0%, rgba(196, 164, 126, 0.04) 100%);
+}
+
+/* --- Page transitions --- */
+body {
+  animation: page-fade-in 0.3s ease;
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Selection color retro --- */
+::selection {
+  background: rgba(196, 94, 44, 0.25);
+  color: var(--text);
+}
+
+/* --- Focus ring retro --- */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- Link retro underline --- */
+a:hover {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--accent);
+}
+
+/* ==========================================
+   ROOM INLINE STYLE REPLACEMENTS
+   ========================================== */
+
+/* --- Stage title logo --- */
+.stage-title img {
+  border-radius: 3px;
+}
+
+/* --- Stage title copy button --- */
+.stage-title .icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+}
+
+/* --- Center header logo --- */
+.stage-header-center .logo-transparent {
+  border-radius: 4px;
+}
+
+/* --- Record pill --- */
+.record-pill {
+  background: var(--danger) !important;
+  display: none;
+}
+
+/* --- Record pulse dot --- */
+.record-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: rec-pulse 1s infinite;
+}
+
+@keyframes rec-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* --- Chat header logo --- */
+.chat-header .logo-transparent {
+  height: 48px;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+
+/* --- Chat panel layout --- */
+#chatPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+/* --- Participants panel layout --- */
+#participantsPanel {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* --- Name gate --- */
+.name-gate-wrap {
+  margin-top: 12px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.name-gate-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.name-gate-input::placeholder {
+  color: var(--text-3);
+}
+
+.name-gate-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(196, 94, 44, 0.15);
+}
+
+/* --- Name gate full-width button --- */
+#nameGateBtn {
+  width: 100%;
+}
+
+/* --- Hand raise lower button --- */
+.hand-lower-btn {
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background 0.2s;
+}
+
+.hand-lower-btn:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* --- Whiteboard flex spacer --- */
+.wb-spacer {
+  flex: 1;
+}
+
+/* --- Room settings toggle rows --- */
+.room-settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.room-settings-toggle .toggle-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* --- Room settings toggle buttons --- */
+.toggle-btn {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.toggle-btn.on {
+  background: var(--accent);
+}
+
+.toggle-btn.off,
+.toggle-btn:not(.on) {
+  background: var(--line-2);
+}
+
+/* --- Toggle knob (JS-created) --- */
+.toggle-knob {
+  display: block;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-btn.on .toggle-knob {
+  transform: translateX(20px);
+}
+
+.toggle-btn.off .toggle-knob,
+.toggle-btn:not(.on) .toggle-knob {
+  transform: translateX(3px);
+}
+
+/* --- Room settings select --- */
+.room-settings-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+/* --- Room settings mic select section --- */
+.room-settings-mic-select {
+  padding: 12px 0;
+}
+
+.room-settings-mic-select .toggle-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* --- Stop screen btn float --- */
+#stopScreenBtn {
+  margin-left: auto;
+}
+
+/* --- Ambient volume helpers --- */
+.ambient-vol-icon {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ambient-vol-pct {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ==========================================
+   AUTH PAGE RETRO
+   ========================================== */
+.auth-brand {
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.auth-logo {
+  width: auto;
+  border-radius: 6px;
+}
+
+.auth-submit {
+  width: 100%;
+}
+
+.auth-forgot {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.auth-demo-notice {
+  background: var(--bg-2);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.auth-body .toggle-row {
+  margin: 10px 0;
+}
+
+/* ==========================================
+   SCHEDULE PAGE
+   ========================================== */
+.schedule-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.schedule-header-row h1 {
+  margin: 0;
+}
+
+.schedule-form {
+  margin-top: 20px;
+}
+
+.schedule-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.schedule-textarea {
+  width: 100%;
+  background: var(--panel-2);
+  border: 2px solid var(--line);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  outline: none;
+  resize: vertical;
+}
+
+.schedule-textarea:focus {
+  border-color: var(--accent);
+}
+
+.schedule-form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================
+   POST PAGE
+   ========================================== */
+.post-logo {
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.post-check-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-3));
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.post-subtitle {
+  color: var(--muted);
+}
+
+.post-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.post-footer-text {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ==========================================
+   SETTINGS PAGE
+   ========================================== */
+.settings-title {
+  margin: 0 0 20px;
+}
+
+.settings-shortcuts-label {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.settings-shortcuts-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.settings-delete-btn {
+  margin-top: 8px;
 }

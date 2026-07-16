@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Toplantı — Seslihan</title>
-  <link rel="stylesheet" href="/css/style.css?v=3" />
+  <link rel="stylesheet" href="/css/style.css?v=4" />
 </head>
 <body class="room-body">
   <div class="room-shell">
@@ -12,9 +12,9 @@
       <header class="stage-header">
         <div class="stage-header-left">
           <div class="stage-title">
-            <img src="/seslihanlogo2.png" alt="" height="32" style="border-radius:3px;" />
+            <img src="/seslihanlogo2.png" alt="" height="32" />
             <span id="roomCodeLabel">------</span>
-            <button id="copyCode" class="icon-btn" data-tooltip="Kodu kopyala" style="width:28px;height:28px;padding:4px;">
+            <button id="copyCode" class="icon-btn" data-tooltip="Kodu kopyala">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
           </div>
@@ -22,12 +22,12 @@
             <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             Güvenli
           </span>
-          <span id="recordPill" class="security-pill" style="background:var(--danger);display:none;">
-            <span style="width:8px;height:8px;background:white;border-radius:50%;animation:rec-pulse 1s infinite;"></span> Kayıt
+          <span id="recordPill" class="security-pill record-pill">
+            <span class="record-dot"></span> Kayıt
           </span>
         </div>
         <div class="stage-header-center">
-          <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" style="border-radius:4px;" />
+          <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
         </div>
         <div class="stage-header-right">
           <span id="connQuality" class="conn-quality" title="Bağlantı kalitesi">
@@ -47,7 +47,7 @@
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             <span id="presentLabel">Sen ekran paylaşıyorsun</span>
           </div>
-          <button id="stopScreenBtn" class="btn small danger" style="margin-left:auto;">
+          <button id="stopScreenBtn" class="btn small danger">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
             Ekran paylaşımını durdur
           </button>
@@ -139,16 +139,16 @@
         <button class="ambient-type" data-ambient="lofi">🎧 Lo-Fi</button>
         <button class="ambient-type" data-ambient="classical">🎻 Klasik</button>
         <div class="ambient-volume-row">
-          <span style="font-size:13px;font-weight:600;">🔊</span>
+          <span class="ambient-vol-icon">🔊</span>
           <input type="range" id="ambientVolume" min="0" max="100" value="25" class="ambient-slider" />
-          <span id="ambientVolLabel" style="font-size:12px;font-weight:600;min-width:32px;text-align:right;">25%</span>
+          <span id="ambientVolLabel" class="ambient-vol-pct">25%</span>
         </div>
       </div>
     </aside>
 
     <aside class="chat">
       <header class="chat-header">
-        <img src="/seslihanlogo2.png" alt="" class="logo-transparent" style="height:48px;border-radius:4px;margin-right:4px;" />
+        <img src="/seslihanlogo2.png" alt="" class="logo-transparent" />
         <h2>Toplantı</h2>
         <button id="toggleChat" class="icon-btn mobile-only" data-tooltip="Gizle">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -160,7 +160,7 @@
         <button class="chat-tab" data-tab="participants">Kişiler <span id="partBadge" class="chat-tab-badge" hidden>0</span></button>
       </div>
 
-      <div id="chatPanel" class="panel" style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;">
+      <div id="chatPanel" class="panel">
         <div id="messages" class="messages"></div>
         <div id="typing" class="typing"></div>
         <form id="chatForm" class="chat-form" autocomplete="off">
@@ -178,7 +178,7 @@
         </form>
       </div>
 
-      <div id="participantsPanel" class="panel" style="display:none;flex:1;flex-direction:column;min-height:0;">
+      <div id="participantsPanel" class="panel">
         <div id="participantsList" class="participants-list"></div>
       </div>
 
@@ -203,9 +203,9 @@
       <div class="spinner" id="joinGateSpinner"></div>
       <h2>Seslihan</h2>
       <p id="joinGateText">Odaya bağlanılıyor...</p>
-      <div id="nameGate" hidden style="margin-top:12px;width:100%;max-width:280px;">
-        <input id="nameGateInput" type="text" placeholder="Adınızı girin" maxlength="32" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;margin-bottom:10px;" />
-        <button id="nameGateBtn" class="btn primary large" style="width:100%;">
+      <div id="nameGate" class="name-gate-wrap" hidden>
+        <input id="nameGateInput" class="name-gate-input" type="text" placeholder="Adınızı girin" maxlength="32" />
+        <button id="nameGateBtn" class="btn primary large">
           Katıl
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
@@ -214,7 +214,7 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
         Tekrar dene
       </button>
-      <button id="joinGateSkipBtn" class="btn large" hidden style="margin-top:10px;">
+      <button id="joinGateSkipBtn" class="btn large" hidden>
         Mikrofon olmadan katıl
       </button>
       <p class="join-gate-hint">Mikrofon ve kamera isteğe bağlıdır — odada sonradan açabilirsiniz</p>
@@ -231,7 +231,7 @@
   <div id="handPill" class="hand-raise-pill" hidden>
     <span>✋</span>
     <span>El kaldırdınız</span>
-    <button id="lowerHandBtn" style="background:rgba(0,0,0,0.2);border:none;color:white;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;margin-left:8px;">İndir</button>
+      <button id="lowerHandBtn" class="hand-lower-btn">İndir</button>
   </div>
 
   <div id="reactionsHost" class="reactions-host"></div>
@@ -272,7 +272,7 @@
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </button>
         <input type="file" id="wbDocInput" hidden accept=".pdf,.ppt,.pptx,.xls,.xlsx,.doc,.docx,.csv,.txt,.odp,.ods" />
-        <div style="flex:1"></div>
+        <div class="wb-spacer"></div>
         <button class="btn small" id="wbClose">Kapat</button>
       </div>
       <div class="wb-canvas-wrap">
@@ -352,25 +352,25 @@
         <button class="mic-test-close" id="roomSettingsClose">&times;</button>
       </div>
       <div class="mic-test-body">
-        <div class="toggle-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);">
-          <span style="font-size:14px;font-weight:600;">Gürültü engelleme</span>
-          <button id="roomNoiseToggle" class="toggle-btn on" style="width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;transition:background 0.2s;"></button>
+        <div class="room-settings-toggle">
+          <span class="toggle-label">Gürültü engelleme</span>
+          <button id="roomNoiseToggle" class="toggle-btn on"></button>
         </div>
-        <div class="toggle-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);">
-          <span style="font-size:14px;font-weight:600;">Yankı engelleme</span>
-          <button id="roomEchoToggle" class="toggle-btn on" style="width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;transition:background 0.2s;"></button>
+        <div class="room-settings-toggle">
+          <span class="toggle-label">Yankı engelleme</span>
+          <button id="roomEchoToggle" class="toggle-btn on"></button>
         </div>
-        <div class="toggle-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);">
-          <span style="font-size:14px;font-weight:600;">Otomatik kazanç kontrolü</span>
-          <button id="roomAgcToggle" class="toggle-btn on" style="width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;transition:background 0.2s;"></button>
+        <div class="room-settings-toggle">
+          <span class="toggle-label">Otomatik kazanç kontrolü</span>
+          <button id="roomAgcToggle" class="toggle-btn on"></button>
         </div>
-        <div class="toggle-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);">
-          <span style="font-size:14px;font-weight:600;">Tepki animasyonları</span>
-          <button id="roomReactToggle" class="toggle-btn on" style="width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;transition:background 0.2s;"></button>
+        <div class="room-settings-toggle">
+          <span class="toggle-label">Tepki animasyonları</span>
+          <button id="roomReactToggle" class="toggle-btn on"></button>
         </div>
-        <div style="padding:12px 0;">
-          <label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px;">Mikrofon seç</label>
-          <select id="roomMicSelect" style="width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;"></select>
+        <div class="room-settings-mic-select">
+          <label class="toggle-label">Mikrofon seç</label>
+          <select id="roomMicSelect" class="room-settings-select"></select>
         </div>
       </div>
     </div>

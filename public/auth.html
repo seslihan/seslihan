@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Giriş / Kayıt — Seslihan</title>
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/style.css?v=4" />
 </head>
 <body class="auth-body">
   <main class="auth-card">
-    <a href="/" class="app-brand" style="justify-content:center;margin-bottom:18px;">
-      <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" height="96" style="width:auto;border-radius:6px;" />
+    <a href="/" class="app-brand auth-brand">
+      <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent auth-logo" height="96" />
     </a>
 
     <div class="auth-tabs">
@@ -30,15 +30,15 @@
       <div id="nameField" class="field" hidden><label>Görünen ad</label><input id="name" type="text" maxlength="32" /></div>
       <div class="field"><label>E-posta</label><input id="email" type="email" required autocomplete="email" /></div>
       <div class="field"><label>Şifre</label><input id="password" type="password" required minlength="6" autocomplete="current-password" /></div>
-      <div class="toggle-row" style="margin:10px 0;">
+      <div class="toggle-row">
         <div class="label"><span class="label-title">Oturumu açık tut</span></div>
         <button id="remember" class="switch on" type="button"></button>
       </div>
-      <button type="submit" class="btn primary" style="width:100%;">Devam et</button>
-      <a href="#" id="forgotLink" style="display:block;text-align:center;margin-top:10px;font-size:13px;">Şifremi unuttum</a>
+      <button type="submit" class="btn primary auth-submit">Devam et</button>
+      <a href="#" id="forgotLink" class="auth-forgot">Şifremi unuttum</a>
     </form>
 
-    <div style="background:var(--bg-2);padding:10px 12px;border-radius:8px;margin-top:16px;font-size:12px;color:var(--muted);">
+    <div class="auth-demo-notice">
       <strong>Not:</strong> Bu demo sürümünde kimlik doğrulama yerel depoda (localStorage) saklanır. Gerçek OAuth, e-posta doğrulama ve şifre sıfırlama için backend entegrasyonu gerekir.
     </div>
   </main>
