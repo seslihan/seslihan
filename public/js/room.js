@@ -328,7 +328,19 @@
 
   // ---------- JOIN / PEER CONNECTION ----------
   function init() {
+    const initTimeout = setTimeout(() => {
+      joinGate.hidden = false;
+      joinGateSpinner.hidden = true;
+      joinGateText.textContent = 'Bağlantı zaman aşımı — tekrar deneyin veya katılın';
+      joinGateBtn.hidden = false;
+      joinGateBtn.disabled = false;
+      joinGateBtn.onclick = () => { joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; joinGateSpinner.hidden = false; init(); };
+      joinGateSkipBtn.hidden = false;
+      joinGateSkipBtn.onclick = joinWithoutMic;
+    }, 20000);
+
     socket.emit('join-room', { roomCode: code, name, mic: state.micOn, cam: state.camOn, asGuest: !getUser() }, (res) => {
+      clearTimeout(initTimeout);
       if (!res || !res.ok) {
         if (res && res.wait) {
           showWaitingScreen();
@@ -1611,11 +1623,11 @@
     const timeout = setTimeout(() => {
       if (settled) return;
       settled = true;
-      joinGateText.textContent = 'Mikrofon erişimi bekleniyor — alternatively katılabilirsiniz';
+      joinGateText.textContent = 'Mikrofon erişimi bekleniyor — katıl butonuna basarak devam edebilirsiniz';
       joinGateBtn.hidden = false;
       joinGateBtn.disabled = false;
       joinGateBtn.onclick = () => { settled = false; joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; doJoin(); };
-    }, 10000);
+    }, 7000);
 
     try {
       const as = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: settings.noiseReduction !== false, autoGainControl: true } });

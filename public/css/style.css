@@ -1874,25 +1874,153 @@ body.post-body { display: flex; align-items: center; justify-content: center; ba
 
 @media (max-width: 900px) {
   .mobile-only { display: inline-flex; }
-  .chat { height: 60vh; }
-  .chat.collapsed { height: 56px; }
+  .room-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto auto;
+    height: 100dvh;
+  }
+  .stage { min-height: 0; }
+  .chat {
+    height: auto;
+    max-height: 50vh;
+    border-left: none;
+    border-top: 1px solid var(--line);
+    position: relative;
+    z-index: 50;
+    transition: max-height 0.3s ease;
+  }
+  .chat.collapsed {
+    max-height: 50px;
+    overflow: hidden;
+  }
   .chat.collapsed .messages,
   .chat.collapsed .chat-form,
   .chat.collapsed .typing,
   .chat.collapsed .chat-tabs { display: none; }
-  .audio-lock { right: 16px; bottom: 64vh; }
-.video-grid[data-count="2"], .video-grid[data-count="3"], .video-grid[data-count="4"] { grid-template-columns: 1fr 1fr; }
+  .chat-header { min-height: 48px; padding: 4px 10px; }
+  .chat-header h2 { font-size: 15px; }
+  .chat-tabs .chat-tab { padding: 8px; font-size: 12px; }
+  .chat-form { padding: 6px 8px; gap: 4px; }
+  .chat-form input { font-size: 14px; padding: 8px 10px; }
+  .icon-btn { width: 36px; height: 36px; }
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  .stage-header { padding: 4px 10px; min-height: 44px; }
+  .stage-header-center img { height: 32px; }
+  .stage-title { font-size: 11px; gap: 6px; padding: 2px 8px; }
+  .stage-timer { font-size: 11px; }
+  .security-pill { font-size: 10px; padding: 2px 6px; }
+  .conn-quality { font-size: 10px; }
+  .conn-quality .signal { height: 10px; }
+  .conn-quality .signal .b { width: 2px; }
+
+  .video-grid { padding: 6px; gap: 4px; }
+  .video-grid[data-count="1"] .tile { border-radius: 8px; }
+  .video-grid[data-count="2"], .video-grid[data-count="3"], .video-grid[data-count="4"] { grid-template-columns: 1fr 1fr; }
   .video-grid[data-count="5"], .video-grid[data-count="6"], .video-grid[data-count="7"], .video-grid[data-count="8"] { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); }
-  .ctrl { width: 44px; height: 44px; }
-  .stage-header { padding: 10px 14px; }
+  .tile { border-width: 1px; border-radius: 8px; }
+  .tile-overlay { padding: 4px 8px; }
+  .tile-overlay .name { font-size: 11px; }
+  .tile-actions { gap: 2px; }
+  .tile-action-btn { width: 28px; height: 28px; }
+
+  .controls {
+    padding: 8px 10px;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+  .controls::-webkit-scrollbar { display: none; }
+  .ctrl {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+  }
+  .ctrl svg { width: 20px; height: 20px; }
+  .ctrl-divider { width: 1px; height: 28px; flex-shrink: 0; }
+  #leaveBtn span { display: none; }
+  #leaveBtn { width: 42px; padding: 0; }
+
+  .audio-lock { right: 12px; bottom: auto; top: 50%; transform: translateY(-50%); }
+  .hand-raise-pill { bottom: auto; top: 12px; left: 50%; transform: translateX(-50%); font-size: 12px; padding: 6px 12px; }
+
+  .join-gate { padding: 12px; z-index: 3000; }
+  .join-gate-card { padding: 24px 20px; width: min(340px, 94vw); }
+  .join-gate-card h2 { font-size: 18px; }
+  .join-gate-card p { font-size: 13px; margin-bottom: 14px; }
+  .join-gate-card .btn { font-size: 14px; padding: 10px 18px; }
+
+  .whiteboard-overlay { padding: 0; }
+  .whiteboard-card { width: 100vw; height: 100vh; border-radius: 0; }
+  .whiteboard-toolbar { padding: 6px 8px; gap: 4px; flex-wrap: nowrap; overflow-x: auto; }
+  .wb-tool { width: 32px; height: 32px; flex-shrink: 0; }
+  .wb-color-row { gap: 3px; }
+
+  .popover { min-width: 180px !important; max-width: 220px !important; font-size: 12px; }
+  .popover-item { padding: 8px 10px; font-size: 12px; }
+
+  .mic-test-modal { padding: 10px; }
+  .mic-test-card { width: min(100vw, 95vw); max-height: 80vh; }
+
+  .ambient-popover { min-width: 200px !important; }
+  .ambient-type { padding: 7px 10px; font-size: 12px; }
+  .ambient-volume-row { padding: 6px 10px; }
+
+  .home-main { padding: 16px 12px; }
+  .hero-card { padding: 20px 16px; }
+  .hero-card h1 { font-size: 20px; }
+  .hero-card p { font-size: 13px; }
+  .action-row { flex-direction: column; gap: 8px; }
+  .action-row .btn { width: 100%; justify-content: center; }
+  .join-form { flex-direction: column; gap: 8px; }
+  .join-form input { font-size: 14px; }
+  .join-form .btn { width: 100%; justify-content: center; }
+  .side-card { display: none; }
+  .meeting-list { max-height: 150px; }
+
+  .app-header { padding: 4px 12px; min-height: 44px; }
+  .app-header .app-brand img { height: 32px; }
+  .app-header-actions { gap: 4px; }
+
+  .prejoin-container { padding: 16px 12px; }
+  .preview-card { max-width: 100%; }
+  .preview-video-wrap { height: 200px; }
+  .preview-controls { gap: 10px; }
+  .preview-controls .ctrl { width: 48px; height: 48px; }
+  .expandable-settings { margin-top: 8px; }
+
+  .name-gate-modal { padding: 24px 20px; width: min(340px, 94vw); }
+  .name-gate-modal h2 { font-size: 18px; }
+  .name-gate-modal input { font-size: 16px; }
+
+  .post-card { padding: 24px 16px; width: min(92vw, 400px); }
+  .post-card h1 { font-size: 20px; }
+
+  .upload-progress { left: 12px; bottom: 80px; right: 12px; width: auto; }
+
+  .wb-doc-viewer { padding: 0; }
+  .wb-doc-card { width: 100vw; height: 100vh; border-radius: 0; }
+
+  #roomSettingsModal .mic-test-card { width: min(95vw, 400px); }
+
+  .reactions-host { bottom: 70px; }
 }
 
-@media (max-width: 480px) {
-  .home-main { padding: 20px 12px; }
-  .hero-card { padding: 22px 18px; }
-  .hero-card h1 { font-size: 22px; }
-  .ctrl { width: 42px; height: 42px; }
-  .video-grid { padding: 8px; gap: 6px; }
+@media (max-width: 400px) {
+  .stage-header-left { gap: 4px; }
+  .stage-header-right { gap: 4px; }
+  .ctrl { width: 38px; height: 38px; }
+  .ctrl svg { width: 18px; height: 18px; }
+  .video-grid { padding: 4px; gap: 3px; }
+  .hero-card h1 { font-size: 18px; }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .room-shell { height: -webkit-fill-available; height: 100dvh; }
 }
 
 /* ---------- EXPANDABLE SETTINGS BAR ---------- */
