@@ -266,6 +266,7 @@
     const tile = document.getElementById('tile-' + uid);
     if (!video || !tile) return;
     if (video.srcObject !== stream) video.srcObject = stream;
+    if (tile.classList.contains('local')) video.muted = true;
     const hasVideo = stream.getVideoTracks().some(t => t.enabled);
     tile.classList.toggle('no-video', !hasVideo);
   }
@@ -1549,7 +1550,12 @@
   }
   $('audioLockBtn').addEventListener('click', () => {
     ensureAudioContext();
-    document.querySelectorAll('video').forEach(v => { v.muted = false; const p = v.play(); if (p && p.catch) p.catch(() => {}); });
+    document.querySelectorAll('video').forEach(v => {
+      if (v.id && v.id.startsWith('video-') && v.closest && v.closest('.local')) return;
+      v.muted = false;
+      const p = v.play();
+      if (p && p.catch) p.catch(() => {});
+    });
     $('audioLock').hidden = true;
   });
 
@@ -1559,6 +1565,7 @@
     audioUnlocked = true;
     ensureAudioContext();
     document.querySelectorAll('video').forEach(v => {
+      if (v.closest && v.closest('.local')) return;
       if (v.srcObject) {
         v.muted = false;
         v.volume = 1;
