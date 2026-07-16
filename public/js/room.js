@@ -1567,6 +1567,30 @@
 
   const hasNameParam = params.has('name') && params.get('name').trim().length > 0;
 
+  function joinWithoutMic() {
+    joinGateBtn.hidden = true;
+    joinGateSkipBtn.hidden = true;
+    state.micOn = false;
+    state.localStream = new MediaStream();
+    if (state.camOn) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(vs => {
+        vs.getVideoTracks().forEach(t => state.localStream.addTrack(t));
+        joinGate.hidden = true;
+        init();
+        spawnChatWatermarks(document.getElementById('chatPanel'), 6);
+      }).catch(() => {
+        state.camOn = false;
+        joinGate.hidden = true;
+        init();
+        spawnChatWatermarks(document.getElementById('chatPanel'), 6);
+      });
+    } else {
+      joinGate.hidden = true;
+      init();
+      spawnChatWatermarks(document.getElementById('chatPanel'), 6);
+    }
+  }
+
   async function doJoin(overrideName) {
     if (overrideName) {
       name = overrideName;
@@ -1574,13 +1598,31 @@
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       joinGateText.textContent = 'Tarayıcı desteklemiyor. Chrome, Edge veya Firefox kullanın.';
       joinGateBtn.disabled = true;
+      joinGateSkipBtn.hidden = false;
+      joinGateSkipBtn.onclick = joinWithoutMic;
       joinGate.hidden = false;
       return;
     }
     joinGate.hidden = false;
     joinGateText.textContent = 'Mikrofon izni isteniyor...';
+    joinGateSkipBtn.hidden = false;
+    joinGateSkipBtn.onclick = joinWithoutMic;
+
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      joinGateText.textContent = 'Mikrofon erişimi bekleniyor — alternatively katılabilirsiniz';
+      joinGateBtn.hidden = false;
+      joinGateBtn.disabled = false;
+      joinGateBtn.onclick = () => { settled = false; joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; doJoin(); };
+    }, 10000);
+
     try {
       const as = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: settings.noiseReduction !== false, autoGainControl: true } });
+      if (settled) { as.getTracks().forEach(t => t.stop()); return; }
+      clearTimeout(timeout);
+      settled = true;
       state.localStream = new MediaStream(as.getAudioTracks());
       if (state.camOn) {
         try {
@@ -1591,9 +1633,13 @@
       state.micOn = true;
       ensureAudioContext();
       joinGate.hidden = true;
+      joinGateSkipBtn.hidden = true;
       init();
       spawnChatWatermarks(document.getElementById('chatPanel'), 6);
     } catch (err) {
+      if (settled) return;
+      clearTimeout(timeout);
+      settled = true;
       let msg = 'Hata: ' + (err.message || err.name);
       if (err.name === 'NotAllowedError') msg = 'Mikrofon izni reddedildi.';
       else if (err.name === 'NotFoundError') msg = 'Mikrofon bulunamadı.';
@@ -1602,22 +1648,7 @@
       joinGateBtn.disabled = false;
       joinGateBtn.onclick = () => { joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; doJoin(); };
       joinGateSkipBtn.hidden = false;
-      joinGateSkipBtn.onclick = () => {
-        joinGateBtn.hidden = true;
-        joinGateSkipBtn.hidden = true;
-        state.micOn = false;
-        state.localStream = new MediaStream();
-        if (state.camOn) {
-          try {
-            const vs = await navigator.mediaDevices.getUserMedia({ video: true });
-            vs.getVideoTracks().forEach(t => state.localStream.addTrack(t));
-          } catch (e) { state.camOn = false; }
-        }
-        joinGate.hidden = true;
-        init();
-        spawnChatWatermarks(document.getElementById('chatPanel'), 6);
-      };
-      toast('Mikrofon erişimi gerekli değil — sesli konuşamazsınız', 'warning');
+      joinGateSkipBtn.onclick = joinWithoutMic;
     }
   }
 
