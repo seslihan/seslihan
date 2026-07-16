@@ -703,9 +703,7 @@ body.room-body { background: var(--bg-2); }
   padding: 4px 16px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
-  height: 56px;
-  max-height: 56px;
-  overflow: hidden;
+  min-height: 56px;
   box-sizing: border-box;
 }
 
@@ -723,7 +721,7 @@ body.room-body { background: var(--bg-2); }
 }
 
 .stage-header-center img {
-  height: 88px;
+  height: 48px;
   width: auto;
 }
 
@@ -1235,12 +1233,11 @@ body.room-body { background: var(--bg-2); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
+  padding: 4px 12px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
-  height: 56px;
-  max-height: 56px;
-  overflow: hidden;
+  min-height: 56px;
+  box-sizing: border-box;
 }
 
 .chat-tabs {
