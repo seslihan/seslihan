@@ -368,6 +368,7 @@
       updateHostUI();
       res.peers.forEach((p) => addPeer(p));
       startTimer();
+      if (isMobile) document.querySelector('.chat').classList.add('collapsed');
     });
   }
 
@@ -396,7 +397,11 @@
         video.muted = false;
         video.volume = 1;
         const p = video.play();
-        if (p && p.catch) p.catch(() => { if (ev.track.kind === 'audio') showAudioLockPrompt(); });
+        if (p && p.catch) p.catch(() => {
+          if (ev.track.kind === 'audio') {
+            if (!audioUnlocked) showAudioLockPrompt();
+          }
+        });
       }
     };
 
@@ -1485,7 +1490,26 @@
   });
 
   // ---------- MISC ----------
-  $('toggleChat').addEventListener('click', () => document.querySelector('.chat').classList.toggle('collapsed'));
+  $('toggleChat').addEventListener('click', () => {
+    const chat = document.querySelector('.chat');
+    const isCollapsed = chat.classList.toggle('collapsed');
+    if (!isCollapsed && isMobile) {
+      setTimeout(() => {
+        const input = document.getElementById('chatInput');
+        if (input) input.focus();
+      }, 400);
+    }
+  });
+  $('toggleChatBtn').addEventListener('click', () => {
+    const chat = document.querySelector('.chat');
+    const isCollapsed = chat.classList.toggle('collapsed');
+    if (!isCollapsed && isMobile) {
+      setTimeout(() => {
+        const input = document.getElementById('chatInput');
+        if (input) input.focus();
+      }, 400);
+    }
+  });
   $('leaveBtn').addEventListener('click', () => {
     window.location.href = '/post.html?code=' + state.roomCode + '&duration=' + Math.floor((Date.now() - state.meetStart) / 1000);
   });
@@ -1528,6 +1552,31 @@
     document.querySelectorAll('video').forEach(v => { v.muted = false; const p = v.play(); if (p && p.catch) p.catch(() => {}); });
     $('audioLock').hidden = true;
   });
+
+  let audioUnlocked = false;
+  function tryUnlockAudio() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    ensureAudioContext();
+    document.querySelectorAll('video').forEach(v => {
+      if (v.srcObject) {
+        v.muted = false;
+        v.volume = 1;
+        const p = v.play();
+        if (p && p.catch) p.catch(() => {});
+      }
+    });
+    $('audioLock').hidden = true;
+  }
+  function onFirstGesture() {
+    tryUnlockAudio();
+    document.removeEventListener('click', onFirstGesture);
+    document.removeEventListener('touchstart', onFirstGesture);
+    document.removeEventListener('keydown', onFirstGesture);
+  }
+  document.addEventListener('click', onFirstGesture, { passive: true });
+  document.addEventListener('touchstart', onFirstGesture, { passive: true });
+  document.addEventListener('keydown', onFirstGesture);
 
   function showWaitingScreen() {
     joinGate.hidden = true;
@@ -1663,6 +1712,8 @@
     }
   }
 
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && window.matchMedia('(max-width:900px)').matches);
+
   if (!hasNameParam) {
     joinGate.hidden = false;
     joinGateSpinner.hidden = true;
@@ -1679,6 +1730,23 @@
       doJoin(n);
     });
     nameGateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') nameGateBtn.click(); });
+  } else if (isMobile) {
+    joinGate.hidden = false;
+    joinGateSpinner.hidden = true;
+    joinGateText.innerHTML = '<span style="font-size:32px;display:block;margin-bottom:8px;">🎙️</span>Toplantıya katılmaya hazır mısın?';
+    nameGate.hidden = true;
+    joinGateBtn.hidden = false;
+    joinGateBtn.disabled = false;
+    joinGateBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg> Katıl';
+    joinGateBtn.onclick = () => {
+      joinGateBtn.hidden = true;
+      joinGateSpinner.hidden = false;
+      joinGateText.textContent = 'Mikrofon izni isteniyor...';
+      doJoin();
+    };
+    joinGateSkipBtn.hidden = false;
+    joinGateSkipBtn.onclick = joinWithoutMic;
+    document.querySelector('.join-gate-hint').textContent = 'Mikrofon ve kamera izni istenecektir — sonra açabilirsiniz';
   } else {
     doJoin();
   }
