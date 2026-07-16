@@ -1,13 +1,13 @@
 (() => {
   const params = new URLSearchParams(window.location.search);
   const code = (params.get('code') || '').toUpperCase();
-  const name = params.get('name') || 'Misafir';
+  let name = params.get('name') || 'Misafir';
   const joinMic = params.get('mic') !== '0';
   const joinCam = params.get('cam') === '1';
 
   if (!code) { window.location.href = '/'; return; }
 
-  const socket = io();
+  const socket = io({ reconnection: true, reconnectionDelay: 1000, reconnectionAttempts: 20, transports: ['websocket', 'polling'] });
   let ICE_CONFIG = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
@@ -327,18 +327,34 @@
     }
   }
 
+  // ---------- SOCKET STATUS ----------
+  socket.on('connect', () => {
+    if (!joinGate.hidden) {
+      joinGateText.textContent = 'Sunucuya bağlandı, odaya giriliyor...';
+    }
+  });
+  socket.on('disconnect', () => {
+    toast('Sunucu bağlantısı kesildi, yeniden bağlanılıyor...', 'error');
+  });
+  socket.on('connect_error', () => {
+    if (!joinGate.hidden && joinGateSpinner && !joinGateSpinner.hidden) {
+      joinGateText.textContent = 'Sunucuya bağlanılıyor... (ilk katılım 30-60 sn sürebilir)';
+    }
+  });
+
   // ---------- JOIN / PEER CONNECTION ----------
   function init() {
     const initTimeout = setTimeout(() => {
       joinGate.hidden = false;
       joinGateSpinner.hidden = true;
-      joinGateText.textContent = 'Bağlantı zaman aşımı — tekrar deneyin veya katılın';
+      joinGateText.textContent = 'Bağlantı zaman aşımı — tekrar deneyin';
       joinGateBtn.hidden = false;
       joinGateBtn.disabled = false;
-      joinGateBtn.onclick = () => { joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; joinGateSpinner.hidden = false; init(); };
+      joinGateBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg> Tekrar dene';
+      joinGateBtn.onclick = () => { joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; joinGateSpinner.hidden = false; joinGateText.textContent = 'Bağlanılıyor...'; init(); };
       joinGateSkipBtn.hidden = false;
       joinGateSkipBtn.onclick = joinWithoutMic;
-    }, 20000);
+    }, 25000);
 
     socket.emit('join-room', { roomCode: code, name, mic: state.micOn, cam: state.camOn, asGuest: !getUser() }, (res) => {
       clearTimeout(initTimeout);
@@ -1671,7 +1687,7 @@
       return;
     }
     joinGate.hidden = false;
-    joinGateText.textContent = 'Mikrofon izni isteniyor...';
+    joinGateText.textContent = 'Bağlanılıyor...';
     joinGateSkipBtn.hidden = false;
     joinGateSkipBtn.onclick = joinWithoutMic;
 
@@ -1679,10 +1695,11 @@
     const timeout = setTimeout(() => {
       if (settled) return;
       settled = true;
-      joinGateText.textContent = 'Mikrofon erişimi bekleniyor — katıl butonuna basarak devam edebilirsiniz';
+      joinGateText.textContent = 'Mikrofon izni bekleniyor — isterseniz doğrudan katılabilirsiniz';
       joinGateBtn.hidden = false;
       joinGateBtn.disabled = false;
-      joinGateBtn.onclick = () => { settled = false; joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; doJoin(); };
+      joinGateBtn.innerHTML = '🎤 Mikrofon izni ver ve katıl';
+      joinGateBtn.onclick = () => { settled = false; joinGateBtn.hidden = true; joinGateSkipBtn.hidden = true; joinGateSpinner.hidden = false; joinGateText.textContent = 'Mikrofon izni isteniyor...'; doJoin(); };
     }, 7000);
 
     try {
@@ -1727,13 +1744,14 @@
     joinGateText.textContent = 'Toplantıya katılmak için adınızı girin';
     nameGate.hidden = false;
     nameGateInput.value = localStorage.getItem('bs-name') || '';
-    nameGateInput.focus();
+    setTimeout(() => nameGateInput.focus(), 100);
     nameGateBtn.addEventListener('click', () => {
       const n = nameGateInput.value.trim();
       if (!n) { nameGateInput.focus(); return; }
       localStorage.setItem('bs-name', n);
       nameGate.hidden = true;
       joinGateSpinner.hidden = false;
+      joinGateText.textContent = 'Bağlanılıyor...';
       doJoin(n);
     });
     nameGateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') nameGateBtn.click(); });
