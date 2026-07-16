@@ -1026,6 +1026,7 @@
   document.addEventListener('click', (e) => {
     if (!$('reactionsPopover').hidden && !$('reactionsPopover').contains(e.target) && e.target !== $('reactionsBtn')) $('reactionsPopover').hidden = true;
     if (!$('morePopover').hidden && !$('morePopover').contains(e.target) && e.target !== $('moreBtn')) $('morePopover').hidden = true;
+    if (!$('ambientPopover').hidden && !$('ambientPopover').contains(e.target) && e.target !== $('ambientBtn')) $('ambientPopover').hidden = true;
   });
 
   // ---------- MORE / LAYOUT ----------
@@ -1758,80 +1759,294 @@
   });
 
   // ---------- AMBIENT MUSIC ----------
-  let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.12 };
+  let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.25, type: 'supermarket', timers: [] };
 
-  function startAmbient() {
-    if (ambientState.playing) return;
+  function clearAmbient() {
+    ambientState.timers.forEach(t => clearTimeout(t));
+    ambientState.timers = [];
+    ambientState.nodes.forEach(n => { try { n.stop(); } catch (_) {} });
+    ambientState.nodes = [];
+    if (ambientState.gainNode) { try { ambientState.gainNode.disconnect(); } catch (_) {} }
+  }
+
+  function createAmbientGain() {
+    const ctx = state.audioCtx;
+    const g = ctx.createGain();
+    g.gain.value = ambientState.volume;
+    g.connect(ctx.destination);
+    ambientState.gainNode = g;
+    return g;
+  }
+
+  const AMBIENT = {
+    supermarket(ctx, master) {
+      const chords = [
+        [261.63, 329.63, 392.00], [293.66, 369.99, 440.00],
+        [220.00, 277.18, 329.63], [246.94, 311.13, 369.99],
+        [261.63, 311.13, 392.00], [196.00, 246.94, 293.66]
+      ];
+      const notes = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00];
+      function pad() {
+        if (!ambientState.playing) return;
+        const ch = chords[Math.floor(Math.random() * chords.length)];
+        const dur = 3 + Math.random() * 3;
+        ch.forEach((freq, i) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0, ctx.currentTime);
+          g.gain.linearRampToValueAtTime(0.06 / (i + 1), ctx.currentTime + dur * 0.3);
+          g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+          o.connect(g).connect(master); o.start(); o.stop(ctx.currentTime + dur + 0.1);
+          ambientState.nodes.push(o);
+        });
+        ambientState.timers.push(setTimeout(pad, dur * 800));
+      }
+      function melody() {
+        if (!ambientState.playing) return;
+        const n = notes[Math.floor(Math.random() * notes.length)];
+        const dur = 0.6 + Math.random() * 1.2;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'triangle'; o.frequency.value = n;
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.035, ctx.currentTime + dur * 0.15);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+        o.connect(g).connect(master); o.start(); o.stop(ctx.currentTime + dur + 0.1);
+        ambientState.nodes.push(o);
+        ambientState.timers.push(setTimeout(melody, (dur + 1 + Math.random() * 2.5) * 1000));
+      }
+      pad(); ambientState.timers.push(setTimeout(melody, 500));
+    },
+
+    cafe(ctx, master) {
+      function pad() {
+        if (!ambientState.playing) return;
+        const freqs = [174.61, 220.00, 261.63, 329.63, 392.00, 440.00];
+        const dur = 5 + Math.random() * 5;
+        for (let i = 0; i < 3; i++) {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = freqs[Math.floor(Math.random() * freqs.length)];
+          g.gain.setValueAtTime(0, ctx.currentTime);
+          g.gain.linearRampToValueAtTime(0.04, ctx.currentTime + dur * 0.4);
+          g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+          o.connect(g).connect(master); o.start(); o.stop(ctx.currentTime + dur + 0.1);
+          ambientState.nodes.push(o);
+        }
+        ambientState.timers.push(setTimeout(pad, dur * 700));
+      }
+      function crackle() {
+        if (!ambientState.playing) return;
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.02;
+        const src = ctx.createBufferSource();
+        src.buffer = buf; src.connect(master); src.start();
+        ambientState.nodes.push(src);
+        ambientState.timers.push(setTimeout(crackle, 200 + Math.random() * 600));
+      }
+      pad(); crackle();
+    },
+
+    rain(ctx, master) {
+      function rainLoop() {
+        if (!ambientState.playing) return;
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.15;
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const filt = ctx.createBiquadFilter();
+        filt.type = 'lowpass'; filt.frequency.value = 800 + Math.random() * 400;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.5);
+        g.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1.5);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime + 2);
+        src.connect(filt).connect(g).connect(master);
+        src.start(); src.stop(ctx.currentTime + 2.1);
+        ambientState.nodes.push(src);
+        ambientState.timers.push(setTimeout(rainLoop, 1800));
+      }
+      function thunder() {
+        if (!ambientState.playing) return;
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 1.5, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) {
+          const env = Math.max(0, 1 - i / (ctx.sampleRate * 1.5));
+          d[i] = (Math.random() * 2 - 1) * env * env * 0.3;
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const filt = ctx.createBiquadFilter();
+        filt.type = 'lowpass'; filt.frequency.value = 200;
+        src.connect(filt).connect(master); src.start();
+        ambientState.nodes.push(src);
+        ambientState.timers.push(setTimeout(thunder, 8000 + Math.random() * 15000));
+      }
+      rainLoop(); thunder();
+    },
+
+    nature(ctx, master) {
+      const birdNotes = [1500, 2000, 2500, 3000, 1800, 2200, 2800];
+      function wind() {
+        if (!ambientState.playing) return;
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        let v = 0;
+        for (let i = 0; i < d.length; i++) {
+          v += (Math.random() * 2 - 1) * 0.01;
+          v *= 0.998;
+          d[i] = v * 3;
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const filt = ctx.createBiquadFilter();
+        filt.type = 'bandpass'; filt.frequency.value = 300; filt.Q.value = 0.5;
+        src.connect(filt).connect(master); src.start();
+        ambientState.nodes.push(src);
+        ambientState.timers.push(setTimeout(wind, 3500));
+      }
+      function birds() {
+        if (!ambientState.playing) return;
+        const f = birdNotes[Math.floor(Math.random() * birdNotes.length)];
+        const dur = 0.1 + Math.random() * 0.2;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = f;
+        o.frequency.linearRampToValueAtTime(f * (0.8 + Math.random() * 0.4), ctx.currentTime + dur);
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.03, ctx.currentTime + dur * 0.2);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+        o.connect(g).connect(master); o.start(); o.stop(ctx.currentTime + dur + 0.1);
+        ambientState.nodes.push(o);
+        const next = 200 + Math.random() * 3000;
+        ambientState.timers.push(setTimeout(birds, next));
+      }
+      wind(); ambientState.timers.push(setTimeout(birds, 1000));
+    },
+
+    lofi(ctx, master) {
+      const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33];
+      function chords() {
+        if (!ambientState.playing) return;
+        const start = Math.floor(Math.random() * (scale.length - 2));
+        const dur = 3 + Math.random() * 2;
+        for (let i = 0; i < 3; i++) {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = scale[start + i] * 0.5;
+          g.gain.setValueAtTime(0, ctx.currentTime);
+          g.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.3);
+          g.gain.setValueAtTime(0.07, ctx.currentTime + dur - 0.5);
+          g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+          o.connect(g).connect(master); o.start(); o.stop(ctx.currentTime + dur + 0.1);
+          ambientState.nodes.push(o);
+        }
+        ambientState.timers.push(setTimeout(chords, dur * 900));
+      }
+      function melody() {
+        if (!ambientState.playing) return;
+        const n = scale[Math.floor(Math.random() * scale.length)];
+        const dur = 0.3 + Math.random() * 0.8;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'triangle'; o.frequency.value = n;
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.04, ctx.currentTime + dur * 0.1);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+        o.connect(g).connect(master); o.start(); o.stop(ctx.currentTime + dur + 0.1);
+        ambientState.nodes.push(o);
+        ambientState.timers.push(setTimeout(melody, (dur + 0.5 + Math.random() * 2) * 1000));
+      }
+      chords(); ambientState.timers.push(setTimeout(melody, 800));
+    },
+
+    classical(ctx, master) {
+      const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+      function arpeggio() {
+        if (!ambientState.playing) return;
+        const root = scale[Math.floor(Math.random() * 5)];
+        const pattern = [1, 1.25, 1.5, 1.25, 1, 0.75];
+        pattern.forEach((mult, i) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = root * mult;
+          const t = ctx.currentTime + i * 0.4;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(0.05, t + 0.05);
+          g.gain.linearRampToValueAtTime(0, t + 0.5);
+          o.connect(g).connect(master); o.start(t); o.stop(t + 0.6);
+          ambientState.nodes.push(o);
+        });
+        ambientState.timers.push(setTimeout(arpeggio, 3000 + Math.random() * 2000));
+      }
+      function sustain() {
+        if (!ambientState.playing) return;
+        const freq = scale[Math.floor(Math.random() * scale.length)] * 0.5;
+        const dur = 4 + Math.random() * 4;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = freq;
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.04, ctx.currentTime + dur * 0.3);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+        o.connect(g).connect(master); o.start(); o.stop(ctx.currentTime + dur + 0.1);
+        ambientState.nodes.push(o);
+        ambientState.timers.push(setTimeout(sustain, dur * 800));
+      }
+      arpeggio(); sustain();
+    }
+  };
+
+  function startAmbient(type) {
+    if (ambientState.playing) clearAmbient();
     ensureAudioContext();
     const ctx = state.audioCtx;
     if (!ctx) return;
-    const masterGain = ctx.createGain();
-    masterGain.gain.value = ambientState.volume;
-    masterGain.connect(ctx.destination);
-    ambientState.gainNode = masterGain;
-
-    const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
-    const chords = [
-      [0, 2, 4], [2, 4, 6], [0, 3, 5], [1, 3, 5],
-      [0, 4, 6], [2, 5, 7], [1, 4, 6], [3, 5, 7]
-    ];
-
-    function playPad() {
-      if (!ambientState.playing) return;
-      const chord = chords[Math.floor(Math.random() * chords.length)];
-      const dur = 4 + Math.random() * 4;
-      chord.forEach((noteIdx, i) => {
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = notes[noteIdx] * (0.5 + Math.random() * 0.01);
-        g.gain.setValueAtTime(0, ctx.currentTime);
-        g.gain.linearRampToValueAtTime(0.08 / (i + 1), ctx.currentTime + dur * 0.3);
-        g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
-        osc.connect(g).connect(masterGain);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + dur + 0.1);
-        ambientState.nodes.push(osc);
-      });
-      setTimeout(playPad, dur * 800);
-    }
-
-    function playMelody() {
-      if (!ambientState.playing) return;
-      const note = notes[Math.floor(Math.random() * notes.length)] * 2;
-      const dur = 0.8 + Math.random() * 1.5;
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = note;
-      g.gain.setValueAtTime(0, ctx.currentTime);
-      g.gain.linearRampToValueAtTime(0.04, ctx.currentTime + dur * 0.2);
-      g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
-      osc.connect(g).connect(masterGain);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + dur + 0.1);
-      ambientState.nodes.push(osc);
-      setTimeout(playMelody, (dur + Math.random() * 3) * 1000);
-    }
-
     ambientState.playing = true;
-    playPad();
-    setTimeout(playMelody, 1000);
+    ambientState.type = type || ambientState.type;
+    const master = createAmbientGain();
+    if (AMBIENT[ambientState.type]) AMBIENT[ambientState.type](ctx, master);
     $('ambientBtn').style.color = 'var(--accent)';
-    toast('Arka plan müziği açıldı', 'info');
+    document.querySelectorAll('.ambient-type').forEach(b => b.classList.toggle('active', b.dataset.ambient === ambientState.type));
   }
 
   function stopAmbient() {
     ambientState.playing = false;
-    ambientState.nodes.forEach(n => { try { n.stop(); } catch (_) {} });
-    ambientState.nodes = [];
-    if (ambientState.gainNode) { try { ambientState.gainNode.disconnect(); } catch (_) {} }
+    clearAmbient();
     $('ambientBtn').style.color = '';
     toast('Arka plan müziği kapatıldı', 'info');
   }
 
-  $('ambientBtn').addEventListener('click', () => {
-    if (ambientState.playing) stopAmbient(); else startAmbient();
+  $('ambientBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const pop = $('ambientPopover');
+    const wasHidden = pop.hidden;
+    pop.hidden = !wasHidden;
+    $('reactionsPopover').hidden = true;
+    $('morePopover').hidden = true;
+    if (wasHidden && ambientState.playing) {
+      document.querySelectorAll('.ambient-type').forEach(b => b.classList.toggle('active', b.dataset.ambient === ambientState.type));
+      $('ambientVolume').value = ambientState.volume * 100;
+      $('ambientVolLabel').textContent = Math.round(ambientState.volume * 100) + '%';
+    }
+  });
+
+  document.querySelectorAll('.ambient-type').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.ambient-type').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      startAmbient(b.dataset.ambient);
+      toast('🎵 ' + b.textContent.trim(), 'info');
+    });
+  });
+
+  $('ambientVolume').addEventListener('input', (e) => {
+    ambientState.volume = e.target.value / 100;
+    $('ambientVolLabel').textContent = e.target.value + '%';
+    if (ambientState.gainNode) ambientState.gainNode.gain.value = ambientState.volume;
   });
 
   window.addEventListener('beforeunload', () => {

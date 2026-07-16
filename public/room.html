@@ -126,6 +126,21 @@
         <button class="popover-item" id="waitingRoomBtn" style="display:none;">⏳ Bekleme odası</button>
         <button class="popover-item danger" id="endMeetingBtn" style="display:none;">🛑 Toplantıyı sonlandır</button>
       </div>
+
+      <div id="ambientPopover" class="popover ambient-popover" hidden>
+        <div class="popover-section-title">🎵 Arka plan müziği</div>
+        <button class="ambient-type active" data-ambient="supermarket">🛒 Süpermarket</button>
+        <button class="ambient-type" data-ambient="cafe">☕ Kafe</button>
+        <button class="ambient-type" data-ambient="rain">🌧 Yağmur</button>
+        <button class="ambient-type" data-ambient="nature">🌿 Doğa</button>
+        <button class="ambient-type" data-ambient="lofi">🎧 Lo-Fi</button>
+        <button class="ambient-type" data-ambient="classical">🎻 Klasik</button>
+        <div class="ambient-volume-row">
+          <span style="font-size:13px;font-weight:600;">🔊</span>
+          <input type="range" id="ambientVolume" min="0" max="100" value="25" class="ambient-slider" />
+          <span id="ambientVolLabel" style="font-size:12px;font-weight:600;min-width:32px;text-align:right;">25%</span>
+        </div>
+      </div>
     </aside>
 
     <aside class="chat">
