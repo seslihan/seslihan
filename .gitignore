@@ -11,3 +11,7 @@ start.bat
 start-tunnel.bat
 tunnel.js
 seslihanlogo2-Photoroom.png
+gh_err.txt
+gh_out.txt
+gh_auth.log
+gh_auth_err.log
