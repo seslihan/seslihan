@@ -84,6 +84,18 @@
     </div>
   </main>
 
+  <div class="name-gate-overlay" id="nameGateOverlay" hidden>
+    <div class="name-gate-modal">
+      <h2>Adınızı girin</h2>
+      <p>Toplantıya katılmak için adınızı yazın</p>
+      <input id="nameGateInput" type="text" placeholder="Adınız" maxlength="32" autocomplete="name" />
+      <div class="name-gate-actions">
+        <button id="nameGateCancel" class="btn">İptal</button>
+        <button id="nameGateConfirm" class="btn primary">Devam</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-host" id="toastHost"></div>
 
   <script src="/socket.io/socket.io.js"></script>

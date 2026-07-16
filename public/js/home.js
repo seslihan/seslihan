@@ -7,6 +7,41 @@
   const roomCodeInput = document.getElementById('roomCode');
   const meetingList = document.getElementById('meetingList');
 
+  const nameOverlay = document.getElementById('nameGateOverlay');
+  const nameInput = document.getElementById('nameGateInput');
+  const nameConfirm = document.getElementById('nameGateConfirm');
+  const nameCancel = document.getElementById('nameGateCancel');
+  let nameGateResolve = null;
+
+  function showNameGate() {
+    return new Promise((resolve) => {
+      nameGateResolve = resolve;
+      nameInput.value = getUserName();
+      nameOverlay.hidden = false;
+      setTimeout(() => nameInput.focus(), 50);
+    });
+  }
+
+  nameConfirm.addEventListener('click', () => {
+    const v = nameInput.value.trim();
+    if (!v) { toast('Adınızı girin', 'error'); nameInput.focus(); return; }
+    localStorage.setItem('bs-name', v);
+    nameOverlay.hidden = true;
+    if (nameGateResolve) nameGateResolve(v);
+    nameGateResolve = null;
+  });
+
+  nameCancel.addEventListener('click', () => {
+    nameOverlay.hidden = true;
+    if (nameGateResolve) nameGateResolve(null);
+    nameGateResolve = null;
+  });
+
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') nameConfirm.click();
+    if (e.key === 'Escape') nameCancel.click();
+  });
+
   function renderMeetings() {
     const list = getMeetings();
     if (list.length === 0) {
@@ -38,12 +73,11 @@
     return localStorage.getItem('bs-name') || '';
   }
 
-  function startMeeting() {
+  async function startMeeting() {
     let name = getUserName();
     if (!name) {
-      name = prompt('Adınız:') || '';
+      name = await showNameGate();
       if (!name) return;
-      localStorage.setItem('bs-name', name);
     }
     newMeetingBtn.disabled = true;
     socket.emit('create-room', (res) => {
@@ -61,20 +95,18 @@
   scheduleBtn.addEventListener('click', () => window.location.href = '/schedule.html');
   if (newScheduledBtn) newScheduledBtn.addEventListener('click', () => window.location.href = '/schedule.html');
 
-  joinForm.addEventListener('submit', (e) => {
+  joinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const code = extractRoomCode(roomCodeInput.value);
     if (!code) { toast('Toplantı kodu girin', 'error'); return; }
     let name = getUserName();
     if (!name) {
-      name = prompt('Adınız:') || '';
+      name = await showNameGate();
       if (!name) return;
-      localStorage.setItem('bs-name', name);
     }
     window.location.href = '/prejoin.html?code=' + encodeURIComponent(code) + '&name=' + encodeURIComponent(name);
   });
 
-  // Pre-fill from URL
   const params = new URLSearchParams(window.location.search);
   const codeParam = params.get('code');
   if (codeParam) roomCodeInput.value = codeParam;
