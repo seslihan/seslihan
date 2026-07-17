@@ -283,14 +283,16 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .icon-btn[data-tooltip]:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: -32px;
+  bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--text);
   color: var(--panel);
   padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
+  border: 2px solid var(--text);
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+  font-family: var(--font);
+  font-size: 8px;
   white-space: nowrap;
   z-index: 1000;
 }
@@ -1033,18 +1035,19 @@ body.room-body { background: var(--bg-2); }
 .ctrl[data-tooltip]:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: -34px;
+  bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--text);
   color: var(--panel);
   padding: 5px 10px;
-  border-radius: 6px;
-  font-size: 11px;
+  border: 2px solid var(--text);
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+  font-family: var(--font);
+  font-size: 8px;
   white-space: nowrap;
   z-index: 1000;
   pointer-events: none;
-  font-weight: 500;
 }
 
 .ctrl .on, .ctrl .off { display: block; }
@@ -3566,4 +3569,403 @@ select {
 /* --- 8-BIT TYPING --- */
 .typing-dot {
   animation: typing-dot 0.8s steps(2) infinite !important;
+}
+
+/* ==========================================
+   8-BIT PIXEL DECORATIONS
+   ========================================== */
+
+/* --- Pixel corner decorations for cards --- */
+.hero-card::before,
+.auth-card::before,
+.post-card::before,
+.mic-test-card::before,
+.whiteboard-card::before,
+.wb-doc-card::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 12px;
+  height: 12px;
+  border-top: 4px solid var(--accent);
+  border-left: 4px solid var(--accent);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-card::after,
+.auth-card::after,
+.post-card::after,
+.mic-test-card::after,
+.whiteboard-card::after,
+.wb-doc-card::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  border-bottom: 4px solid var(--accent);
+  border-right: 4px solid var(--accent);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-card,
+.auth-card,
+.post-card,
+.mic-test-card,
+.whiteboard-card,
+.wb-doc-card {
+  position: relative;
+}
+
+/* --- 8-BIT UPLOAD PROGRESS BAR --- */
+.upload-progress-bar {
+  height: 16px;
+  background: var(--bg) !important;
+  border: 3px solid var(--text) !important;
+  box-shadow: 2px 2px 0px var(--text) !important;
+  overflow: hidden;
+}
+
+#uploadProgressFill {
+  height: 100% !important;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0px,
+    var(--accent) 8px,
+    var(--accent-2) 8px,
+    var(--accent-2) 16px
+  ) !important;
+  transition: width 0.1s steps(10) !important;
+}
+
+/* --- 8-BIT SPECTRUM VISUALIZER --- */
+.spectrum-container {
+  image-rendering: pixelated;
+}
+
+.spectrum-bar {
+  image-rendering: pixelated;
+  border: 1px solid var(--text);
+}
+
+/* --- 8-BIT WATERMARK --- */
+.watermark {
+  image-rendering: pixelated;
+  opacity: 0.06;
+  mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] .watermark {
+  opacity: 0.04;
+  mix-blend-mode: screen;
+}
+
+/* --- 8-BIT TILE NAME OVERLAY --- */
+.tile-overlay {
+  background: rgba(30, 20, 12, 0.85);
+  border-top: 2px solid var(--text);
+  padding: 4px 8px;
+}
+
+.tile-overlay .name {
+  font-family: var(--font);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* --- 8-BIT PLACEHOLDER (no camera) --- */
+.placeholder {
+  background: var(--bg-3) !important;
+  border: 2px dashed var(--text) !important;
+}
+
+/* --- 8-BIT WHITEBOARD CANVAS --- */
+.wb-canvas {
+  image-rendering: pixelated;
+  border: 2px solid var(--text);
+  background: var(--panel);
+}
+
+/* --- 8-BIT MIC METER --- */
+.preview-mic-meter .bar {
+  background: var(--accent);
+  border: 1px solid var(--text);
+}
+
+/* --- 8-BIT FREQUENCY BARS --- */
+.freq-bar {
+  image-rendering: pixelated;
+}
+
+/* --- 8-BIT SCROLLBAR THUMB --- */
+::-webkit-scrollbar-thumb {
+  image-rendering: pixelated;
+}
+
+/* --- 8-BIT EMOJI GRID --- */
+.emoji-grid button {
+  transition: none !important;
+}
+
+.emoji-grid button:hover {
+  background: var(--accent) !important;
+  border: 2px solid var(--text) !important;
+}
+
+/* --- 8-BIT PRESENT STAGE --- */
+.present-stage {
+  border: 3px solid var(--text) !important;
+  box-shadow: 4px 4px 0px var(--text) !important;
+}
+
+.present-badge {
+  border: 2px solid var(--text);
+  font-family: var(--font);
+  font-size: 8px;
+}
+
+/* --- 8-BIT CAPTIONS --- */
+.caption-box {
+  font-family: var(--font);
+  font-size: 8px;
+  border: 2px solid var(--text) !important;
+  box-shadow: 2px 2px 0px var(--text) !important;
+}
+
+/* --- 8-BIT REACTIONS --- */
+.reactions-host {
+  pointer-events: none;
+}
+
+/* --- 8-BIT TOGGLE ROW --- */
+.toggle-row {
+  border-bottom: 2px solid var(--line);
+}
+
+.toggle-row .label-title {
+  font-family: var(--font);
+  font-size: 8px;
+}
+
+.toggle-row .label-desc {
+  font-family: var(--font);
+  font-size: 7px;
+}
+
+/* --- 8-BIT FIELD LABELS --- */
+.field label {
+  font-family: var(--font);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- 8-BIT SECTION HEADINGS --- */
+h1, h2, h3 {
+  font-family: var(--font);
+  letter-spacing: 0.5px;
+}
+
+h1 { font-size: 16px; }
+h2 { font-size: 12px; }
+h3 { font-size: 10px; }
+
+/* --- 8-BIT KBD --- */
+kbd {
+  display: inline-block;
+  min-width: 18px;
+  text-align: center;
+  background: var(--bg-2);
+  border: 2px solid var(--text) !important;
+  box-shadow: 2px 2px 0px var(--text) !important;
+  font-family: var(--font);
+  font-size: 8px;
+  padding: 3px 6px;
+}
+
+/* --- 8-BIT STATUS INDICATORS --- */
+.host-badge {
+  font-family: var(--font);
+  font-size: 7px;
+  background: var(--accent);
+  color: white;
+  padding: 2px 6px;
+  border: 2px solid var(--accent-2);
+}
+
+.co-host-badge {
+  font-family: var(--font);
+  font-size: 7px;
+  background: var(--info);
+  color: white;
+  padding: 2px 6px;
+  border: 2px solid #3a5a7a;
+}
+
+/* --- 8-BIT DIVIDER TEXT --- */
+.divider-text {
+  font-family: var(--font);
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* --- 8-BIT NOTE / HINT --- */
+.note,
+.join-gate-hint {
+  font-family: var(--font);
+  font-size: 8px;
+}
+
+/* --- 8-BIT TOAST VARIANT --- */
+.toast.success {
+  border-color: var(--success) !important;
+  box-shadow: 3px 3px 0px var(--success) !important;
+}
+
+.toast.error {
+  border-color: var(--danger) !important;
+  box-shadow: 3px 3px 0px var(--danger) !important;
+}
+
+.toast.info {
+  border-color: var(--info) !important;
+  box-shadow: 3px 3px 0px var(--info) !important;
+}
+
+/* --- 8-BIT MIC TEST VOLUME --- */
+.mic-test-volume-bar-wrap {
+  border: 2px solid var(--text);
+  height: 12px;
+  background: var(--bg);
+}
+
+.mic-test-volume-fill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--success) 0px,
+    var(--success) 4px,
+    transparent 4px,
+    transparent 6px
+  );
+  transition: width 0.1s steps(10);
+}
+
+/* --- 8-BIT PROGRESS STEPS --- */
+@keyframes pixel-progress {
+  0% { background-position: 0 0; }
+  100% { background-position: 24px 0; }
+}
+
+/* --- 8-BIT AMBIENT SLIDER --- */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  background: var(--bg-3);
+  border: 2px solid var(--text);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border: 2px solid var(--text);
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border: 2px solid var(--text);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+/* --- 8-BIT PROFILE DROPDOWN --- */
+.profile-dropdown-item {
+  font-family: var(--font);
+  font-size: 8px;
+}
+
+.profile-dropdown-name {
+  font-family: var(--font);
+  font-size: 9px;
+}
+
+.profile-dropdown-email {
+  font-family: var(--font);
+  font-size: 7px;
+}
+
+/* --- 8-BIT SCHEDULE DATE --- */
+.schedule-item-date,
+.meeting-item-date {
+  font-family: var(--font);
+  font-size: 7px;
+  letter-spacing: 0.5px;
+}
+
+/* --- 8-BIT POST STATS --- */
+.stat-label {
+  font-family: var(--font);
+  font-size: 7px;
+  text-transform: uppercase;
+}
+
+/* --- 8-BIT LOGO ON STAGE --- */
+.stage-header-center .logo-transparent,
+.app-brand .logo-transparent {
+  image-rendering: pixelated;
+}
+
+/* --- 8-BIT EMPTY STATE --- */
+.meeting-list-empty {
+  font-family: var(--font);
+  font-size: 8px;
+  line-height: 1.8;
+  border: 2px dashed var(--line);
+  padding: 24px 16px;
+}
+
+/* --- 8-BIT CHIP/PILL --- */
+.security-pill,
+.conn-quality {
+  font-family: var(--font);
+  font-size: 7px;
+  letter-spacing: 0.5px;
+}
+
+/* --- 8-BIT NOISE REDUCTION TOGGLE ANIMATION --- */
+@keyframes pixel-pulse {
+  0%, 100% { box-shadow: 2px 2px 0px var(--text); }
+  50% { box-shadow: 2px 2px 0px var(--accent); }
+}
+
+/* --- 8-BIT WARM GLOW ON TILE SPEAKING --- */
+.tile.speaking {
+  animation: pixel-pulse 1.5s steps(2) infinite;
+}
+
+/* --- 8-BIT JOIN GATE CARD --- */
+.join-gate-card h2 {
+  font-family: var(--font);
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.join-gate-card p {
+  font-family: var(--font);
+  font-size: 8px;
+  line-height: 1.8;
 }
