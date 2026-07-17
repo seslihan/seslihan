@@ -4741,6 +4741,53 @@ input[type="range"]::-moz-range-thumb {
   .x-list { max-height: 300px; }
 }
 
+/* === HOME STOCK STRIP === */
+.dash-stock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #0a0a0a;
+  border: 2px solid #00ff41;
+  padding: 6px 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+}
+.dash-stock::-webkit-scrollbar { display: none; }
+.dash-stock-items {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+.dash-stock-items .stock-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dash-stock-items .stock-sym {
+  color: #888;
+  text-transform: uppercase;
+}
+.dash-stock-items .stock-val {
+  color: #00ff41;
+}
+.dash-stock-items .stock-chg {
+  font-size: 9px;
+}
+.stock-up .stock-chg { color: #00ff41; }
+.stock-down .stock-chg { color: #ff3333; }
+.stock-loading-sm {
+  color: #00ff41;
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.dash-stock-time {
+  color: #555;
+  font-size: 8px;
+  flex-shrink: 0;
+}
+
 /* === STANDALONE PAGES === */
 .standalone-page {
   max-width: 960px;

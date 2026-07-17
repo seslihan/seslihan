@@ -176,6 +176,33 @@
 
   fetchNews('turkey');
 
+  // Stock strip
+  const dashStockItems = document.getElementById('dashStockItems');
+  const dashStockTime = document.getElementById('dashStockTime');
+
+  function fetchStock() {
+    fetch('/api/stock').then(r => r.json()).then(data => {
+      if (!data.items || data.items.length === 0) return;
+      dashStockItems.innerHTML = '';
+      data.items.forEach(item => {
+        const cls = item.chg > 0 ? 'stock-up' : item.chg < 0 ? 'stock-down' : '';
+        const arrow = item.chg > 0 ? '▲' : item.chg < 0 ? '▼' : '—';
+        const val = typeof item.val === 'number' ? item.val.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) : item.val;
+        const el = document.createElement('span');
+        el.className = 'stock-item ' + cls;
+        el.innerHTML = '<span class="stock-sym">' + item.sym + '</span><span class="stock-val">' + val + '</span><span class="stock-chg">' + arrow + ' ' + Math.abs(item.chg).toFixed(2) + '%</span>';
+        dashStockItems.appendChild(el);
+      });
+      if (data.time) {
+        const t = new Date(data.time);
+        dashStockTime.textContent = t.toLocaleTimeString('tr-TR');
+      }
+    }).catch(() => {});
+  }
+
+  fetchStock();
+  setInterval(fetchStock, 15000);
+
   setTimeout(() => {
     if (window.twttr && window.twttr.widgets) window.twttr.widgets.load();
   }, 2000);
