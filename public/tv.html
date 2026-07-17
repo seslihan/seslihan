@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Seslihan — Canlı TV</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/css/style.css?v=5" />
+  <link rel="stylesheet" href="/css/style.css?v=7" />
 </head>
 <body class="home">
   <header class="app-header">
@@ -40,14 +40,14 @@
   <script src="/js/common.js"></script>
   <script>
     const channels = [
-      { id: 'cnnturk', name: 'CNN Türk', handle: '@CNABorgu', color: '#e30a17' },
-      { id: 'trthaber', name: 'TRT Haber', handle: '@trthaber', color: '#003399' },
-      { id: 'haberturktv', name: 'Habertürk TV', handle: '@aborguaborgu', color: '#e4002b' },
-      { id: 'ntv', name: 'NTV', handle: '@ntv', color: '#c8102e' },
-      { id: 'showtv', name: 'Show TV', handle: '@showaborgu', color: '#0066cc' },
-      { id: 'ahaber', name: 'A Haber', handle: '@aaborghaberr', color: '#c8102e' },
-      { id: 'tv8', name: 'TV8', handle: '@tv8', color: '#6c2dc7' },
-      { id: '24tv', name: '24 TV', handle: '@24aboraborgu', color: '#003366' }
+      { id: 'cnnturk', name: 'CNN Türk', handle: '@CNNTurk', cid: 'UCV6zcRug6Hqp1UX_FdyUeBg', color: '#e30a17' },
+      { id: 'trthaber', name: 'TRT Haber', handle: '@trthaber', cid: 'UCBgTP2LOFVPmq15W-RH-WXA', color: '#003399' },
+      { id: 'haberturk', name: 'Habertürk TV', handle: '@haberturktv', cid: 'UCn6dNfiRE_Xunu7iMyvD7AA', color: '#e4002b' },
+      { id: 'ntv', name: 'NTV', handle: '@ntv', cid: 'UCGMghpDmBAqhz2p7eLHX-eg', color: '#c8102e' },
+      { id: 'showtv', name: 'Show TV', handle: '@showtv', cid: 'UC9JMe_We017gYrRc7kZHgmg', color: '#0066cc' },
+      { id: 'ahaber', name: 'A Haber', handle: '@ahaber', cid: 'UCKQhfw-lzz0uKnE1fY1PsAA', color: '#c8102e' },
+      { id: 'tv8', name: 'TV8', handle: '@tv8', cid: 'UCp4N3g1zcvp8WE2qJ_JKqBg', color: '#6c2dc7' },
+      { id: '24tv', name: '24 TV', handle: '@24TV', cid: 'UCN7VYCsI4Lx1-J4_BtjoWUA', color: '#003366' }
     ];
 
     const grid = document.getElementById('tvGrid');
@@ -67,7 +67,7 @@
       channelName.textContent = ch.name;
       player.hidden = false;
       container.innerHTML = '<div class="tv-loading">Yükleniyor...</div>';
-      fetch('/api/tv-live/' + ch.handle)
+      fetch('/api/tv-rss/' + ch.cid)
         .then(r => r.json())
         .then(data => {
           if (data.videoId) {
@@ -76,9 +76,7 @@
             container.innerHTML = '<div class="tv-loading">Yayın bulunamadı — YouTube\'da canlı yayın yok</div>';
           }
         })
-        .catch(() => {
-          container.innerHTML = '<div class="tv-loading">Bağlantı hatası</div>';
-        });
+        .catch(() => container.innerHTML = '<div class="tv-loading">Bağlantı hatası</div>');
     }
 
     document.getElementById('tvClose').addEventListener('click', () => {

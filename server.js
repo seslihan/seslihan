@@ -229,6 +229,25 @@ app.get('/api/stock', (req, res) => {
   }).catch(() => res.status(502).json({ error: 'Fetch failed' }));
 });
 
+app.get('/api/tv-rss/:cid', (req, res) => {
+  const cid = req.params.cid;
+  if (!cid || !cid.startsWith('UC') || cid.length !== 24) return res.status(400).json({ videoId: null });
+  const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${cid}`;
+  https.get(feedUrl, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+    const chunks = [];
+    r.on('data', c => chunks.push(c));
+    r.on('end', () => {
+      const data = Buffer.concat(chunks).toString('utf8');
+      const entries = data.split('<entry>');
+      if (entries.length > 1) {
+        const vidMatch = entries[1].match(/<yt:videoId>([\w-]+)<\/yt:videoId>/);
+        if (vidMatch) return res.json({ videoId: vidMatch[1] });
+      }
+      res.json({ videoId: null });
+    });
+  }).on('error', () => res.json({ videoId: null }));
+});
+
 app.get('/api/tv-live/:channelId', (req, res) => {
   const channelId = req.params.channelId;
   if (!channelId) return res.status(400).json({ error: 'Invalid channel' });
