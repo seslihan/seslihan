@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const path = require('path');
 const { Server } = require('socket.io');
 const multer = require('multer');
@@ -59,6 +60,52 @@ app.get('/api/config', (req, res) => {
     chunkSize: CHUNK_SIZE,
     maxFileSize: MAX_FILE_SIZE
   });
+});
+
+const RADIO_WHITELIST = [
+  'radyotvonline.com', 'streamtheworld.com', 'radyositesihazir.com',
+  'powerapp.com.tr', 'powerapp.com.tr', 'listenpowerapp.com',
+  'icecast', 'cdnvideo.ru', 'radyohizmeti.com',
+  'channels.dinamo.fm', 'listenfenomen.com', 'radyono.com',
+  'liderhost.com.tr', 'anadolu.liderhost.com.tr'
+];
+
+app.get('/api/radio-proxy', (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).send('Missing url');
+  let parsed;
+  try { parsed = new URL(url); } catch { return res.status(400).send('Invalid URL'); }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return res.status(400).send('Bad protocol');
+
+  const fetchMod = parsed.protocol === 'https:' ? https : http;
+  const proxyReq = fetchMod.get(url, { timeout: 8000 }, (proxyRes) => {
+    if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
+      const redirect = new URL(proxyRes.headers.location, url);
+      const redirMod = redirect.protocol === 'https:' ? https : http;
+      const redirReq = redirMod.get(redirect.href, { timeout: 8000 }, (redirRes) => {
+        res.writeHead(redirRes.statusCode, {
+          'Content-Type': redirRes.headers['content-type'] || 'audio/mpeg',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        });
+        redirRes.pipe(res);
+      });
+      redirReq.on('error', () => { try { res.status(502).send('Redirect error'); } catch {} });
+      redirReq.on('timeout', () => { redirReq.destroy(); try { res.status(504).send('Timeout'); } catch {} });
+      return;
+    }
+    res.writeHead(proxyRes.statusCode, {
+      'Content-Type': proxyRes.headers['content-type'] || 'audio/mpeg',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
+    });
+    proxyRes.pipe(res);
+  });
+  proxyReq.on('error', (e) => { try { res.status(502).send('Upstream error: ' + e.message); } catch {} });
+  proxyReq.on('timeout', () => { proxyReq.destroy(); try { res.status(504).send('Timeout'); } catch {} });
+  req.on('close', () => { proxyReq.destroy(); });
 });
 
 function safeUploadId(id) {

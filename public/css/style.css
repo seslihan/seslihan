@@ -233,7 +233,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 
 .app-brand img, .logo-transparent {
-  height: 80px;
+  height: 160px;
   width: auto;
   mix-blend-mode: multiply;
 }
@@ -735,7 +735,7 @@ body.room-body { background: var(--bg-2); }
   justify-content: center;
 }
 
-.stage-header-center img { height: 64px; width: auto; }
+.stage-header-center img { height: 128px; width: auto; }
 
 .stage-title {
   display: flex;
@@ -1799,7 +1799,7 @@ body.post-body {
     padding: 4px 10px; min-height: 40px;
     background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 100%);
   }
-  .stage-header-center img { height: 44px; }
+  .stage-header-center img { height: 88px; }
   .stage-title { font-size: 8px; gap: 6px; padding: 2px 8px; background: rgba(0,0,0,0.25); border-radius: 0; border: 2px solid rgba(255,255,255,0.2); }
   .stage-header-left, .stage-header-right { gap: 6px; }
   .stage-timer { font-size: 11px; }
@@ -1933,7 +1933,7 @@ body.post-body {
   .side-card { display: none; }
   .meeting-list { max-height: 150px; }
   .app-header { padding: 4px 12px; min-height: 44px; }
-  .app-header .app-brand img { height: 48px; }
+  .app-header .app-brand img { height: 96px; }
   .app-header-actions { gap: 4px; }
 
   .prejoin-container { padding: 16px 12px; }
@@ -2504,7 +2504,7 @@ a:hover {
 
 /* --- Chat header logo --- */
 .chat-header .logo-transparent {
-  height: 64px;
+  height: 128px;
   border-radius: 4px;
   margin-right: 4px;
 }

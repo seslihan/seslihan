@@ -1919,11 +1919,11 @@
   let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.25, type: 'supermarket', timers: [], radioEl: null };
 
   const RADIO_STREAMS = {
-    'radio-powerturk': { name: 'PowerTürk FM', url: 'https://mpegpowerturk.listenpowerapp.com/powerturk/mpeg/icecast.audio' },
-    'radio-powerfm':   { name: 'Power FM',     url: 'https://playerservices.streamtheworld.com/api/livestream-redirect/POWER_FM_SC' },
-    'radio-ntv':       { name: 'NTV Radyo',     url: 'http://ntvrdwmp.radyotvonline.com/' },
-    'radio-radyono':   { name: 'Kral Türk FM',  url: 'https://live.radyositesihazir.com/8032/stream' },
-    'radio-fenomen':   { name: 'Fenomen FM',    url: 'https://fenomen.listenfenomen.com/fenomen/256/icecast.audio' }
+    'radio-powerturk': { name: 'PowerTürk FM', url: '/api/radio-proxy?url=' + encodeURIComponent('https://mpegpowerturk.listenpowerapp.com/powerturk/mpeg/icecast.audio') },
+    'radio-powerfm':   { name: 'Power FM',     url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.250/;stream') },
+    'radio-ntv':       { name: 'NTV Radyo',     url: '/api/radio-proxy?url=' + encodeURIComponent('http://ntvrdwmp.radyotvonline.com/') },
+    'radio-radyono':   { name: 'Kral Türk FM',  url: '/api/radio-proxy?url=' + encodeURIComponent('https://live.radyositesihazir.com/8032/stream') },
+    'radio-fenomen':   { name: 'Fenomen FM',    url: '/api/radio-proxy?url=' + encodeURIComponent('https://fenomen.listenfenomen.com/fenomen/256/icecast.audio') }
   };
 
   function clearAmbient() {
