@@ -189,8 +189,8 @@ app.get('/api/stock', (req, res) => {
     if (btcturk && btcturk.data) {
       const btc = btcturk.data.find(t => t.pair === 'BTCTRY');
       const eth = btcturk.data.find(t => t.pair === 'ETHTRY');
-      if (btc) result.push({ sym: 'BTC/TRY', val: btc.last, chg: parseFloat(btc.dailyChangeRate) || 0 });
-      if (eth) result.push({ sym: 'ETH/TRY', val: eth.last, chg: parseFloat(eth.dailyChangeRate) || 0 });
+      if (btc) result.push({ sym: 'BTC/TRY', val: btc.last, chg: parseFloat(btc.dailyPercent) || 0 });
+      if (eth) result.push({ sym: 'ETH/TRY', val: eth.last, chg: parseFloat(eth.dailyPercent) || 0 });
     }
 
     if (finans) {
