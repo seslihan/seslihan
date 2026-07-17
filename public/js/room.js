@@ -38,6 +38,13 @@
   const chatForm = $('chatForm');
   const fileInput = $('fileInput');
   const typingEl = $('typing');
+  const chatEmptyState = $('chatEmptyState');
+
+  function updateChatEmptyState() {
+    if (!chatEmptyState) return;
+    const hasMessages = messagesEl.querySelectorAll('.msg-row, .system-msg, .file-progress').length > 0;
+    chatEmptyState.style.display = hasMessages ? 'none' : 'flex';
+  }
 
   const state = {
     you: null,
@@ -574,6 +581,7 @@
   socket.on('delete-message', (id) => {
     const el = messagesEl.querySelector('[data-msg-id="' + id + '"]');
     if (el) el.remove();
+    updateChatEmptyState();
   });
 
   socket.on('media-state', ({ id, mic, cam, screen }) => {
@@ -688,6 +696,7 @@
       del.addEventListener('click', () => {
         socket.emit('delete-message', msg.id);
         row.remove();
+        updateChatEmptyState();
       });
       bubble.appendChild(del);
     }
@@ -696,6 +705,7 @@
     row.appendChild(bubble);
     messagesEl.appendChild(row);
     messagesEl.scrollTop = messagesEl.scrollHeight;
+    updateChatEmptyState();
     if (!isMe && state.activeTab !== 'chat') {
       state.unreadChat = (state.unreadChat || 0) + 1;
       const badge = $('chatBadge');
@@ -710,6 +720,7 @@
     div.textContent = text;
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
+    updateChatEmptyState();
   }
 
   chatForm.addEventListener('submit', (e) => {

@@ -128,7 +128,7 @@ app.get('/api/stock', (req, res) => {
   });
 
   Promise.all([
-    fetchJSON('https://api.btcturk.com/v2/ticker'),
+    fetchJSON('https://api.btcturk.com/api/v2/ticker'),
     fetchText('https://finans.truncgil.com/today.json')
   ]).then(([btcturk, finans]) => {
     const result = [];
