@@ -1509,26 +1509,20 @@
   });
 
   // ---------- MISC ----------
-  $('toggleChat').addEventListener('click', () => {
+  function toggleChatPanel() {
     const chat = document.querySelector('.chat');
     const isCollapsed = chat.classList.toggle('collapsed');
+    const btn = $('toggleChat');
+    if (btn) btn.setAttribute('data-tooltip', isCollapsed ? 'Sohbeti aç' : 'Sohbeti gizle');
     if (!isCollapsed && isMobile) {
       setTimeout(() => {
         const input = document.getElementById('chatInput');
         if (input) input.focus();
       }, 400);
     }
-  });
-  $('toggleChatBtn').addEventListener('click', () => {
-    const chat = document.querySelector('.chat');
-    const isCollapsed = chat.classList.toggle('collapsed');
-    if (!isCollapsed && isMobile) {
-      setTimeout(() => {
-        const input = document.getElementById('chatInput');
-        if (input) input.focus();
-      }, 400);
-    }
-  });
+  }
+  $('toggleChat').addEventListener('click', toggleChatPanel);
+  $('toggleChatBtn').addEventListener('click', toggleChatPanel);
   $('leaveBtn').addEventListener('click', () => {
     window.location.href = '/post.html?code=' + state.roomCode + '&duration=' + Math.floor((Date.now() - state.meetStart) / 1000);
   });

@@ -1205,12 +1205,20 @@ body.room-body { background: var(--bg-2); }
 /* ---------- CHAT PANEL ---------- */
 .chat {
   background: var(--panel);
-  border-left: 1px solid var(--line);
+  border-left: 3px solid var(--text);
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-width: 320px;
+  width: 360px;
   position: relative;
-  transition: transform 0.2s;
+  overflow: hidden;
+  transition: width 0.15s steps(4), min-width 0.15s steps(4), border-left-width 0.15s steps(4);
+}
+
+.chat.collapsed {
+  width: 0;
+  min-width: 0;
+  border-left-width: 0;
 }
 
 .chat-header {
@@ -1740,6 +1748,7 @@ body.post-body {
   .chat {
     position: fixed; left: 0; right: 0; bottom: 0;
     height: auto; max-height: 75vh;
+    width: auto; min-width: 0;
     border: 3px solid var(--text) !important; border-radius: 0 !important;
     box-shadow: 0 -4px 0px var(--text) !important;
     z-index: 200;
@@ -1748,7 +1757,7 @@ body.post-body {
     display: flex; flex-direction: column;
   }
   .chat:not(.collapsed) { transform: translateY(0); }
-  .chat.collapsed { transform: translateY(100%); pointer-events: none; }
+  .chat.collapsed { transform: translateY(100%); pointer-events: none; width: auto; min-width: 0; border-left-width: 3px; }
   .chat.collapsed .messages,
   .chat.collapsed .chat-form,
   .chat.collapsed .typing,
