@@ -2,6 +2,7 @@
   const params = new URLSearchParams(window.location.search);
   const code = (params.get('code') || '').toUpperCase();
   const name = params.get('name') || '';
+  const feature = params.get('feature') || '';
 
   if (!code) { window.location.href = '/'; return; }
 
@@ -447,6 +448,7 @@
     const camOn = state.camOn;
     if (state.stream) state.stream.getTracks().forEach(t => t.stop());
     const qs = new URLSearchParams({ code, name: n, mic: micOn ? '1' : '0', cam: camOn ? '1' : '0' });
+    if (feature) qs.set('feature', feature);
     window.location.href = '/room.html?' + qs.toString();
   });
 

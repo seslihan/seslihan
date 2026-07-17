@@ -112,4 +112,83 @@
   if (codeParam) roomCodeInput.value = codeParam;
 
   renderMeetings();
+
+  const featureCards = document.querySelectorAll('.feature-card');
+  featureCards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      let name = localStorage.getItem('bs-name') || '';
+      const href = card.getAttribute('href');
+      const url = new URL(href, window.location.origin);
+      const code = url.searchParams.get('code');
+      const type = url.searchParams.get('type');
+      if (!name) {
+        showNameGate().then(n => {
+          if (!n) return;
+          socket.emit('create-room', (res) => {
+            if (res && res.code) {
+              window.location.href = '/prejoin.html?code=' + encodeURIComponent(res.code) + '&name=' + encodeURIComponent(n) + '&feature=' + type;
+            }
+          });
+        });
+      } else {
+        socket.emit('create-room', (res) => {
+          if (res && res.code) {
+            window.location.href = '/prejoin.html?code=' + encodeURIComponent(res.code) + '&name=' + encodeURIComponent(name) + '&feature=' + type;
+          }
+        });
+      }
+    });
+  });
+
+  let currentCategory = 'world';
+  const newsGrid = document.getElementById('newsGrid');
+  const newsTime = document.getElementById('newsTime');
+  const newsRefreshBtn = document.getElementById('newsRefreshBtn');
+  const newsTabs = document.querySelectorAll('.news-tab');
+
+  function fetchNews(category) {
+    currentCategory = category;
+    newsGrid.innerHTML = '<div class="news-loading">Haberler yükleniyor...</div>';
+    fetch('/api/news/' + category)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.items || data.items.length === 0) {
+          newsGrid.innerHTML = '<div class="news-loading">Haber bulunamadı</div>';
+          return;
+        }
+        newsGrid.innerHTML = '';
+        data.items.forEach(item => {
+          const card = document.createElement('a');
+          card.className = 'news-card';
+          card.href = item.link;
+          card.target = '_blank';
+          card.rel = 'noopener';
+          card.innerHTML =
+            '<div class="news-card-title">' + escapeHtml(item.title) + '</div>' +
+            (item.desc ? '<div class="news-card-desc">' + escapeHtml(item.desc) + '</div>' : '') +
+            (item.pubDate ? '<div class="news-card-time">' + escapeHtml(item.pubDate) + '</div>' : '');
+          newsGrid.appendChild(card);
+        });
+        if (data.time) {
+          const t = new Date(data.time);
+          newsTime.textContent = 'Son güncelleme: ' + t.toLocaleTimeString('tr-TR');
+        }
+      })
+      .catch(() => {
+        newsGrid.innerHTML = '<div class="news-loading">Haberler yüklenemedi</div>';
+      });
+  }
+
+  newsTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      newsTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      fetchNews(tab.dataset.category);
+    });
+  });
+
+  if (newsRefreshBtn) newsRefreshBtn.addEventListener('click', () => fetchNews(currentCategory));
+
+  fetchNews('world');
 })();

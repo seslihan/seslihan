@@ -4,6 +4,7 @@
   let name = params.get('name') || 'Misafir';
   const joinMic = params.get('mic') !== '0';
   const joinCam = params.get('cam') === '1';
+  const autoFeature = params.get('feature') || '';
 
   if (!code) { window.location.href = '/'; return; }
 
@@ -395,6 +396,16 @@
       res.peers.forEach((p) => addPeer(p));
       startTimer();
       if (isMobile) document.querySelector('.chat').classList.add('collapsed');
+      if (autoFeature) {
+        setTimeout(() => {
+          if (autoFeature === 'tv') $('liveTvBtn').click();
+          else if (autoFeature === 'radio') $('ambientBtn').click();
+          else if (autoFeature === 'stock') $('stockTickerBtn').click();
+          else if (autoFeature === 'whiteboard') $('whiteboardBtn').click();
+          else if (autoFeature === 'chat') $('toggleChatBtn').click();
+          else if (autoFeature === 'captions') $('toggleCaptions').click();
+        }, 500);
+      }
     });
   }
 

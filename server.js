@@ -108,6 +108,53 @@ app.get('/api/radio-proxy', (req, res) => {
   req.on('close', () => { proxyReq.destroy(); });
 });
 
+app.get('/api/news/:category', (req, res) => {
+  const FEEDS = {
+    world: [
+      'https://feeds.bbci.co.uk/news/world/rss.xml',
+      'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
+      'https://www.aljazeera.com/xml/rss/all.xml'
+    ],
+    ai: [
+      'https://www.technologyreview.com/feed/',
+      'https://feeds.arstechnica.com/arstechnica/technology-lab',
+      'https://www.wired.com/feed/tag/ai/latest/rss'
+    ],
+    turkey: [
+      'https://www.ntv.com.tr/rss/news?id=dunya',
+      'https://www.sozcu.com.tr/rss/tum-haberler.xml',
+      'https://www.hurriyet.com.tr/rss/anasayfa'
+    ]
+  };
+  const feeds = FEEDS[req.params.category];
+  if (!feeds) return res.status(400).json({ error: 'Unknown category' });
+
+  const fetchFeed = (url) => new Promise((resolve) => {
+    const mod = url.startsWith('https') ? https : http;
+    mod.get(url, { timeout: 5000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' } }, (r) => {
+      let data = '';
+      r.on('data', c => data += c);
+      r.on('end', () => {
+        const items = [];
+        const entries = data.split(/<item>|<entry>/i).slice(1, 6);
+        entries.forEach(entry => {
+          const title = (entry.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/i) || [])[1] || '';
+          const link = (entry.match(/<link[^>]*>([^<]*)<\/link>/i) || entry.match(/<link[^>]*href="([^"]*)"/i) || [])[1] || '#';
+          const desc = (entry.match(/<description[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/description>/i) || [])[1] || '';
+          const pubDate = (entry.match(/<pubDate[^>]*>(.*?)<\/pubDate>/i) || entry.match(/<published[^>]*>(.*?)<\/published>/i) || [])[1] || '';
+          items.push({ title: title.replace(/<[^>]*>/g, '').trim(), link: link.trim(), desc: desc.replace(/<[^>]*>/g, '').trim().substring(0, 200), pubDate });
+        });
+        resolve(items);
+      });
+    }).on('error', () => resolve([])).on('timeout', function() { this.destroy(); resolve([]); });
+  });
+
+  Promise.all(feeds.map(fetchFeed)).then(results => {
+    const all = results.flat().sort(() => Math.random() - 0.5).slice(0, 12);
+    res.json({ items: all, time: new Date().toISOString() });
+  });
+});
+
 app.get('/api/stock', (req, res) => {
   const fetchJSON = (url) => new Promise((resolve, reject) => {
     const mod = url.startsWith('https') ? https : http;
