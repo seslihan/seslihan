@@ -2315,38 +2315,49 @@ body.post-body {
 
 .stock-ticker {
   position: fixed; bottom: 60px; left: 0; right: 0;
-  height: 36px; background: var(--panel);
-  border-top: 2px solid var(--text);
-  border-bottom: 2px solid var(--text);
-  display: flex; align-items: center; overflow: hidden; z-index: 100;
+  background: #0a0a0a;
+  border-top: 2px solid #00ff41;
+  border-bottom: 2px solid #00ff41;
+  display: flex; flex-direction: column; overflow: hidden; z-index: 100;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 0 20px rgba(0,255,65,0.15);
+}
+.stock-ticker::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.03) 2px, rgba(0,255,65,0.03) 4px);
+  pointer-events: none; z-index: 1;
 }
 .ticker-label {
-  flex-shrink: 0;
-  background: var(--accent); color: white;
-  padding: 0 12px; height: 100%;
-  display: flex; align-items: center;
-  font-family: var(--font); font-size: 8px; font-weight: 700;
-  border-right: 2px solid var(--text);
+  display: none;
 }
 .ticker-track {
-  flex: 1; overflow: hidden; position: relative;
-  font-family: var(--font); font-size: 8px;
-  white-space: nowrap;
-  animation: tickerScroll 30s linear infinite;
+  flex: 1; padding: 6px 12px; font-size: 11px; line-height: 1.6;
+  color: #00ff41; white-space: nowrap; overflow-x: auto;
+  position: relative; z-index: 2;
+  scrollbar-width: none;
 }
+.ticker-track::-webkit-scrollbar { display: none; }
 .ticker-item {
-  display: inline-block; padding: 0 16px;
+  display: inline-block; padding: 0 20px 0 0;
 }
-.ticker-up { color: var(--success); }
-.ticker-down { color: var(--danger); }
-.ticker-flat { color: var(--muted); }
+.ticker-item::before {
+  content: '>';
+  color: #00cc33;
+  margin-right: 4px;
+}
+.ticker-up { color: #00ff41; text-shadow: 0 0 8px rgba(0,255,65,0.5); }
+.ticker-down { color: #ff3333; text-shadow: 0 0 8px rgba(255,51,51,0.5); }
+.ticker-flat { color: #888; }
 .ticker-close {
-  flex-shrink: 0; width: 36px; height: 100%;
-  background: var(--danger); color: white;
-  border: none; border-left: 2px solid var(--text);
-  font-family: var(--font); font-size: 10px;
-  cursor: pointer;
+  position: absolute; top: 0; right: 0;
+  width: 28px; height: 28px;
+  background: transparent; color: #00ff41;
+  border: none; font-family: 'Courier New', monospace;
+  font-size: 12px; cursor: pointer; z-index: 3;
+  display: flex; align-items: center; justify-content: center;
 }
+.ticker-close:hover { color: #ff3333; text-shadow: 0 0 6px rgba(255,51,51,0.6); }
 @keyframes tickerScroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }

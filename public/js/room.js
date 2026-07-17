@@ -2332,8 +2332,7 @@
     const track = $('tickerTrack');
     if (!track || stockItems.length === 0) return;
     let html = '';
-    const items = stockItems.concat(stockItems);
-    items.forEach(s => {
+    stockItems.forEach(s => {
       const cls = s.chg > 0 ? 'ticker-up' : s.chg < 0 ? 'ticker-down' : 'ticker-flat';
       const arrow = s.chg > 0 ? '▲' : s.chg < 0 ? '▼' : '—';
       const val = typeof s.val === 'number' ? s.val.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) : s.val;
@@ -2357,7 +2356,7 @@
     t.hidden = !t.hidden;
     if (!t.hidden) {
       fetchStockData();
-      toast('📈 Borsa ticker açıldı', 'info');
+      toast('BIST> Terminal açıldı', 'info');
     }
   });
 
