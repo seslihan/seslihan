@@ -197,16 +197,15 @@ app.get('/api/stock', (req, res) => {
       const tryParse = (k) => {
         const item = finans[k];
         if (!item) return null;
-        const keys = Object.keys(item);
+        const vals = Object.values(item).map(v => String(v));
         let saleVal = null, chgVal = 0;
-        for (const ck of keys) {
-          const lower = ck.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-          if (lower.startsWith('sat')) {
-            saleVal = parseFloat(String(item[ck]).replace(/\./g, '').replace(',', '.'));
-          }
-          if (lower.startsWith('deg')) {
-            const raw = String(item[ck]);
-            chgVal = parseFloat(raw.replace('%', '').replace(',', '.')) || 0;
+        for (const v of vals) {
+          const cleaned = v.replace(/%/g, '');
+          if (/^%-?[\d]+[.,][\d]+$/.test(v) || /^%-?[\d]+$/.test(v)) {
+            chgVal = parseFloat(cleaned.replace(',', '.')) || 0;
+          } else if (v !== 'Döviz' && v !== 'Altın' && v !== 'Doviz' && /^[\d.,]+$/.test(v.replace(/\s/g, ''))) {
+            const num = parseFloat(v.replace(/\./g, '').replace(',', '.'));
+            if (num && num > 0) saleVal = num;
           }
         }
         if (saleVal) return { val: saleVal, chg: chgVal };
