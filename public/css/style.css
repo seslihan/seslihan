@@ -213,13 +213,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 20px;
+  padding: 2px 16px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
   z-index: 100;
-  min-height: 64px;
+  min-height: 52px;
 }
 
 .app-brand {
@@ -715,10 +715,10 @@ body.room-body { background: var(--bg-2); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 16px;
+  padding: 2px 16px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
-  min-height: 72px;
+  min-height: 52px;
   box-sizing: border-box;
 }
 
@@ -1848,10 +1848,10 @@ body.post-body {
   .ctrl svg { width: 22px; height: 22px; }
   .ctrl[data-tooltip]:hover::after { display: none; }
   .ctrl-divider { display: none; }
-  #toggleScreen, #toggleCaptions, #raiseHand, #whiteboardBtn, #ambientBtn, #moreBtn {
+  #toggleScreen, #toggleCaptions, #raiseHand, #whiteboardBtn, #ambientBtn, #liveTvBtn, #stockTickerBtn, #moreBtn {
     width: 42px; height: 42px;
   }
-  #toggleScreen svg, #toggleCaptions svg, #raiseHand svg, #whiteboardBtn svg, #ambientBtn svg, #moreBtn svg {
+  #toggleScreen svg, #toggleCaptions svg, #raiseHand svg, #whiteboardBtn svg, #ambientBtn svg, #liveTvBtn svg, #stockTickerBtn svg, #moreBtn svg {
     width: 18px; height: 18px;
   }
   #leaveBtn {
@@ -1932,7 +1932,7 @@ body.post-body {
   .join-form .btn { width: 100%; justify-content: center; }
   .side-card { display: none; }
   .meeting-list { max-height: 150px; }
-  .app-header { padding: 4px 12px; min-height: 44px; }
+  .app-header { padding: 2px 12px; min-height: 44px; }
   .app-header .app-brand img { height: 96px; }
   .app-header-actions { gap: 4px; }
 
@@ -1982,7 +1982,7 @@ body.post-body {
   .video-grid { padding: 3px; gap: 2px; }
   .hero-card h1 { font-size: 14px; }
   .controls { gap: 8px; padding: 8px 12px; }
-  #toggleScreen, #toggleCaptions, #raiseHand, #whiteboardBtn, #ambientBtn, #moreBtn {
+  #toggleScreen, #toggleCaptions, #raiseHand, #whiteboardBtn, #ambientBtn, #liveTvBtn, #stockTickerBtn, #moreBtn {
     width: 38px; height: 38px;
   }
 }
@@ -2253,6 +2253,80 @@ body.post-body {
 }
 .ambient-stop-btn:hover { opacity: 0.85; }
 .ambient-stop-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--text); }
+
+.tv-popover { min-width: 240px !important; }
+.tv-channel {
+  display: block; width: 100%;
+  padding: 8px 12px; background: var(--panel); color: var(--text);
+  border: 1px solid var(--line); border-bottom: none;
+  font-family: var(--font); font-size: 8px; text-align: left;
+  cursor: pointer; transition: background 0.15s;
+}
+.tv-channel:last-of-type { border-bottom: 1px solid var(--line); }
+.tv-channel:hover { background: var(--bg-3); }
+
+.tv-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85); z-index: 300;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.tv-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px; color: white;
+}
+.tv-title { font-family: var(--font); font-size: 12px; }
+.tv-overlay .icon-btn { color: white; border-color: rgba(255,255,255,0.3); width: 36px; height: 36px; font-size: 18px; }
+.tv-container {
+  width: 100%; max-width: 960px; aspect-ratio: 16/9;
+  border: 3px solid var(--accent); background: #000;
+}
+.tv-container iframe {
+  width: 100%; height: 100%; border: none;
+}
+
+.stock-ticker {
+  position: fixed; bottom: 60px; left: 0; right: 0;
+  height: 36px; background: var(--panel);
+  border-top: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+  display: flex; align-items: center; overflow: hidden; z-index: 100;
+}
+.ticker-label {
+  flex-shrink: 0;
+  background: var(--accent); color: white;
+  padding: 0 12px; height: 100%;
+  display: flex; align-items: center;
+  font-family: var(--font); font-size: 8px; font-weight: 700;
+  border-right: 2px solid var(--text);
+}
+.ticker-track {
+  flex: 1; overflow: hidden; position: relative;
+  font-family: var(--font); font-size: 8px;
+  white-space: nowrap;
+  animation: tickerScroll 30s linear infinite;
+}
+.ticker-item {
+  display: inline-block; padding: 0 16px;
+}
+.ticker-up { color: var(--success); }
+.ticker-down { color: var(--danger); }
+.ticker-flat { color: var(--muted); }
+.ticker-close {
+  flex-shrink: 0; width: 36px; height: 100%;
+  background: var(--danger); color: white;
+  border: none; border-left: 2px solid var(--text);
+  font-family: var(--font); font-size: 10px;
+  cursor: pointer;
+}
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.room-body .controls .ctrl[data-tooltip]:hover::after {
+  z-index: 500;
+}
 
 /* ==========================================
    RETRO / NOSTALJIK EFEKTLER

@@ -916,15 +916,20 @@
           height: { ideal: 1080 },
           frameRate: { ideal: 30 }
         },
-        audio: false
+        audio: true
       });
       const track = ss.getVideoTracks()[0];
+      const screenAudioTracks = ss.getAudioTracks();
       state.screenStream = ss;
       state.screenSharing = true;
       state.peers.forEach(p => {
-        const sender = p.pc.getSenders().find(s => s.track && s.track.kind === 'video');
-        if (sender) sender.replaceTrack(track);
+        const vSender = p.pc.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (vSender) vSender.replaceTrack(track);
         else { try { p.pc.addTrack(track, state.localStream); } catch (_) {} }
+        screenAudioTracks.forEach(sa => {
+          const aExists = p.pc.getSenders().some(s => s.track && s.track.kind === 'audio' && s.track !== state.localStream.getAudioTracks()[0]);
+          if (!aExists) { try { p.pc.addTrack(sa, state.localStream); } catch (_) {} }
+        });
       });
       $('presentVideo').srcObject = ss;
       $('presentStage').hidden = false;
@@ -935,10 +940,11 @@
         $('presentPip').hidden = false;
       } else $('presentPip').hidden = true;
       $('toggleScreen').classList.add('active');
-      $('presentLabel').textContent = 'Sen ekran paylaşıyorsun';
+      $('presentLabel').textContent = 'Sen ekran paylaşıyorsun' + (screenAudioTracks.length > 0 ? ' (ses dahil)' : '');
       track.onended = () => stopScreenShare();
+      if (screenAudioTracks.length > 0) screenAudioTracks.forEach(t => { t.onended = () => stopScreenShare(); });
       socket.emit('media-state', { mic: state.micOn, cam: state.camOn, screen: true });
-      toast('Ekran paylaşımı başladı', 'success');
+      toast(screenAudioTracks.length > 0 ? 'Ekran paylaşımı + ses başladı' : 'Ekran paylaşımı başladı (sessiz)', 'success');
     } catch (e) { if (e.name !== 'NotAllowedError') toast('Ekran paylaşımı başlatılamadı', 'error'); }
   });
 
@@ -948,6 +954,7 @@
 
   function stopScreenShare() {
     if (!state.screenStream) return;
+    const screenAudioTracks = state.screenStream.getAudioTracks();
     state.screenStream.getTracks().forEach(t => t.stop());
     state.screenStream = null;
     state.screenSharing = false;
@@ -958,6 +965,12 @@
     } else {
       state.peers.forEach(p => { const ss = p.pc.getSenders().filter(s => s.track && s.track.kind === 'video'); ss.forEach(s => { try { p.pc.removeTrack(s); } catch (_) {} }); });
     }
+    screenAudioTracks.forEach(() => {
+      state.peers.forEach(p => {
+        const screenAudio = p.pc.getSenders().filter(s => s.track && s.track.kind === 'audio' && s.track !== (state.localStream && state.localStream.getAudioTracks()[0]));
+        screenAudio.forEach(s => { try { p.pc.removeTrack(s); } catch (_) {} });
+      });
+    });
     $('presentVideo').srcObject = null;
     $('presentStage').hidden = true;
     videoGrid.style.display = '';
@@ -1919,11 +1932,21 @@
   let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.25, type: 'supermarket', timers: [], radioEl: null };
 
   const RADIO_STREAMS = {
-    'radio-powerturk': { name: 'PowerTürk FM', url: '/api/radio-proxy?url=' + encodeURIComponent('https://mpegpowerturk.listenpowerapp.com/powerturk/mpeg/icecast.audio') },
-    'radio-powerfm':   { name: 'Power FM',     url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.250/;stream') },
-    'radio-ntv':       { name: 'NTV Radyo',     url: '/api/radio-proxy?url=' + encodeURIComponent('http://ntvrdwmp.radyotvonline.com/') },
-    'radio-radyono':   { name: 'Kral Türk FM',  url: '/api/radio-proxy?url=' + encodeURIComponent('https://live.radyositesihazir.com/8032/stream') },
-    'radio-fenomen':   { name: 'Fenomen FM',    url: '/api/radio-proxy?url=' + encodeURIComponent('https://fenomen.listenfenomen.com/fenomen/256/icecast.audio') }
+    'radio-powerturk':  { name: 'PowerTürk FM',   url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/POWERTURK_SC') },
+    'radio-powerfm':    { name: 'Power FM',        url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/POWER_FM_SC') },
+    'radio-ntv':        { name: 'NTV Radyo',       url: '/api/radio-proxy?url=' + encodeURIComponent('http://ntvrdwmp.radyotvonline.com/') },
+    'radio-superfm':    { name: 'Süper FM',        url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/SUPER_FM_SC') },
+    'radio-virgin':     { name: 'Virgin Radio',    url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO_SC') },
+    'radio-joyturk':    { name: 'Joy Türk',        url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC') },
+    'radio-kral':       { name: 'Kral Türk FM',    url: '/api/radio-proxy?url=' + encodeURIComponent('https://live.radyositesihazir.com/8032/stream') },
+    'radio-radyo7':     { name: 'Radyo 7',         url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.250/;stream') },
+    'radio-fenomen':    { name: 'Fenomen FM',      url: '/api/radio-proxy?url=' + encodeURIComponent('https://fenomen.listenfenomen.com/fenomen/256/icecast.audio') },
+    'radio-90lar':      { name: '90\'lar Radyo',   url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/166/') },
+    'radio-altin':      { name: 'Altın Şarkılar',  url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/25/;') },
+    'radio-metro':      { name: 'Metro FM',        url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/METRO_FM_SC') },
+    'radio-dinamocaffe':{ name: 'Dinamo Caffe',    url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/caffe-mp3') },
+    'radio-dinamosleep':{ name: 'Dinamo Sleep',    url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/sleep-mp3') },
+    'radio-sputnik':    { name: 'Radyo Sputnik',   url: '/api/radio-proxy?url=' + encodeURIComponent('https://icecast-rian.cdnvideo.ru/voicestm') }
   };
 
   function clearAmbient() {
@@ -2247,6 +2270,96 @@
     if (ambientState.gainNode) ambientState.gainNode.gain.value = ambientState.volume;
     if (ambientState.radioEl) ambientState.radioEl.volume = ambientState.volume;
   });
+
+  // ---------- CANLI TV ----------
+  $('liveTvBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const pop = $('tvPopover');
+    pop.hidden = !pop.hidden;
+    $('ambientPopover').hidden = true;
+    $('reactionsPopover').hidden = true;
+    $('morePopover').hidden = true;
+  });
+
+  document.querySelectorAll('.tv-channel').forEach(b => {
+    b.addEventListener('click', () => {
+      $('tvFrame').src = 'https://www.youtube.com/embed/' + b.dataset.tv + '?autoplay=1&rel=0';
+      $('tvOverlay').hidden = false;
+      $('tvPopover').hidden = true;
+      toast('📺 ' + b.textContent.trim(), 'info');
+    });
+  });
+
+  $('tvOverlayClose').addEventListener('click', () => {
+    $('tvOverlay').hidden = true;
+    $('tvFrame').src = '';
+  });
+
+  $('tvCloseBtn').addEventListener('click', () => {
+    $('tvOverlay').hidden = true;
+    $('tvFrame').src = '';
+    $('tvPopover').hidden = true;
+  });
+
+  // ---------- BORSA TICKER ----------
+  const STOCK_DATA = [
+    { sym: 'BIST100', val: 10245, chg: 1.24 },
+    { sym: 'BIST30',  val: 11580, chg: 0.87 },
+    { sym: 'USD/TRY', val: 38.42, chg: -0.15 },
+    { sym: 'EUR/TRY', val: 42.18, chg: 0.32 },
+    { sym: 'GBP/TRY', val: 49.05, chg: 0.11 },
+    { sym: 'ALTIN',   val: 3485, chg: 0.68 },
+    { sym: 'BITCOIN', val: 118420, chg: 2.14 },
+    { sym: 'ETH',     val: 3620, chg: 1.85 },
+    { sym: 'DAVAMO',  val: 142.50, chg: -0.42 },
+    { sym: 'THYAO',   val: 298.75, chg: 1.10 },
+    { sym: 'GARAN',   val: 142.30, chg: 0.55 },
+    { sym: 'ASELS',   val: 92.10, chg: -0.85 },
+    { sym: 'SISE',    val: 54.80, chg: 0.30 },
+    { sym: 'KCHOL',   val: 210.40, chg: 0.92 },
+    { sym: 'BRENT',   val: 82.35, chg: -0.48 },
+    { sym: 'FAİZ%',   val: 42.50, chg: 0.00 },
+    { sym: 'DAX',     val: 18920, chg: 0.65 },
+    { sym: 'S&P500',  val: 5680, chg: 0.41 },
+    { sym: 'NASDAQ',  val: 18340, chg: 0.72 },
+    { sym: 'NIKKEI',  val: 39850, chg: -0.22 }
+  ];
+
+  function renderTicker() {
+    const track = $('tickerTrack');
+    if (!track) return;
+    let html = '';
+    const items = STOCK_DATA.concat(STOCK_DATA);
+    items.forEach(s => {
+      const cls = s.chg > 0 ? 'ticker-up' : s.chg < 0 ? 'ticker-down' : 'ticker-flat';
+      const arrow = s.chg > 0 ? '▲' : s.chg < 0 ? '▼' : '—';
+      html += '<span class="ticker-item ' + cls + '">' + s.sym + ' ' + s.val.toLocaleString('tr-TR') + ' ' + arrow + ' ' + Math.abs(s.chg).toFixed(2) + '%</span>';
+    });
+    track.innerHTML = html;
+  }
+
+  $('stockTickerBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const t = $('stockTicker');
+    t.hidden = !t.hidden;
+    if (!t.hidden) {
+      renderTicker();
+      toast('📈 Borsa ticker açıldı', 'info');
+    }
+  });
+
+  $('closeTicker').addEventListener('click', () => {
+    $('stockTicker').hidden = true;
+  });
+
+  setInterval(() => {
+    STOCK_DATA.forEach(s => {
+      const delta = (Math.random() - 0.48) * 0.3;
+      s.chg = Math.round((s.chg + delta) * 100) / 100;
+      s.val = Math.round(s.val * (1 + delta / 100) * 100) / 100;
+    });
+    if (!$('stockTicker').hidden) renderTicker();
+  }, 5000);
 
   window.addEventListener('beforeunload', () => {
     stopAmbient();
