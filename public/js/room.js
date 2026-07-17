@@ -1135,6 +1135,15 @@
     updateScreenZoom();
   });
 
+  $('presentFullscreenBtn').addEventListener('click', () => {
+    const el = $('presentContent');
+    if (!document.fullscreenElement) {
+      el.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
   /* ---------- MIC TEST ---------- */
   const mt = { ctx: null, analyser: null, data: null, loopback: false, loopbackGain: null, recording: false, recordedChunks: [], mediaRecorder: null, audioBlob: null, animFrame: null, stream: null };
 
@@ -1910,11 +1919,11 @@
   let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.25, type: 'supermarket', timers: [], radioEl: null };
 
   const RADIO_STREAMS = {
-    'radio-powerturk': { name: 'PowerTürk FM', url: 'https://live.powerapp.com.tr/powerturk/abr/playlist.m3u8' },
-    'radio-powerfm':   { name: 'Power FM',     url: 'https://live.powerapp.com.tr/powerfmadver/abr/playlist.m3u8' },
-    'radio-superfm':   { name: 'Süper FM',     url: 'https://live.powerapp.com.tr/superfm/abr/playlist.m3u8' },
-    'radio-radyono':   { name: 'Radyono',      url: 'https://listen.radyono.com/radyono/icecast.audio' },
-    'radio-fenomen':   { name: 'Fenomen FM',   url: 'https://fenomen.listenfenomen.com/fenomen/256/icecast.audio' }
+    'radio-powerturk': { name: 'PowerTürk FM', url: 'https://mpegpowerturk.listenpowerapp.com/powerturk/mpeg/icecast.audio' },
+    'radio-powerfm':   { name: 'Power FM',     url: 'https://playerservices.streamtheworld.com/api/livestream-redirect/POWER_FM_SC' },
+    'radio-ntv':       { name: 'NTV Radyo',     url: 'http://ntvrdwmp.radyotvonline.com/' },
+    'radio-radyono':   { name: 'Kral Türk FM',  url: 'https://live.radyositesihazir.com/8032/stream' },
+    'radio-fenomen':   { name: 'Fenomen FM',    url: 'https://fenomen.listenfenomen.com/fenomen/256/icecast.audio' }
   };
 
   function clearAmbient() {
@@ -1935,11 +1944,12 @@
     if (!stream) return;
     clearAmbient();
     const audio = new Audio();
-    audio.crossOrigin = 'anonymous';
     audio.src = stream.url;
     audio.volume = ambientState.volume;
     audio.preload = 'auto';
-    audio.play().catch(() => {});
+    audio.play().catch(() => {
+      toast(stream.name + ' çalınamadı — tarayıcı Engellemiş olabilir', 'error');
+    });
     audio.addEventListener('error', () => {
       toast(stream.name + ' yayınına bağlanılamadı', 'error');
     }, { once: true });
@@ -2224,6 +2234,11 @@
       startAmbient(b.dataset.ambient);
       toast('🎵 ' + b.textContent.trim(), 'info');
     });
+  });
+
+  $('stopAmbientBtn').addEventListener('click', () => {
+    stopAmbient();
+    document.querySelectorAll('.ambient-type').forEach(x => x.classList.remove('active'));
   });
 
   $('ambientVolume').addEventListener('input', (e) => {

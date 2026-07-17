@@ -654,12 +654,14 @@ body.prejoin-body { display: flex; background: var(--bg); overflow: auto; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
+  overflow: hidden;
 }
 .toggle-row:last-child { border-bottom: none; }
 
-.toggle-row .label { display: flex; flex-direction: column; gap: 2px; }
+.toggle-row .label { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .toggle-row .label-title { font-weight: 600; font-size: 14px; color: var(--text); }
 .toggle-row .label-desc { font-size: 12px; color: var(--muted); }
 
@@ -668,12 +670,12 @@ body.prejoin-body { display: flex; background: var(--bg); overflow: auto; }
   width: 42px;
   height: 24px;
   background: var(--line);
-  border-radius: 12px;
+  border: 2px solid var(--text);
   cursor: pointer;
   transition: background 0.25s;
   flex-shrink: 0;
-  border: none;
   padding: 0;
+  overflow: hidden;
 }
 
 .switch::after {
@@ -681,12 +683,10 @@ body.prejoin-body { display: flex; background: var(--bg); overflow: auto; }
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   background: white;
-  border-radius: 50%;
   transition: transform 0.25s;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
 }
 
 .switch.on { background: var(--accent); }
@@ -2241,6 +2241,19 @@ body.post-body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
+.ambient-stop-btn {
+  display: block; width: 100%;
+  padding: 8px 12px; margin-top: 6px;
+  background: var(--danger); color: white;
+  border: 2px solid var(--text);
+  font-family: var(--font); font-size: 8px;
+  cursor: pointer; text-align: center;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+  transition: transform 0.1s;
+}
+.ambient-stop-btn:hover { opacity: 0.85; }
+.ambient-stop-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--text); }
+
 /* ==========================================
    RETRO / NOSTALJIK EFEKTLER
    ========================================== */
@@ -3132,6 +3145,7 @@ textarea:focus {
   cursor: pointer;
   position: relative;
   box-shadow: 2px 2px 0px var(--text) !important;
+  overflow: hidden;
 }
 
 .switch.on {
