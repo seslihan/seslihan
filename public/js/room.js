@@ -963,6 +963,8 @@
     videoGrid.style.display = '';
     $('presentPip').hidden = true;
     $('toggleScreen').classList.remove('active');
+    screenZoom = 1;
+    updateScreenZoom();
     socket.emit('media-state', { mic: state.micOn, cam: state.camOn, screen: false });
   }
 
@@ -1096,6 +1098,41 @@
     if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
     else document.exitFullscreen();
     $('morePopover').hidden = true;
+  });
+
+  /* ---------- SCREEN SHARE ZOOM ---------- */
+  let screenZoom = 1;
+  const screenZoomMin = 0.5;
+  const screenZoomMax = 4;
+  const screenZoomStep = 0.25;
+
+  function updateScreenZoom() {
+    const v = $('presentVideo');
+    if (v) v.style.transform = 'scale(' + screenZoom + ')';
+    const lbl = $('zoomLevel');
+    if (lbl) lbl.textContent = Math.round(screenZoom * 100) + '%';
+  }
+
+  $('zoomInBtn').addEventListener('click', () => {
+    screenZoom = Math.min(screenZoomMax, screenZoom + screenZoomStep);
+    updateScreenZoom();
+  });
+
+  $('zoomOutBtn').addEventListener('click', () => {
+    screenZoom = Math.max(screenZoomMin, screenZoom - screenZoomStep);
+    updateScreenZoom();
+  });
+
+  $('presentContent').addEventListener('wheel', (e) => {
+    e.preventDefault();
+    if (e.deltaY < 0) screenZoom = Math.min(screenZoomMax, screenZoom + screenZoomStep);
+    else screenZoom = Math.max(screenZoomMin, screenZoom - screenZoomStep);
+    updateScreenZoom();
+  }, { passive: false });
+
+  $('presentContent').addEventListener('dblclick', () => {
+    screenZoom = screenZoom === 1 ? 2 : 1;
+    updateScreenZoom();
   });
 
   /* ---------- MIC TEST ---------- */

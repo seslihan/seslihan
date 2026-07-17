@@ -48,12 +48,17 @@
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             <span id="presentLabel">Sen ekran paylaşıyorsun</span>
           </div>
-          <button id="stopScreenBtn" class="btn small danger">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-            Ekran paylaşımını durdur
-          </button>
+          <div class="present-controls">
+            <button id="zoomOutBtn" class="icon-btn" data-tooltip="Uzaklaştır">-</button>
+            <span id="zoomLevel" class="present-zoom-level">100%</span>
+            <button id="zoomInBtn" class="icon-btn" data-tooltip="Yakınlaştır">+</button>
+            <button id="stopScreenBtn" class="btn small danger">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+              Ekran paylaşımını durdur
+            </button>
+          </div>
         </div>
-        <div class="present-content">
+        <div class="present-content" id="presentContent">
           <video id="presentVideo" autoplay playsinline muted></video>
         </div>
         <div class="present-pip" id="presentPip" hidden>
