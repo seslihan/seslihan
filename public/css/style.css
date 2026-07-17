@@ -4743,27 +4743,41 @@ input[type="range"]::-moz-range-thumb {
 
 /* === HOME STOCK STRIP === */
 .dash-stock {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  position: relative;
   background: #0a0a0a;
   border: 2px solid #00ff41;
-  padding: 6px 12px;
-  overflow-x: auto;
-  white-space: nowrap;
-  font-family: 'Courier New', monospace;
-  font-size: 10px;
+  padding: 0;
+  overflow: hidden;
+  height: 28px;
 }
-.dash-stock::-webkit-scrollbar { display: none; }
+.dash-stock-inner {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  height: 100%;
+  white-space: nowrap;
+  animation: ticker-scroll 20s linear infinite;
+  padding-left: 100%;
+}
+.dash-stock:hover .dash-stock-inner {
+  animation-play-state: paused;
+}
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
 .dash-stock-items {
   display: flex;
-  gap: 16px;
-  flex: 1;
+  gap: 40px;
+  align-items: center;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
 }
 .dash-stock-items .stock-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 .dash-stock-items .stock-sym {
   color: #888;
@@ -4771,6 +4785,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .dash-stock-items .stock-val {
   color: #00ff41;
+  font-weight: 700;
 }
 .dash-stock-items .stock-chg {
   font-size: 9px;
@@ -4779,13 +4794,24 @@ input[type="range"]::-moz-range-thumb {
 .stock-down .stock-chg { color: #ff3333; }
 .stock-loading-sm {
   color: #00ff41;
-  animation: blink 1s steps(1) infinite;
+  padding-left: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
 }
-@keyframes blink { 50% { opacity: 0; } }
 .dash-stock-time {
-  color: #555;
-  font-size: 8px;
-  flex-shrink: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background: #0a0a0a;
+  color: #00ff41;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  z-index: 2;
+  border-left: 1px solid #00ff4133;
 }
 
 /* === STANDALONE PAGES === */

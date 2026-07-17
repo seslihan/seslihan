@@ -183,16 +183,14 @@
   function fetchStock() {
     fetch('/api/stock').then(r => r.json()).then(data => {
       if (!data.items || data.items.length === 0) return;
-      dashStockItems.innerHTML = '';
+      let html = '';
       data.items.forEach(item => {
         const cls = item.chg > 0 ? 'stock-up' : item.chg < 0 ? 'stock-down' : '';
         const arrow = item.chg > 0 ? '▲' : item.chg < 0 ? '▼' : '—';
         const val = typeof item.val === 'number' ? item.val.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) : item.val;
-        const el = document.createElement('span');
-        el.className = 'stock-item ' + cls;
-        el.innerHTML = '<span class="stock-sym">' + item.sym + '</span><span class="stock-val">' + val + '</span><span class="stock-chg">' + arrow + ' ' + Math.abs(item.chg).toFixed(2) + '%</span>';
-        dashStockItems.appendChild(el);
+        html += '<span class="stock-item ' + cls + '"><span class="stock-sym">' + item.sym + '</span><span class="stock-val">' + val + '</span><span class="stock-chg">' + arrow + ' ' + Math.abs(item.chg).toFixed(2) + '%</span></span>';
       });
+      dashStockItems.innerHTML = html + html;
       if (data.time) {
         const t = new Date(data.time);
         dashStockTime.textContent = t.toLocaleTimeString('tr-TR');
