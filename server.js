@@ -197,32 +197,31 @@ app.get('/api/stock', (req, res) => {
       const tryParse = (k) => {
         const item = finans[k];
         if (!item) return null;
-        const vals = Object.values(item).map(v => String(v));
+        const entries = Object.entries(item);
         let saleVal = null, chgVal = 0;
-        for (const v of vals) {
-          const cleaned = v.replace(/%/g, '');
-          if (/^%-?[\d]+[.,][\d]+$/.test(v) || /^%-?[\d]+$/.test(v)) {
-            chgVal = parseFloat(cleaned.replace(',', '.')) || 0;
-          } else if (v !== 'Döviz' && v !== 'Altın' && v !== 'Doviz' && /^[\d.,]+$/.test(v.replace(/\s/g, ''))) {
-            const num = parseFloat(v.replace(/\./g, '').replace(',', '.'));
-            if (num && num > 0) saleVal = num;
+        for (const [rk, rv] of entries) {
+          const v = String(rv);
+          if (v.includes('%')) {
+            chgVal = parseFloat(v.replace(/%/g, '').replace(',', '.')) || 0;
+          } else if (v !== 'Döviz' && v !== 'Altın' && v !== 'Doviz') {
+            const num = parseFloat(v.replace(/[$]/g, '').replace(/\./g, '').replace(',', '.'));
+            if (num && num > 0) {
+              if (!saleVal || num > saleVal) saleVal = num;
+            }
           }
         }
         if (saleVal) return { val: saleVal, chg: chgVal };
         return null;
       };
-      const usd = tryParse('USD');
-      const eur = tryParse('EUR');
-      const gbp = tryParse('GBP');
-      const gram = tryParse('gram-altin');
-      const cumhuriyet = tryParse('cumhuriyet-altini');
-      const cevre = tryParse('ceyrek-altin');
-      if (usd) result.push({ sym: 'USD/TRY', val: usd.val, chg: usd.chg });
-      if (eur) result.push({ sym: 'EUR/TRY', val: eur.val, chg: eur.chg });
-      if (gbp) result.push({ sym: 'GBP/TRY', val: gbp.val, chg: gbp.chg });
-      if (gram) result.push({ sym: 'GRAM ALTIN', val: gram.val, chg: gram.chg });
-      if (cumhuriyet) result.push({ sym: 'CUMH. ALTIN', val: cumhuriyet.val, chg: cumhuriyet.chg });
-      if (cevre) result.push({ sym: 'CEYREK', val: cevre.val, chg: cevre.chg });
+      const items = [
+        ['USD', 'USD/TRY'], ['EUR', 'EUR/TRY'], ['GBP', 'GBP/TRY'], ['CHF', 'CHF/TRY'],
+        ['gram-altin', 'GRAM ALTIN'], ['cumhuriyet-altini', 'CUMH. ALTIN'],
+        ['ceyrek-altin', 'CEYREK'], ['ons', 'ONS ALTIN']
+      ];
+      for (const [k, sym] of items) {
+        const p = tryParse(k);
+        if (p) result.push({ sym, val: p.val, chg: p.chg });
+      }
     }
 
     if (result.length === 0) return res.status(502).json({ error: 'No data' });
