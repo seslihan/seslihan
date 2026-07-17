@@ -197,7 +197,7 @@ app.get('/api/stock', (req, res) => {
       const get = (k) => finans[k] || finans['USD'] || null;
       const tryParse = (k) => {
         const item = finans[k];
-        if (item && item.Satış) return { val: parseFloat(String(item.Satış).replace(',', '.')), chg: item.Değişim ? parseFloat(String(item.Değişim).replace(',', '.').replace('%', '')) : 0 };
+        if (item && item.Satış) return { val: parseFloat(String(item.Satış).replace(/\./g, '').replace(',', '.')), chg: item.Değişim ? parseFloat(String(item.Değişim).replace(',', '.').replace('%', '')) : 0 };
         return null;
       };
       const usd = tryParse('USD');
