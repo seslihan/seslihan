@@ -125,7 +125,66 @@
     }
   });
 
-  // ---------- HELPERS ----------
+  // ---------- SPA ROUTER ----------
+  (function initRouter() {
+    const mainEl = () => document.querySelector('main');
+    const PAGES = {
+      '/': '/index.html',
+      '/tv': '/tv.html',
+      '/radio': '/radio.html',
+      '/stock': '/stock.html',
+      '/whiteboard': '/whiteboard.html'
+    };
+    let loading = false;
+
+    function extractBody(html) {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      return { main: doc.querySelector('main'), title: doc.querySelector('title') };
+    }
+
+    function loadPage(url, push) {
+      if (loading || url === location.pathname) return;
+      loading = true;
+      fetch(url, { headers: { 'X-Request': 'spa' } })
+        .then(r => r.ok ? r.text() : Promise.reject())
+        .then(html => {
+          const { main, title } = extractBody(html);
+          if (!main) { loading = false; return; }
+          const m = mainEl();
+          if (m) m.innerHTML = main.innerHTML;
+          if (title) document.title = title.textContent;
+          if (push) history.pushState({}, '', url);
+          window.scrollTo(0, 0);
+          runScripts();
+          loading = false;
+        })
+        .catch(() => { loading = false; window.location.href = url; });
+    }
+
+    function runScripts() {
+      document.querySelectorAll('main script[data-spa]').forEach(old => old.remove());
+      document.querySelectorAll('main [data-spa-src]').forEach(el => {
+        if (document.querySelector('script[data-spa][src="' + el.dataset.spaSrc + '"]')) return;
+        const s = document.createElement('script');
+        s.src = el.dataset.spaSrc;
+        s.setAttribute('data-spa', '1');
+        document.body.appendChild(s);
+      });
+    }
+
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[data-spa]');
+      if (!a) return;
+      const url = a.getAttribute('href');
+      if (!url || url.startsWith('http') || url.startsWith('#')) return;
+      e.preventDefault();
+      loadPage(url, true);
+    });
+
+    window.addEventListener('popstate', () => {
+      loadPage(location.pathname, false);
+    });
+  })();
   window.escapeHtml = function (s) {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   };
