@@ -194,10 +194,22 @@ app.get('/api/stock', (req, res) => {
     }
 
     if (finans) {
-      const get = (k) => finans[k] || finans['USD'] || null;
       const tryParse = (k) => {
         const item = finans[k];
-        if (item && item.Satış) return { val: parseFloat(String(item.Satış).replace(/\./g, '').replace(',', '.')), chg: item.Değişim ? parseFloat(String(item.Değişim).replace(',', '.').replace('%', '')) : 0 };
+        if (!item) return null;
+        const keys = Object.keys(item);
+        let saleVal = null, chgVal = 0;
+        for (const ck of keys) {
+          const lower = ck.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          if (lower.startsWith('sat')) {
+            saleVal = parseFloat(String(item[ck]).replace(/\./g, '').replace(',', '.'));
+          }
+          if (lower.startsWith('deg')) {
+            const raw = String(item[ck]);
+            chgVal = parseFloat(raw.replace('%', '').replace(',', '.')) || 0;
+          }
+        }
+        if (saleVal) return { val: saleVal, chg: chgVal };
         return null;
       };
       const usd = tryParse('USD');
@@ -211,7 +223,7 @@ app.get('/api/stock', (req, res) => {
       if (gbp) result.push({ sym: 'GBP/TRY', val: gbp.val, chg: gbp.chg });
       if (gram) result.push({ sym: 'GRAM ALTIN', val: gram.val, chg: gram.chg });
       if (cumhuriyet) result.push({ sym: 'CUMH. ALTIN', val: cumhuriyet.val, chg: cumhuriyet.chg });
-      if (cevre) result.push({ sym: 'ÇEYREK', val: cevre.val, chg: cevre.chg });
+      if (cevre) result.push({ sym: 'CEYREK', val: cevre.val, chg: cevre.chg });
     }
 
     if (result.length === 0) return res.status(502).json({ error: 'No data' });
