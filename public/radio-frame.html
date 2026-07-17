@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>radio</title></head>
+<body>
+<audio id="a" preload="auto"></audio>
+<script>
+  const audio = document.getElementById('a');
+  window.addEventListener('message', e => {
+    if (!e.data) return;
+    const d = e.data;
+    if (d.action === 'play') {
+      audio.src = d.url;
+      audio.volume = d.volume || 0.5;
+      audio.play().catch(() => {});
+    } else if (d.action === 'volume') {
+      audio.volume = d.volume;
+    } else if (d.action === 'stop') {
+      audio.pause();
+      audio.src = '';
+    } else if (d.action === 'getState') {
+      e.source.postMessage({ playing: !audio.paused, src: audio.src, volume: audio.volume }, '*');
+    }
+  });
+  window.parent.postMessage({ ready: true }, '*');
+</script>
+</body>
+</html>

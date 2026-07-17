@@ -286,4 +286,107 @@
     requestAnimationFrame(tick);
   };
   document.addEventListener('DOMContentLoaded', function () { spawnWatermarks(12); });
+
+  // ---------- PERSISTENT RADIO ----------
+  (function initRadio() {
+    const radioKey = 'bs-radio';
+    let iframe = null;
+    let ready = false;
+    let pendingUrl = null;
+
+    function getState() {
+      try { return JSON.parse(localStorage.getItem(radioKey) || 'null'); } catch (_) { return null; }
+    }
+    function saveState(s) { localStorage.setItem(radioKey, JSON.stringify(s)); }
+
+    function ensureIframe() {
+      if (iframe) return;
+      iframe = document.createElement('iframe');
+      iframe.src = '/radio-frame.html';
+      iframe.style.cssText = 'position:fixed;bottom:0;right:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none;z-index:-1';
+      iframe.allow = 'autoplay';
+      document.body.appendChild(iframe);
+    }
+
+    window.addEventListener('message', e => {
+      if (e.data && e.data.ready) {
+        ready = true;
+        const st = getState();
+        if (st && st.playing && st.url) {
+          iframe.contentWindow.postMessage({ action: 'play', url: st.url, volume: st.volume || 0.5 }, '*');
+        }
+      }
+      if (e.data && e.data.playing === false) {
+        const st = getState();
+        if (st) { st.playing = false; saveState(st); }
+        updateRadioUI();
+      }
+    });
+
+    function updateRadioUI() {
+      const st = getState();
+      const bar = document.getElementById('globalRadioBar');
+      if (!bar) {
+        const b = document.createElement('div');
+        b.id = 'globalRadioBar';
+        b.className = 'global-radio-bar';
+        b.innerHTML = '<span class="global-radio-dot"></span><span class="global-radio-label" id="globalRadioName">Radyo</span><input id="globalRadioVol" type="range" min="0" max="100" value="50" class="global-radio-vol" /><button id="globalRadioStop" class="global-radio-stop">Durdur</button>';
+        b.hidden = true;
+        document.body.appendChild(b);
+      }
+      const bar2 = document.getElementById('globalRadioBar');
+      const name = document.getElementById('globalRadioName');
+      if (bar2) {
+        if (st && st.playing) {
+          bar2.hidden = false;
+          if (name) name.textContent = st.name || 'Radyo';
+        } else {
+          bar2.hidden = true;
+        }
+      }
+    }
+
+    window.radioPlay = function (url, name, volume) {
+      ensureIframe();
+      const st = { playing: true, url: url, name: name, volume: volume || 0.5 };
+      saveState(st);
+      if (ready && iframe) {
+        iframe.contentWindow.postMessage({ action: 'play', url: url, volume: st.volume }, '*');
+      }
+      updateRadioUI();
+      toast('Radyo caliniyor: ' + name);
+    };
+
+    window.radioStop = function () {
+      const st = getState();
+      if (st) { st.playing = false; saveState(st); }
+      if (ready && iframe) {
+        iframe.contentWindow.postMessage({ action: 'stop' }, '*');
+      }
+      updateRadioUI();
+    };
+
+    window.radioVolume = function (v) {
+      const st = getState();
+      if (st) { st.volume = v; saveState(st); }
+      if (ready && iframe) {
+        iframe.contentWindow.postMessage({ action: 'volume', volume: v }, '*');
+      }
+    };
+
+    window.radioIsPlaying = function () {
+      const st = getState();
+      return !!(st && st.playing);
+    };
+
+    ensureIframe();
+    document.addEventListener('DOMContentLoaded', () => {
+      updateRadioUI();
+      const bar = document.getElementById('globalRadioBar');
+      const btn = document.getElementById('globalRadioStop');
+      if (btn) btn.addEventListener('click', () => { radioStop(); });
+      const vol = document.getElementById('globalRadioVol');
+      if (vol) vol.addEventListener('input', () => { radioVolume(vol.value / 100); });
+    });
+  })();
 })();
