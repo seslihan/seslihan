@@ -909,7 +909,15 @@
   $('toggleScreen').addEventListener('click', async () => {
     if (state.screenSharing) { stopScreenShare(); return; }
     try {
-      const ss = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: 'always' }, audio: false });
+      const ss = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          cursor: 'always',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          frameRate: { ideal: 30 }
+        },
+        audio: false
+      });
       const track = ss.getVideoTracks()[0];
       state.screenStream = ss;
       state.screenSharing = true;
