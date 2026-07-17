@@ -2,11 +2,9 @@
   const socket = io();
   const newMeetingBtn = document.getElementById('newMeetingBtn');
   const scheduleBtn = document.getElementById('scheduleBtn');
-  const newScheduledBtn = document.getElementById('newScheduledBtn');
   const joinForm = document.getElementById('joinForm');
   const roomCodeInput = document.getElementById('roomCode');
   const meetingList = document.getElementById('meetingList');
-
   const nameOverlay = document.getElementById('nameGateOverlay');
   const nameInput = document.getElementById('nameGateInput');
   const nameConfirm = document.getElementById('nameGateConfirm');
@@ -45,7 +43,7 @@
   function renderMeetings() {
     const list = getMeetings();
     if (list.length === 0) {
-      meetingList.innerHTML = '<div class="meeting-list-empty">Henüz planlanmış toplantı yok</div>';
+      meetingList.innerHTML = '<div class="meeting-list-empty">Henüz toplantı yok</div>';
       return;
     }
     meetingList.innerHTML = '';
@@ -53,13 +51,8 @@
       const item = document.createElement('div');
       item.className = 'meeting-item';
       item.innerHTML =
-        '<div class="meeting-item-icon">' +
-          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>' +
-        '</div>' +
-        '<div class="meeting-item-info">' +
-          '<div class="meeting-item-code">' + escapeHtml(m.code) + '</div>' +
-          '<div class="meeting-item-time">' + escapeHtml(m.title || 'Adsız toplantı') + ' · ' + escapeHtml(formatDateTime(m.scheduledAt || m.createdAt)) + '</div>' +
-        '</div>';
+        '<div class="meeting-item-code">' + escapeHtml(m.code) + '</div>' +
+        '<div class="meeting-item-time">' + escapeHtml(m.title || 'Toplantı') + ' · ' + escapeHtml(formatDateTime(m.scheduledAt || m.createdAt)) + '</div>';
       item.addEventListener('click', () => {
         window.location.href = '/prejoin.html?code=' + encodeURIComponent(m.code);
       });
@@ -81,11 +74,11 @@
     }
     newMeetingBtn.disabled = true;
     socket.emit('create-room', (res) => {
+      newMeetingBtn.disabled = false;
       if (res && res.code) {
         addMeeting({ code: res.code, title: 'Hemen başlatılan toplantı' });
         window.location.href = '/prejoin.html?code=' + encodeURIComponent(res.code) + '&name=' + encodeURIComponent(name);
       } else {
-        newMeetingBtn.disabled = false;
         toast('Toplantı oluşturulamadı', 'error');
       }
     });
@@ -93,7 +86,6 @@
 
   newMeetingBtn.addEventListener('click', startMeeting);
   scheduleBtn.addEventListener('click', () => window.location.href = '/schedule.html');
-  if (newScheduledBtn) newScheduledBtn.addEventListener('click', () => window.location.href = '/schedule.html');
 
   joinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -113,20 +105,25 @@
 
   renderMeetings();
 
+  // News
   let currentCategory = 'turkey';
   const newsGrid = document.getElementById('newsGrid');
   const newsTime = document.getElementById('newsTime');
   const newsRefreshBtn = document.getElementById('newsRefreshBtn');
   const newsTabs = document.querySelectorAll('.news-tab');
 
+  function stripHtml(s) {
+    return s.replace(/<[^>]*>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim();
+  }
+
   function fetchNews(category) {
     currentCategory = category;
-    newsGrid.innerHTML = '<div class="news-loading">Haberler yükleniyor...</div>';
+    newsGrid.innerHTML = '<div class="news-loading">Yükleniyor...</div>';
     fetch('/api/news/' + category)
       .then(r => r.json())
       .then(data => {
         if (!data.items || data.items.length === 0) {
-          newsGrid.innerHTML = '<div class="news-loading">Haber bulunamadı</div>';
+          newsGrid.innerHTML = '<div class="news-loading">Bulunamadı</div>';
           return;
         }
         newsGrid.innerHTML = '';
@@ -142,26 +139,28 @@
               const d = new Date(item.pubDate);
               const now = new Date();
               const diffMin = Math.floor((now - d) / 60000);
-              if (diffMin < 60) timeStr = diffMin + ' dk önce';
-              else if (diffMin < 1440) timeStr = Math.floor(diffMin / 60) + ' saat önce';
+              if (diffMin < 60) timeStr = diffMin + ' dk';
+              else if (diffMin < 1440) timeStr = Math.floor(diffMin / 60) + ' saat';
               else timeStr = d.toLocaleDateString('tr-TR');
-            } catch (e) { timeStr = item.pubDate; }
+            } catch (e) {}
           }
-          let sourceBadge = item.source ? '<span class="news-card-source">' + escapeHtml(item.source) + '</span>' : '';
-          card.innerHTML =
-            sourceBadge +
-            '<div class="news-card-title">' + escapeHtml(item.title) + '</div>' +
-            (item.desc ? '<div class="news-card-desc">' + escapeHtml(item.desc) + '</div>' : '') +
-            (timeStr ? '<div class="news-card-time">' + timeStr + '</div>' : '');
+          const title = stripHtml(item.title);
+          const desc = stripHtml(item.desc || '');
+          let html = '';
+          if (item.source) html += '<div class="news-card-source">' + escapeHtml(stripHtml(item.source)) + '</div>';
+          html += '<div class="news-card-title">' + escapeHtml(title) + '</div>';
+          if (desc) html += '<div class="news-card-desc">' + escapeHtml(desc.substring(0, 120)) + '</div>';
+          if (timeStr) html += '<div class="news-card-time">' + timeStr + '</div>';
+          card.innerHTML = html;
           newsGrid.appendChild(card);
         });
         if (data.time) {
           const t = new Date(data.time);
-          newsTime.textContent = 'Son güncelleme: ' + t.toLocaleTimeString('tr-TR');
+          newsTime.textContent = t.toLocaleTimeString('tr-TR');
         }
       })
       .catch(() => {
-        newsGrid.innerHTML = '<div class="news-loading">Haberler yüklenemedi</div>';
+        newsGrid.innerHTML = '<div class="news-loading">Hata</div>';
       });
   }
 
@@ -178,8 +177,6 @@
   fetchNews('turkey');
 
   setTimeout(() => {
-    if (window.twttr && window.twttr.widgets) {
-      window.twttr.widgets.load();
-    }
-  }, 1000);
+    if (window.twttr && window.twttr.widgets) window.twttr.widgets.load();
+  }, 2000);
 })();

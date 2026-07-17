@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Seslihan — Ücretsiz görüntülü toplantı</title>
+  <title>Seslihan</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="description" content="Seslihan — Ücretsiz, uçtan uca şifreli sesli ve görüntülü toplantılar. Kayıt olmadan katıl." />
-  <meta property="og:title" content="Seslihan — Ücretsiz görüntülü toplantı" />
-  <meta property="og:description" content="Ücretsiz, uçtan uca şifreli sesli ve görüntülü toplantılar, ekran paylaşımı, sohbet ve dosya gönderimi." />
-  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Seslihan" />
   <meta property="og:image" content="/seslihanlogo2.png" />
-  <link rel="stylesheet" href="/css/style.css?v=5" />
+  <link rel="stylesheet" href="/css/style.css?v=6" />
 </head>
 <body class="home">
   <header class="app-header">
@@ -19,133 +16,82 @@
     </a>
     <div class="app-header-actions">
       <a href="/schedule.html" class="icon-btn" data-tooltip="Takvim">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       </a>
       <button id="themeBtn" class="icon-btn" data-tooltip="Tema">
-        <svg class="theme-light" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <svg class="theme-dark" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-light" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="theme-dark" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" hidden><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
       <div class="profile-menu" id="profileMenu">
-        <button id="profileBtn" class="profile-avatar" data-tooltip="Profil">M</button>
+        <button id="profileBtn" class="profile-avatar">M</button>
         <div id="profileDropdown" class="profile-dropdown" hidden>
           <div class="profile-dropdown-header">
             <div class="profile-dropdown-name" id="profileName">Misafir</div>
-            <div class="profile-dropdown-email" id="profileEmail">Hesap açmadan devam ediyorsunuz</div>
           </div>
-          <button class="profile-dropdown-item" id="authBtn">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Giriş yap / Kayıt ol
-          </button>
-          <a href="/settings.html" class="profile-dropdown-item">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Ayarlar
-          </a>
-          <button class="profile-dropdown-item danger" id="signOutBtn" hidden>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Çıkış yap
-          </button>
+          <button class="profile-dropdown-item" id="authBtn">Giriş yap / Kayıt ol</button>
+          <a href="/settings.html" class="profile-dropdown-item">Ayarlar</a>
         </div>
       </div>
     </div>
   </header>
 
   <main class="home-main">
-    <div class="home-container">
+    <div class="home-dashboard">
 
-      <section class="hero-card">
-        <h1>Bağlantıda kal, planları paylaş</h1>
-        <p>Ücretsiz, uçtan uca şifreli sesli ve görüntülü toplantılar, ekran paylaşımı, sohbet ve dosya gönderimi — kayıt olmadan da katıl.</p>
-        <div class="action-row">
-          <button id="newMeetingBtn" class="btn primary large">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-            Yeni toplantı başlat
-          </button>
-          <button id="scheduleBtn" class="btn large">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Toplantı planla
-          </button>
-        </div>
-        <div class="divider-text">veya bağlantı ile katıl</div>
-        <form id="joinForm" class="join-form">
-          <input id="roomCode" type="text" placeholder="Toplantı kodu veya bağlantı" maxlength="60" autocomplete="off" />
-          <button type="submit" class="btn primary">
-            Katıl
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </button>
-        </form>
-      </section>
+      <div class="dash-row">
+        <section class="dash-card dash-hero">
+          <h1>Bağlantıda kal, planları paylaş</h1>
+          <div class="action-row">
+            <button id="newMeetingBtn" class="btn primary">Yeni toplantı başlat</button>
+            <button id="scheduleBtn" class="btn">Toplantı planla</button>
+          </div>
+          <form id="joinForm" class="join-form">
+            <input id="roomCode" type="text" placeholder="Toplantı kodu veya bağlantı" maxlength="60" autocomplete="off" />
+            <button type="submit" class="btn primary">Katıl</button>
+          </form>
+        </section>
+        <aside class="dash-card dash-meetings">
+          <h2>Toplantılar</h2>
+          <div id="meetingList" class="meeting-list">
+            <div class="meeting-list-empty">Henüz toplantı yok</div>
+          </div>
+        </aside>
+      </div>
 
-      <aside class="side-card">
-        <h2>Yaklaşan toplantılar</h2>
-        <div id="meetingList" class="meeting-list">
-          <div class="meeting-list-empty">Henüz planlanmış toplantı yok</div>
+      <div class="dash-row dash-features">
+        <a href="/tv.html" class="feat-card"><span class="feat-icon" style="background:#e30a17">📺</span><span class="feat-name">Canlı TV</span></a>
+        <a href="/radio.html" class="feat-card"><span class="feat-icon" style="background:#ff9900">📻</span><span class="feat-name">Radyo</span></a>
+        <a href="/stock.html" class="feat-card"><span class="feat-icon" style="background:var(--accent)">📈</span><span class="feat-name">Borsa</span></a>
+        <a href="/whiteboard.html" class="feat-card"><span class="feat-icon" style="background:#6c5ce7">🎨</span><span class="feat-name">Tahta</span></a>
+      </div>
+
+      <div class="dash-row dash-news-row">
+        <div class="dash-card dash-news">
+          <div class="dash-card-header">
+            <h2>Canlı Haberler</h2>
+            <button id="newsRefreshBtn" class="btn tiny">↻ Yenile</button>
+          </div>
+          <div class="news-tabs">
+            <button class="news-tab active" data-category="turkey">🇹🇷 Türkiye</button>
+            <button class="news-tab" data-category="world">🌍 Dünya</button>
+            <button class="news-tab" data-category="ai">🤖 YZ</button>
+          </div>
+          <div id="newsGrid" class="news-grid"></div>
+          <span id="newsTime" class="news-time"></span>
         </div>
-        <button id="newScheduledBtn" class="btn small">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Yeni toplantı planla
-        </button>
-      </aside>
+
+        <div class="dash-card dash-x">
+          <div class="dash-card-header">
+            <h2>X Canlı Akış</h2>
+            <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+          </div>
+          <div class="x-list">
+            <a class="twitter-timeline" data-height="320" data-theme="dark" data-chrome="nofooter noborders transparent" data-tweet-limit="4" data-width="300" href="https://x.com/anadoluajansi">AA</a>
+          </div>
+        </div>
+      </div>
 
     </div>
-
-      <div class="home-features">
-      <h2 class="home-section-title">Özellikler</h2>
-      <div class="feature-grid">
-        <a href="/tv.html" class="feature-card">
-          <div class="feature-icon feature-icon-tv">📺</div>
-          <div class="feature-name">Canlı TV</div>
-        </a>
-        <a href="/radio.html" class="feature-card">
-          <div class="feature-icon feature-icon-radio">📻</div>
-          <div class="feature-name">Radyo</div>
-        </a>
-        <a href="/stock.html" class="feature-card">
-          <div class="feature-icon feature-icon-stock">📈</div>
-          <div class="feature-name">Borsa</div>
-        </a>
-        <a href="/whiteboard.html" class="feature-card">
-          <div class="feature-icon feature-icon-wb">🎨</div>
-          <div class="feature-name">Tahta</div>
-        </a>
-      </div>
-    </div>
-
-    <div class="home-news">
-      <div class="news-section-header">
-        <h2 class="home-section-title">CANLI HABERLER</h2>
-        <div class="news-source-badge">
-          <span class="live-dot"></span> X (Twitter) Canlı Akış
-        </div>
-      </div>
-      <div class="x-timelines">
-        <div class="x-timeline-col">
-          <h3 class="x-timeline-label">@anadoluajansi</h3>
-          <a class="twitter-timeline" data-height="280" data-theme="dark" data-chrome="nofooter noborders transparent" data-tweet-limit="3" href="https://x.com/anadoluajansi">AA Haberleri</a>
-        </div>
-        <div class="x-timeline-col">
-          <h3 class="x-timeline-label">@CNABorgu</h3>
-          <a class="twitter-timeline" data-height="280" data-theme="dark" data-chrome="nofooter noborders transparent" data-tweet-limit="3" href="https://x.com/CNABorgu">CNN Türk Haberleri</a>
-        </div>
-        <div class="x-timeline-col">
-          <h3 class="x-timeline-label">@trthaber</h3>
-          <a class="twitter-timeline" data-height="280" data-theme="dark" data-chrome="nofooter noborders transparent" data-tweet-limit="3" href="https://x.com/trthaber">TRT Haber</a>
-        </div>
-      </div>
-
-      <div class="news-tabs">
-        <button class="news-tab active" data-category="turkey">🇹🇷 Türkiye</button>
-        <button class="news-tab" data-category="world">🌍 Dünya</button>
-        <button class="news-tab" data-category="ai">🤖 Yapay Zeka</button>
-      </div>
-      <div id="newsGrid" class="news-grid">
-        <div class="news-loading">Haberler yükleniyor...</div>
-      </div>
-      <div class="news-refresh">
-        <button id="newsRefreshBtn" class="btn small">↻ Yenile</button>
-        <span id="newsTime" class="news-time"></span>
-      </div>
-    </div>
-
   </main>
 
   <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -163,7 +109,6 @@
   </div>
 
   <div class="toast-host" id="toastHost"></div>
-
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
   <script src="/js/home.js"></script>
