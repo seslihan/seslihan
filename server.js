@@ -108,6 +108,100 @@ app.get('/api/radio-proxy', (req, res) => {
   req.on('close', () => { proxyReq.destroy(); });
 });
 
+app.get('/api/stock', (req, res) => {
+  const fetchJSON = (url) => new Promise((resolve, reject) => {
+    const mod = url.startsWith('https') ? https : http;
+    mod.get(url, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+      let data = '';
+      r.on('data', c => data += c);
+      r.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve(null); } });
+    }).on('error', () => resolve(null)).on('timeout', function() { this.destroy(); resolve(null); });
+  });
+
+  const fetchText = (url) => new Promise((resolve, reject) => {
+    const mod = url.startsWith('https') ? https : http;
+    mod.get(url, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+      let data = '';
+      r.on('data', c => data += c);
+      r.on('end', () => resolve(data));
+    }).on('error', () => resolve('')).on('timeout', function() { this.destroy(); resolve(''); });
+  });
+
+  Promise.all([
+    fetchJSON('https://api.btcturk.com/v2/ticker'),
+    fetchText('https://finans.truncgil.com/today.json')
+  ]).then(([btcturk, finans]) => {
+    const result = [];
+
+    if (btcturk && btcturk.data) {
+      const btc = btcturk.data.find(t => t.pair === 'BTCTRY');
+      const eth = btcturk.data.find(t => t.pair === 'ETHTRY');
+      if (btc) result.push({ sym: 'BTC/TRY', val: btc.last, chg: parseFloat(btc.dailyChangeRate) || 0 });
+      if (eth) result.push({ sym: 'ETH/TRY', val: eth.last, chg: parseFloat(eth.dailyChangeRate) || 0 });
+    }
+
+    if (finans) {
+      const get = (k) => finans[k] || finans['USD'] || null;
+      const tryParse = (k) => {
+        const item = finans[k];
+        if (item && item.Satış) return { val: parseFloat(String(item.Satış).replace(',', '.')), chg: item.Değişim ? parseFloat(String(item.Değişim).replace(',', '.').replace('%', '')) : 0 };
+        return null;
+      };
+      const usd = tryParse('USD');
+      const eur = tryParse('EUR');
+      const gbp = tryParse('GBP');
+      const gram = tryParse('gram-altin');
+      const cumhuriyet = tryParse('cumhuriyet-altini');
+      const cevre = tryParse('ceyrek-altin');
+      if (usd) result.push({ sym: 'USD/TRY', val: usd.val, chg: usd.chg });
+      if (eur) result.push({ sym: 'EUR/TRY', val: eur.val, chg: eur.chg });
+      if (gbp) result.push({ sym: 'GBP/TRY', val: gbp.val, chg: gbp.chg });
+      if (gram) result.push({ sym: 'GRAM ALTIN', val: gram.val, chg: gram.chg });
+      if (cumhuriyet) result.push({ sym: 'CUMH. ALTIN', val: cumhuriyet.val, chg: cumhuriyet.chg });
+      if (cevre) result.push({ sym: 'ÇEYREK', val: cevre.val, chg: cevre.chg });
+    }
+
+    if (result.length === 0) return res.status(502).json({ error: 'No data' });
+    res.json({ items: result, time: new Date().toISOString() });
+  }).catch(() => res.status(502).json({ error: 'Fetch failed' }));
+});
+
+app.get('/api/tv-live/:channelId', (req, res) => {
+  const channelId = req.params.channelId;
+  if (!channelId) return res.status(400).json({ error: 'Invalid channel' });
+
+  function fetchFeed(cid) {
+    const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${cid}`;
+    https.get(feedUrl, { timeout: 5000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+      let data = '';
+      r.on('data', c => data += c);
+      r.on('end', () => {
+        const entries = data.split('<entry>');
+        if (entries.length > 1) {
+          const vidMatch = entries[1].match(/<yt:videoId>([\w-]+)<\/yt:videoId>/);
+          if (vidMatch) return res.json({ videoId: vidMatch[1] });
+        }
+        res.json({ videoId: null });
+      });
+    }).on('error', () => res.json({ videoId: null }));
+  }
+
+  if (channelId.startsWith('UC') && channelId.length === 24) {
+    fetchFeed(channelId);
+  } else {
+    const handle = channelId.startsWith('@') ? channelId : '@' + channelId;
+    https.get(`https://www.youtube.com/${handle}`, { timeout: 5000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+      let data = '';
+      r.on('data', c => data += c);
+      r.on('end', () => {
+        const cidMatch = data.match(/"externalId"\s*:\s*"(UC[\w-]{22})"/);
+        if (cidMatch) fetchFeed(cidMatch[1]);
+        else res.json({ videoId: null });
+      });
+    }).on('error', () => res.json({ videoId: null }));
+  }
+});
+
 function safeUploadId(id) {
   return /^[a-zA-Z0-9_-]{4,40}$/.test(String(id || ''));
 }

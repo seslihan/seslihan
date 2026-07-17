@@ -2283,10 +2283,23 @@
 
   document.querySelectorAll('.tv-channel').forEach(b => {
     b.addEventListener('click', () => {
-      $('tvFrame').src = 'https://www.youtube.com/embed/' + b.dataset.tv + '?autoplay=1&rel=0';
+      const tvYt = b.dataset.tvYt;
+      if (!tvYt) return;
       $('tvOverlay').hidden = false;
       $('tvPopover').hidden = true;
-      toast('📺 ' + b.textContent.trim(), 'info');
+      $('tvFrame').src = '';
+      toast('📺 ' + b.textContent.trim() + ' yükleniyor...', 'info');
+      fetch('/api/tv-live/' + encodeURIComponent(tvYt)).then(r => r.json()).then(d => {
+        if (d.videoId) {
+          $('tvFrame').src = 'https://www.youtube.com/embed/' + d.videoId + '?autoplay=1&mute=1';
+        } else {
+          toast('📺 Canlı yayın şu an mevcut değil', 'error');
+          $('tvOverlay').hidden = true;
+        }
+      }).catch(() => {
+        toast('📺 Bağlantı hatası', 'error');
+        $('tvOverlay').hidden = true;
+      });
     });
   });
 
@@ -2302,40 +2315,29 @@
   });
 
   // ---------- BORSA TICKER ----------
-  const STOCK_DATA = [
-    { sym: 'BIST100', val: 10245, chg: 1.24 },
-    { sym: 'BIST30',  val: 11580, chg: 0.87 },
-    { sym: 'USD/TRY', val: 38.42, chg: -0.15 },
-    { sym: 'EUR/TRY', val: 42.18, chg: 0.32 },
-    { sym: 'GBP/TRY', val: 49.05, chg: 0.11 },
-    { sym: 'ALTIN',   val: 3485, chg: 0.68 },
-    { sym: 'BITCOIN', val: 118420, chg: 2.14 },
-    { sym: 'ETH',     val: 3620, chg: 1.85 },
-    { sym: 'DAVAMO',  val: 142.50, chg: -0.42 },
-    { sym: 'THYAO',   val: 298.75, chg: 1.10 },
-    { sym: 'GARAN',   val: 142.30, chg: 0.55 },
-    { sym: 'ASELS',   val: 92.10, chg: -0.85 },
-    { sym: 'SISE',    val: 54.80, chg: 0.30 },
-    { sym: 'KCHOL',   val: 210.40, chg: 0.92 },
-    { sym: 'BRENT',   val: 82.35, chg: -0.48 },
-    { sym: 'FAİZ%',   val: 42.50, chg: 0.00 },
-    { sym: 'DAX',     val: 18920, chg: 0.65 },
-    { sym: 'S&P500',  val: 5680, chg: 0.41 },
-    { sym: 'NASDAQ',  val: 18340, chg: 0.72 },
-    { sym: 'NIKKEI',  val: 39850, chg: -0.22 }
-  ];
+  let stockItems = [];
 
   function renderTicker() {
     const track = $('tickerTrack');
-    if (!track) return;
+    if (!track || stockItems.length === 0) return;
     let html = '';
-    const items = STOCK_DATA.concat(STOCK_DATA);
+    const items = stockItems.concat(stockItems);
     items.forEach(s => {
       const cls = s.chg > 0 ? 'ticker-up' : s.chg < 0 ? 'ticker-down' : 'ticker-flat';
       const arrow = s.chg > 0 ? '▲' : s.chg < 0 ? '▼' : '—';
-      html += '<span class="ticker-item ' + cls + '">' + s.sym + ' ' + s.val.toLocaleString('tr-TR') + ' ' + arrow + ' ' + Math.abs(s.chg).toFixed(2) + '%</span>';
+      const val = typeof s.val === 'number' ? s.val.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) : s.val;
+      html += '<span class="ticker-item ' + cls + '">' + s.sym + ' ' + val + ' ' + arrow + ' ' + Math.abs(s.chg).toFixed(2) + '%</span>';
     });
     track.innerHTML = html;
+  }
+
+  function fetchStockData() {
+    fetch('/api/stock').then(r => r.json()).then(d => {
+      if (d.items && d.items.length > 0) {
+        stockItems = d.items;
+        renderTicker();
+      }
+    }).catch(() => {});
   }
 
   $('stockTickerBtn').addEventListener('click', (e) => {
@@ -2343,7 +2345,7 @@
     const t = $('stockTicker');
     t.hidden = !t.hidden;
     if (!t.hidden) {
-      renderTicker();
+      fetchStockData();
       toast('📈 Borsa ticker açıldı', 'info');
     }
   });
@@ -2353,13 +2355,8 @@
   });
 
   setInterval(() => {
-    STOCK_DATA.forEach(s => {
-      const delta = (Math.random() - 0.48) * 0.3;
-      s.chg = Math.round((s.chg + delta) * 100) / 100;
-      s.val = Math.round(s.val * (1 + delta / 100) * 100) / 100;
-    });
-    if (!$('stockTicker').hidden) renderTicker();
-  }, 5000);
+    if (!$('stockTicker').hidden) fetchStockData();
+  }, 15000);
 
   window.addEventListener('beforeunload', () => {
     stopAmbient();
