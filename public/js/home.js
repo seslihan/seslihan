@@ -113,34 +113,6 @@
 
   renderMeetings();
 
-  const featureCards = document.querySelectorAll('.feature-card');
-  featureCards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      e.preventDefault();
-      let name = localStorage.getItem('bs-name') || '';
-      const href = card.getAttribute('href');
-      const url = new URL(href, window.location.origin);
-      const code = url.searchParams.get('code');
-      const type = url.searchParams.get('type');
-      if (!name) {
-        showNameGate().then(n => {
-          if (!n) return;
-          socket.emit('create-room', (res) => {
-            if (res && res.code) {
-              window.location.href = '/prejoin.html?code=' + encodeURIComponent(res.code) + '&name=' + encodeURIComponent(n) + '&feature=' + type;
-            }
-          });
-        });
-      } else {
-        socket.emit('create-room', (res) => {
-          if (res && res.code) {
-            window.location.href = '/prejoin.html?code=' + encodeURIComponent(res.code) + '&name=' + encodeURIComponent(name) + '&feature=' + type;
-          }
-        });
-      }
-    });
-  });
-
   let currentCategory = 'turkey';
   const newsGrid = document.getElementById('newsGrid');
   const newsTime = document.getElementById('newsTime');

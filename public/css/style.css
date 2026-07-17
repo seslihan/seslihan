@@ -4732,3 +4732,208 @@ input[type="range"]::-moz-range-thumb {
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
   .news-grid { grid-template-columns: 1fr; }
 }
+
+/* === STANDALONE PAGES === */
+.standalone-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+.standalone-title {
+  font-family: var(--font);
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.standalone-desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+/* TV Page */
+.tv-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.tv-card {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  overflow: hidden;
+}
+.tv-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+.tv-card-color { height: 4px; }
+.tv-card-name {
+  padding: 12px;
+  font-family: var(--font);
+  font-size: 9px;
+  text-transform: uppercase;
+  text-align: center;
+}
+.tv-player {
+  margin-top: 20px;
+  border: 2px solid var(--line);
+  background: var(--panel);
+}
+.tv-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.tv-channel-name {
+  font-family: var(--font);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.tv-player-wrap {
+  position: relative;
+  padding-top: 56.25%;
+}
+.tv-player-wrap iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: none;
+}
+.tv-loading {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* Radio Page */
+.radio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.radio-card {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  text-align: center;
+}
+.radio-card:hover, .radio-card.playing {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(255,183,0,0.15);
+}
+.radio-card.playing {
+  background: var(--bg-3);
+}
+.radio-card-genre {
+  font-family: var(--font);
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.radio-card-name {
+  font-family: var(--font);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.radio-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 52px;
+  background: var(--panel);
+  border-top: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 100;
+}
+.radio-now-playing {
+  font-family: var(--font);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.radio-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.radio-volume {
+  width: 100px;
+}
+
+/* Stock Page */
+.stock-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.stock-card {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  padding: 20px;
+  text-align: center;
+}
+.stock-card.stock-up { border-color: #00ff41; }
+.stock-card.stock-down { border-color: #ff3333; }
+.stock-sym {
+  font-family: var(--font);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.stock-val {
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.stock-up .stock-val { color: #00ff41; text-shadow: 0 0 8px rgba(0,255,65,0.3); }
+.stock-down .stock-val { color: #ff3333; text-shadow: 0 0 8px rgba(255,51,51,0.3); }
+.stock-chg {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+}
+.stock-up .stock-chg { color: #00ff41; }
+.stock-down .stock-chg { color: #ff3333; }
+.stock-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 10px;
+}
+.stock-refresh {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: center;
+}
+.stock-time {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: var(--font);
+}
+
+@media (max-width: 600px) {
+  .tv-grid { grid-template-columns: repeat(2, 1fr); }
+  .radio-grid { grid-template-columns: repeat(2, 1fr); }
+  .stock-grid { grid-template-columns: repeat(2, 1fr); }
+}

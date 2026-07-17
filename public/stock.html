@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Seslihan — Borsa Takip</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/css/style.css?v=5" />
+</head>
+<body class="home">
+  <header class="app-header">
+    <a href="/" class="app-brand">
+      <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
+    </a>
+    <div class="app-header-actions">
+      <button id="themeBtn" class="icon-btn" data-tooltip="Tema">
+        <svg class="theme-light" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="theme-dark" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" hidden><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="home-main">
+    <div class="standalone-page">
+      <h1 class="standalone-title">📈 BORSA TAKİP</h1>
+      <p class="standalone-desc">BİST, kripto para ve döviz kurları — canlı veri</p>
+      <div id="stockGrid" class="stock-grid">
+        <div class="stock-loading">Veriler yükleniyor...</div>
+      </div>
+      <div class="stock-refresh">
+        <button id="refreshBtn" class="btn small">↻ Yenile</button>
+        <span id="stockTime" class="stock-time"></span>
+      </div>
+    </div>
+  </main>
+  <div class="toast-host" id="toastHost"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    const grid = document.getElementById('stockGrid');
+    const timeEl = document.getElementById('stockTime');
+
+    function fetchStock() {
+      grid.innerHTML = '<div class="stock-loading">Veriler yükleniyor...</div>';
+      fetch('/api/stock').then(r => r.json()).then(data => {
+        if (!data.items || data.items.length === 0) {
+          grid.innerHTML = '<div class="stock-loading">Veri bulunamadı</div>';
+          return;
+        }
+        grid.innerHTML = '';
+        data.items.forEach(item => {
+          const card = document.createElement('div');
+          const cls = item.chg > 0 ? 'stock-up' : item.chg < 0 ? 'stock-down' : 'stock-flat';
+          const arrow = item.chg > 0 ? '▲' : item.chg < 0 ? '▼' : '—';
+          const val = typeof item.val === 'number' ? item.val.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) : item.val;
+          card.className = 'stock-card ' + cls;
+          card.innerHTML = '<div class="stock-sym">' + item.sym + '</div><div class="stock-val">' + val + '</div><div class="stock-chg">' + arrow + ' ' + Math.abs(item.chg).toFixed(2) + '%</div>';
+          grid.appendChild(card);
+        });
+        if (data.time) {
+          const t = new Date(data.time);
+          timeEl.textContent = 'Son güncelleme: ' + t.toLocaleTimeString('tr-TR');
+        }
+      }).catch(() => {
+        grid.innerHTML = '<div class="stock-loading">Veriler yüklenemedi</div>';
+      });
+    }
+
+    fetchStock();
+    document.getElementById('refreshBtn').addEventListener('click', fetchStock);
+    setInterval(fetchStock, 15000);
+  </script>
+</body>
+</html>

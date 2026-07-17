@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Seslihan — Beyaz Tahta</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/css/style.css?v=5" />
+  <style>
+    .wb-page { display:flex; flex-direction:column; height:100vh; }
+    .wb-toolbar { display:flex; gap:4px; padding:8px; background:var(--panel); border-bottom:2px solid var(--line); align-items:center; flex-wrap:wrap; }
+    .wb-toolbar .icon-btn { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; font-size:14px; }
+    .wb-toolbar .icon-btn.active { background:var(--accent); color:white; border-color:var(--accent); }
+    .wb-toolbar input[type="color"] { width:32px; height:32px; border:2px solid var(--line); cursor:pointer; padding:0; }
+    .wb-toolbar input[type="range"] { width:80px; }
+    .wb-canvas-wrap { flex:1; position:relative; overflow:hidden; background:#faf8f5; }
+    .wb-canvas-wrap.dark { background:#1a1a1a; }
+    #wbCanvas { display:block; width:100%; height:100%; cursor:crosshair; }
+  </style>
+</head>
+<body class="home">
+  <header class="app-header">
+    <a href="/" class="app-brand">
+      <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
+    </a>
+    <div class="app-header-actions">
+      <button id="themeBtn" class="icon-btn" data-tooltip="Tema">
+        <svg class="theme-light" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="theme-dark" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" hidden><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+  <div class="wb-page">
+    <div class="wb-toolbar">
+      <button class="icon-btn active" id="wbPen" title="Kalem">✏️</button>
+      <button class="icon-btn" id="wbEraser" title="Silgi">🧽</button>
+      <input type="color" id="wbColor" value="#e8760a" />
+      <input type="range" id="wbSize" min="1" max="20" value="3" />
+      <span id="wbSizeLabel" style="font-size:10px;font-family:var(--font);">3px</span>
+      <div style="flex:1"></div>
+      <button class="icon-btn" id="wbUndo" title="Geri Al">↩️</button>
+      <button class="icon-btn" id="wbClear" title="Temizle">🗑️</button>
+      <button class="btn small" id="wbDownload">💾 Kaydet</button>
+    </div>
+    <div class="wb-canvas-wrap" id="wbWrap">
+      <canvas id="wbCanvas"></canvas>
+    </div>
+  </div>
+  <div class="toast-host" id="toastHost"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    const canvas = document.getElementById('wbCanvas');
+    const ctx = canvas.getContext('2d');
+    const wrap = document.getElementById('wbWrap');
+    let drawing = false;
+    let tool = 'pen';
+    let history = [];
+
+    function resize() {
+      const rect = wrap.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      redraw();
+    }
+
+    function redraw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      history.forEach(step => {
+        ctx.beginPath();
+        ctx.strokeStyle = step.color;
+        ctx.lineWidth = step.size;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        if (step.tool === 'eraser') { ctx.globalCompositeOperation = 'destination-out'; }
+        else { ctx.globalCompositeOperation = 'source-over'; }
+        step.points.forEach((p, i) => {
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        });
+        ctx.stroke();
+      });
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function startStroke(e) {
+      drawing = true;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      history.push({ tool, color: document.getElementById('wbColor').value, size: document.getElementById('wbSize').value, points: [{ x, y }] });
+    }
+
+    function drawStroke(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      const last = history[history.length - 1];
+      last.points.push({ x, y });
+      redraw();
+    }
+
+    function endStroke() { drawing = false; }
+
+    canvas.addEventListener('mousedown', startStroke);
+    canvas.addEventListener('mousemove', drawStroke);
+    canvas.addEventListener('mouseup', endStroke);
+    canvas.addEventListener('mouseleave', endStroke);
+    canvas.addEventListener('touchstart', startStroke, { passive: false });
+    canvas.addEventListener('touchmove', drawStroke, { passive: false });
+    canvas.addEventListener('touchend', endStroke);
+
+    document.getElementById('wbPen').addEventListener('click', () => { tool = 'pen'; document.getElementById('wbPen').classList.add('active'); document.getElementById('wbEraser').classList.remove('active'); });
+    document.getElementById('wbEraser').addEventListener('click', () => { tool = 'eraser'; document.getElementById('wbEraser').classList.add('active'); document.getElementById('wbPen').classList.remove('active'); });
+    document.getElementById('wbSize').addEventListener('input', (e) => { document.getElementById('wbSizeLabel').textContent = e.target.value + 'px'; });
+    document.getElementById('wbUndo').addEventListener('click', () => { history.pop(); redraw(); });
+    document.getElementById('wbClear').addEventListener('click', () => { history = []; redraw(); });
+    document.getElementById('wbDownload').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'seslihan-tahta-' + Date.now() + '.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+
+    window.addEventListener('resize', resize);
+    resize();
+  </script>
+</body>
+</html>

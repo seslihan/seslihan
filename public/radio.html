@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Seslihan — Radyo</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/css/style.css?v=5" />
+</head>
+<body class="home">
+  <header class="app-header">
+    <a href="/" class="app-brand">
+      <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
+    </a>
+    <div class="app-header-actions">
+      <button id="themeBtn" class="icon-btn" data-tooltip="Tema">
+        <svg class="theme-light" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="theme-dark" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" hidden><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="home-main">
+    <div class="standalone-page">
+      <h1 class="standalone-title">📻 RADYO</h1>
+      <p class="standalone-desc">15 radyo istasyonunu canlı dinleyin</p>
+      <div id="radioGrid" class="radio-grid"></div>
+      <div id="radioBar" class="radio-bar" hidden>
+        <div class="radio-bar-info">
+          <span id="radioNowPlaying" class="radio-now-playing">—</span>
+        </div>
+        <div class="radio-bar-controls">
+          <input id="radioVolume" type="range" min="0" max="100" value="50" class="radio-volume" />
+          <button id="radioStopBtn" class="btn small danger">⏹ Durdur</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div class="toast-host" id="toastHost"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    const stations = [
+      { key: 'powerturk', name: 'PowerTürk FM', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.powerapp.com.tr/powerturk/mpeg/icecast.audio') },
+      { key: 'powerfm', name: 'Power FM', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.powerapp.com.tr/powerfm/mpeg/icecast.audio') },
+      { key: 'superfm', name: 'Süper FM', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/SUPER_FM_SC') },
+      { key: 'virgin', name: 'Virgin Radio', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO_SC') },
+      { key: 'joyturk', name: 'Joy Türk', genre: 'Slow', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC') },
+      { key: 'metro', name: 'Metro FM', genre: 'Yabancı', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/METRO_FM_SC') },
+      { key: 'fenomen', name: 'Fenomen FM', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.radyofenomen.com/fenomen/128/icecast.audio') },
+      { key: 'kral', name: 'Kral Türk FM', genre: 'Türkçe', url: '/api/radio-proxy?url=' + encodeURIComponent('https://live.radyositesihazir.com/8032/stream') },
+      { key: 'radyo7', name: 'Radyo 7', genre: 'Türkçe', url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.250/;stream') },
+      { key: 'ntv', name: 'NTV Radyo', genre: 'Haber', url: '/api/radio-proxy?url=' + encodeURIComponent('http://ntvrdwmp.radyotvonline.com/') },
+      { key: '90lar', name: '90\'lar Radyo', genre: 'Nostalji', url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/166/') },
+      { key: 'altin', name: 'Altın Şarkılar', genre: 'Nostalji', url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/25/;') },
+      { key: 'dinamocaffe', name: 'Dinamo Caffe', genre: 'Lounge', url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/caffe-mp3') },
+      { key: 'dinamosleep', name: 'Dinamo Sleep', genre: 'Ambient', url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/sleep-mp3') },
+      { key: 'sputnik', name: 'Radyo Sputnik', genre: 'Haber', url: '/api/radio-proxy?url=' + encodeURIComponent('https://icecast-rian.cdnvideo.ru/voicestm') }
+    ];
+
+    const grid = document.getElementById('radioGrid');
+    const bar = document.getElementById('radioBar');
+    const nowPlaying = document.getElementById('radioNowPlaying');
+    const volumeSlider = document.getElementById('radioVolume');
+    let audio = null;
+    let currentKey = null;
+
+    const genreColors = { Pop: '#ff6b6b', Slow: '#48dbfb', Haber: '#feca57', Nostalji: '#ff9ff3', Yabancı: '#54a0ff', Türkçe: '#00d2d3', Lounge: '#5f27cd', Ambient: '#01a3a4' };
+
+    stations.forEach(st => {
+      const card = document.createElement('div');
+      card.className = 'radio-card';
+      card.dataset.key = st.key;
+      const gc = genreColors[st.genre] || '#888';
+      card.innerHTML = '<div class="radio-card-genre" style="color:' + gc + '">' + st.genre + '</div><div class="radio-card-name">' + st.name + '</div>';
+      card.addEventListener('click', () => playRadio(st));
+      grid.appendChild(card);
+    });
+
+    function playRadio(st) {
+      if (audio) { audio.pause(); audio.src = ''; }
+      if (currentKey) {
+        const prev = grid.querySelector('[data-key="' + currentKey + '"]');
+        if (prev) prev.classList.remove('playing');
+      }
+      currentKey = st.key;
+      const card = grid.querySelector('[data-key="' + st.key + '"]');
+      if (card) card.classList.add('playing');
+
+      audio = new Audio(st.url);
+      audio.volume = volumeSlider.value / 100;
+      audio.play().catch(() => {});
+      nowPlaying.textContent = st.name;
+      bar.hidden = false;
+    }
+
+    volumeSlider.addEventListener('input', () => {
+      if (audio) audio.volume = volumeSlider.value / 100;
+    });
+
+    document.getElementById('radioStopBtn').addEventListener('click', () => {
+      if (audio) { audio.pause(); audio.src = ''; audio = null; }
+      if (currentKey) {
+        const prev = grid.querySelector('[data-key="' + currentKey + '"]');
+        if (prev) prev.classList.remove('playing');
+      }
+      currentKey = null;
+      bar.hidden = true;
+    });
+  </script>
+</body>
+</html>
