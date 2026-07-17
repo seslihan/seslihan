@@ -113,7 +113,9 @@
   const newsTabs = document.querySelectorAll('.news-tab');
 
   function stripHtml(s) {
-    return s.replace(/<[^>]*>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim();
+    const el = document.createElement('div');
+    el.innerHTML = s;
+    return el.textContent || el.innerText || '';
   }
 
   function fetchNews(category) {
