@@ -22,7 +22,7 @@
   <main class="home-main">
     <div class="standalone-page">
       <h1 class="standalone-title">📻 RADYO</h1>
-      <p class="standalone-desc">15 radyo istasyonunu canlı dinleyin</p>
+      <p class="standalone-desc">21 radyo istasyonunu canlı dinleyin</p>
       <div id="radioGrid" class="radio-grid"></div>
       <div id="radioBar" class="radio-bar" hidden>
         <div class="radio-bar-info">
@@ -54,7 +54,13 @@
       { key: 'altin', name: 'Altın Şarkılar', genre: 'Nostalji', url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/25/;') },
       { key: 'dinamocaffe', name: 'Dinamo Caffe', genre: 'Lounge', url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/caffe-mp3') },
       { key: 'dinamosleep', name: 'Dinamo Sleep', genre: 'Ambient', url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/sleep-mp3') },
-      { key: 'sputnik', name: 'Radyo Sputnik', genre: 'Haber', url: '/api/radio-proxy?url=' + encodeURIComponent('https://icecast-rian.cdnvideo.ru/voicestm') }
+      { key: 'sputnik', name: 'Radyo Sputnik', genre: 'Haber', url: '/api/radio-proxy?url=' + encodeURIComponent('https://icecast-rian.cdnvideo.ru/voicestm') },
+      { key: 'viva', name: 'Radyo Viva', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.231/') },
+      { key: 'moda', name: 'Radyo Moda', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('http://m.radyomoda.com.tr:8000/stream') },
+      { key: 'eksen', name: 'Radyo Eksen', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.230/') },
+      { key: 'alem', name: 'Alem FM', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('https://turkmedya.radyotvonline.net/alemfmaac') },
+      { key: 'light', name: 'Radyo Light', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('https://yayin.radiolight.net:8005/live') },
+      { key: 'seyrfm', name: 'Seyr FM', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('https://seyrdijital.com/stream') }
     ];
 
     const grid = document.getElementById('radioGrid');
@@ -64,7 +70,7 @@
     let audio = null;
     let currentKey = null;
 
-    const genreColors = { Pop: '#ff6b6b', Slow: '#48dbfb', Haber: '#feca57', Nostalji: '#ff9ff3', Yabancı: '#54a0ff', Türkçe: '#00d2d3', Lounge: '#5f27cd', Ambient: '#01a3a4' };
+    const genreColors = { Pop: '#ff6b6b', Slow: '#48dbfb', Haber: '#feca57', Nostalji: '#ff9ff3', Yabancı: '#54a0ff', Türkçe: '#00d2d3', Lounge: '#5f27cd', Ambient: '#01a3a4', 'İstanbul': '#e17055' };
 
     stations.forEach(st => {
       const card = document.createElement('div');
