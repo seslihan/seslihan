@@ -1906,8 +1906,16 @@
     $('wbDocContent').innerHTML = '';
   });
 
-  // ---------- AMBIENT MUSIC ----------
-  let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.25, type: 'supermarket', timers: [] };
+  // ---------- AMBIENT MUSIC + RADIO ----------
+  let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.25, type: 'supermarket', timers: [], radioEl: null };
+
+  const RADIO_STREAMS = {
+    'radio-powerturk': { name: 'PowerTürk FM', url: 'https://live.powerapp.com.tr/powerturk/abr/playlist.m3u8' },
+    'radio-powerfm':   { name: 'Power FM',     url: 'https://live.powerapp.com.tr/powerfmadver/abr/playlist.m3u8' },
+    'radio-superfm':   { name: 'Süper FM',     url: 'https://live.powerapp.com.tr/superfm/abr/playlist.m3u8' },
+    'radio-radyono':   { name: 'Radyono',      url: 'https://listen.radyono.com/radyono/icecast.audio' },
+    'radio-fenomen':   { name: 'Fenomen FM',   url: 'https://fenomen.listenfenomen.com/fenomen/256/icecast.audio' }
+  };
 
   function clearAmbient() {
     ambientState.timers.forEach(t => clearTimeout(t));
@@ -1915,6 +1923,32 @@
     ambientState.nodes.forEach(n => { try { n.stop(); } catch (_) {} });
     ambientState.nodes = [];
     if (ambientState.gainNode) { try { ambientState.gainNode.disconnect(); } catch (_) {} }
+    if (ambientState.radioEl) {
+      ambientState.radioEl.pause();
+      ambientState.radioEl.src = '';
+      ambientState.radioEl = null;
+    }
+  }
+
+  function startRadio(type) {
+    const stream = RADIO_STREAMS[type];
+    if (!stream) return;
+    clearAmbient();
+    const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
+    audio.src = stream.url;
+    audio.volume = ambientState.volume;
+    audio.preload = 'auto';
+    audio.play().catch(() => {});
+    audio.addEventListener('error', () => {
+      toast(stream.name + ' yayınına bağlanılamadı', 'error');
+    }, { once: true });
+    ambientState.radioEl = audio;
+    ambientState.playing = true;
+    ambientState.type = type;
+    $('ambientBtn').style.color = 'var(--accent)';
+    document.querySelectorAll('.ambient-type').forEach(b => b.classList.toggle('active', b.dataset.ambient === type));
+    toast('📻 ' + stream.name + ' canlı', 'success');
   }
 
   function createAmbientGain() {
@@ -2149,6 +2183,7 @@
   };
 
   function startAmbient(type) {
+    if (RADIO_STREAMS[type]) { startRadio(type); return; }
     if (ambientState.playing) clearAmbient();
     ensureAudioContext();
     const ctx = state.audioCtx;
@@ -2195,6 +2230,7 @@
     ambientState.volume = e.target.value / 100;
     $('ambientVolLabel').textContent = e.target.value + '%';
     if (ambientState.gainNode) ambientState.gainNode.gain.value = ambientState.volume;
+    if (ambientState.radioEl) ambientState.radioEl.volume = ambientState.volume;
   });
 
   window.addEventListener('beforeunload', () => {
