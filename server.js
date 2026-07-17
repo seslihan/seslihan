@@ -165,24 +165,24 @@ app.get('/api/stock', (req, res) => {
   const fetchJSON = (url) => new Promise((resolve, reject) => {
     const mod = url.startsWith('https') ? https : http;
     mod.get(url, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
-      let data = '';
-      r.on('data', c => data += c);
-      r.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve(null); } });
+      const chunks = [];
+      r.on('data', c => chunks.push(c));
+      r.on('end', () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))); } catch { resolve(null); } });
     }).on('error', () => resolve(null)).on('timeout', function() { this.destroy(); resolve(null); });
   });
 
   const fetchText = (url) => new Promise((resolve, reject) => {
     const mod = url.startsWith('https') ? https : http;
     mod.get(url, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
-      let data = '';
-      r.on('data', c => data += c);
-      r.on('end', () => resolve(data));
+      const chunks = [];
+      r.on('data', c => chunks.push(c));
+      r.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
     }).on('error', () => resolve('')).on('timeout', function() { this.destroy(); resolve(''); });
   });
 
   Promise.all([
     fetchJSON('https://api.btcturk.com/api/v2/ticker'),
-    fetchText('https://finans.truncgil.com/today.json')
+    fetchJSON('https://finans.truncgil.com/today.json')
   ]).then(([btcturk, finans]) => {
     const result = [];
 
