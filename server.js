@@ -137,9 +137,10 @@ app.get('/api/news/:category', (req, res) => {
   const fetchFeed = (url) => new Promise((resolve) => {
     const mod = url.startsWith('https') ? https : http;
     mod.get(url, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' } }, (r) => {
-      let data = '';
-      r.on('data', c => data += c);
+      const chunks = [];
+      r.on('data', c => chunks.push(c));
       r.on('end', () => {
+        const data = Buffer.concat(chunks).toString('utf8');
         const items = [];
         const entries = data.split(/<item>|<entry>/i).slice(1, 8);
         entries.forEach(entry => {
@@ -232,20 +233,41 @@ app.get('/api/stock', (req, res) => {
 app.get('/api/tv-rss/:cid', (req, res) => {
   const cid = req.params.cid;
   if (!cid || !cid.startsWith('UC') || cid.length !== 24) return res.status(400).json({ videoId: null });
-  const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${cid}`;
-  https.get(feedUrl, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
-    const chunks = [];
-    r.on('data', c => chunks.push(c));
-    r.on('end', () => {
-      const data = Buffer.concat(chunks).toString('utf8');
-      const entries = data.split('<entry>');
-      if (entries.length > 1) {
-        const vidMatch = entries[1].match(/<yt:videoId>([\w-]+)<\/yt:videoId>/);
-        if (vidMatch) return res.json({ videoId: vidMatch[1] });
-      }
-      res.json({ videoId: null });
+
+  function tryRSS() {
+    return new Promise(resolve => {
+      const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${cid}`;
+      https.get(feedUrl, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } }, (r) => {
+        const chunks = [];
+        r.on('data', c => chunks.push(c));
+        r.on('end', () => {
+          const data = Buffer.concat(chunks).toString('utf8');
+          const vidMatch = data.match(/<yt:videoId>([\w-]+)<\/yt:videoId>/);
+          resolve(vidMatch ? vidMatch[1] : null);
+        });
+      }).on('error', () => resolve(null)).on('timeout', function() { this.destroy(); resolve(null); });
     });
-  }).on('error', () => res.json({ videoId: null }));
+  }
+
+  function tryScrape() {
+    return new Promise(resolve => {
+      const pageUrl = `https://www.youtube.com/channel/${cid}`;
+      https.get(pageUrl, { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Accept-Language': 'en-US,en;q=0.9' } }, (r) => {
+        const chunks = [];
+        r.on('data', c => chunks.push(c));
+        r.on('end', () => {
+          const data = Buffer.concat(chunks).toString('utf8');
+          const vidMatch = data.match(/"videoId"\s*:\s*"([\w-]{11})"/);
+          resolve(vidMatch ? vidMatch[1] : null);
+        });
+      }).on('error', () => resolve(null)).on('timeout', function() { this.destroy(); resolve(null); });
+    });
+  }
+
+  tryRSS().then(vid => {
+    if (vid) return res.json({ videoId: vid });
+    return tryScrape().then(vid2 => res.json({ videoId: vid2 }));
+  });
 });
 
 app.get('/api/tv-live/:channelId', (req, res) => {
@@ -255,9 +277,10 @@ app.get('/api/tv-live/:channelId', (req, res) => {
   function fetchFeed(cid) {
     const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${cid}`;
     https.get(feedUrl, { timeout: 5000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
-      let data = '';
-      r.on('data', c => data += c);
+      const chunks = [];
+      r.on('data', c => chunks.push(c));
       r.on('end', () => {
+        const data = Buffer.concat(chunks).toString('utf8');
         const entries = data.split('<entry>');
         if (entries.length > 1) {
           const vidMatch = entries[1].match(/<yt:videoId>([\w-]+)<\/yt:videoId>/);
@@ -273,9 +296,10 @@ app.get('/api/tv-live/:channelId', (req, res) => {
   } else {
     const handle = channelId.startsWith('@') ? channelId : '@' + channelId;
     https.get(`https://www.youtube.com/${handle}`, { timeout: 5000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
-      let data = '';
-      r.on('data', c => data += c);
+      const chunks = [];
+      r.on('data', c => chunks.push(c));
       r.on('end', () => {
+        const data = Buffer.concat(chunks).toString('utf8');
         const cidMatch = data.match(/"externalId"\s*:\s*"(UC[\w-]{22})"/);
         if (cidMatch) fetchFeed(cidMatch[1]);
         else res.json({ videoId: null });
