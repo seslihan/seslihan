@@ -64,9 +64,9 @@ app.get('/api/config', (req, res) => {
 
 const RADIO_WHITELIST = [
   'radyotvonline.com', 'streamtheworld.com', 'radyositesihazir.com',
-  'powerapp.com.tr', 'powerapp.com.tr', 'listenpowerapp.com',
+  'powerapp.com.tr', 'listenpowerapp.com', 'powergroup.com.tr',
   'icecast', 'cdnvideo.ru', 'radyohizmeti.com',
-  'channels.dinamo.fm', 'listenfenomen.com', 'radyono.com',
+  'channels.dinamo.fm', 'radyofenomen.com', 'radyono.com',
   'liderhost.com.tr', 'anadolu.liderhost.com.tr'
 ];
 
@@ -113,17 +113,22 @@ app.get('/api/news/:category', (req, res) => {
     world: [
       'https://feeds.bbci.co.uk/news/world/rss.xml',
       'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
-      'https://www.aljazeera.com/xml/rss/all.xml'
+      'https://www.aljazeera.com/xml/rss/all.xml',
+      'https://news.google.com/rss/search?q=world+news&hl=en&gl=US&ceid=US:en'
     ],
     ai: [
       'https://www.technologyreview.com/feed/',
       'https://feeds.arstechnica.com/arstechnica/technology-lab',
-      'https://www.wired.com/feed/tag/ai/latest/rss'
+      'https://www.wired.com/feed/tag/ai/latest/rss',
+      'https://news.google.com/rss/search?q=artificial+intelligence&hl=tr&gl=TR&ceid=TR:tr'
     ],
     turkey: [
-      'https://www.ntv.com.tr/rss/news?id=dunya',
-      'https://www.sozcu.com.tr/rss/tum-haberler.xml',
-      'https://www.hurriyet.com.tr/rss/anasayfa'
+      'https://www.cnnturk.com/feed/rss/all/news',
+      'https://www.trthaber.com/sondakika.rss',
+      'https://www.sozcu.com.tr/rss/all.xml',
+      'https://www.milliyet.com.tr/rss/rssnew/gundemrss.xml',
+      'https://www.aa.com.tr/tr/rss/default?cat=guncel',
+      'https://news.google.com/rss/search?q=t%C3%BCrkiye+gundem&hl=tr&gl=TR&ceid=TR:tr'
     ]
   };
   const feeds = FEEDS[req.params.category];
@@ -131,18 +136,19 @@ app.get('/api/news/:category', (req, res) => {
 
   const fetchFeed = (url) => new Promise((resolve) => {
     const mod = url.startsWith('https') ? https : http;
-    mod.get(url, { timeout: 5000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' } }, (r) => {
+    mod.get(url, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' } }, (r) => {
       let data = '';
       r.on('data', c => data += c);
       r.on('end', () => {
         const items = [];
-        const entries = data.split(/<item>|<entry>/i).slice(1, 6);
+        const entries = data.split(/<item>|<entry>/i).slice(1, 8);
         entries.forEach(entry => {
           const title = (entry.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/i) || [])[1] || '';
           const link = (entry.match(/<link[^>]*>([^<]*)<\/link>/i) || entry.match(/<link[^>]*href="([^"]*)"/i) || [])[1] || '#';
           const desc = (entry.match(/<description[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/description>/i) || [])[1] || '';
           const pubDate = (entry.match(/<pubDate[^>]*>(.*?)<\/pubDate>/i) || entry.match(/<published[^>]*>(.*?)<\/published>/i) || [])[1] || '';
-          items.push({ title: title.replace(/<[^>]*>/g, '').trim(), link: link.trim(), desc: desc.replace(/<[^>]*>/g, '').trim().substring(0, 200), pubDate });
+          const source = (entry.match(/<source[^>]*>(.*?)<\/source>/i) || [])[1] || '';
+          items.push({ title: title.replace(/<[^>]*>/g, '').trim(), link: link.trim(), desc: desc.replace(/<[^>]*>/g, '').trim().substring(0, 200), pubDate, source: source.replace(/<[^>]*>/g, '').trim() });
         });
         resolve(items);
       });
@@ -150,7 +156,7 @@ app.get('/api/news/:category', (req, res) => {
   });
 
   Promise.all(feeds.map(fetchFeed)).then(results => {
-    const all = results.flat().sort(() => Math.random() - 0.5).slice(0, 12);
+    const all = results.flat().sort(() => Math.random() - 0.5).slice(0, 15);
     res.json({ items: all, time: new Date().toISOString() });
   });
 });

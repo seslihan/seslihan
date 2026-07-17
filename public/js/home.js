@@ -141,7 +141,7 @@
     });
   });
 
-  let currentCategory = 'world';
+  let currentCategory = 'turkey';
   const newsGrid = document.getElementById('newsGrid');
   const newsTime = document.getElementById('newsTime');
   const newsRefreshBtn = document.getElementById('newsRefreshBtn');
@@ -164,10 +164,23 @@
           card.href = item.link;
           card.target = '_blank';
           card.rel = 'noopener';
+          let timeStr = '';
+          if (item.pubDate) {
+            try {
+              const d = new Date(item.pubDate);
+              const now = new Date();
+              const diffMin = Math.floor((now - d) / 60000);
+              if (diffMin < 60) timeStr = diffMin + ' dk önce';
+              else if (diffMin < 1440) timeStr = Math.floor(diffMin / 60) + ' saat önce';
+              else timeStr = d.toLocaleDateString('tr-TR');
+            } catch (e) { timeStr = item.pubDate; }
+          }
+          let sourceBadge = item.source ? '<span class="news-card-source">' + escapeHtml(item.source) + '</span>' : '';
           card.innerHTML =
+            sourceBadge +
             '<div class="news-card-title">' + escapeHtml(item.title) + '</div>' +
             (item.desc ? '<div class="news-card-desc">' + escapeHtml(item.desc) + '</div>' : '') +
-            (item.pubDate ? '<div class="news-card-time">' + escapeHtml(item.pubDate) + '</div>' : '');
+            (timeStr ? '<div class="news-card-time">' + timeStr + '</div>' : '');
           newsGrid.appendChild(card);
         });
         if (data.time) {
@@ -190,5 +203,11 @@
 
   if (newsRefreshBtn) newsRefreshBtn.addEventListener('click', () => fetchNews(currentCategory));
 
-  fetchNews('world');
+  fetchNews('turkey');
+
+  setTimeout(() => {
+    if (window.twttr && window.twttr.widgets) {
+      window.twttr.widgets.load();
+    }
+  }, 1000);
 })();

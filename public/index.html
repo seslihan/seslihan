@@ -125,10 +125,31 @@
     </div>
 
     <div class="home-news">
+      <div class="news-section-header">
+        <h2 class="home-section-title">CANLI HABERLER</h2>
+        <div class="news-source-badge">
+          <span class="live-dot"></span> X (Twitter) Canlı Akış
+        </div>
+      </div>
+      <div class="x-timelines">
+        <div class="x-timeline-col">
+          <h3 class="x-timeline-label">@anadoluajansi</h3>
+          <a class="twitter-timeline" data-height="420" data-theme="dark" data-chrome="nofooter noborders transparent" data-tweet-limit="5" href="https://x.com/anadoluajansi">AA Haberleri</a>
+        </div>
+        <div class="x-timeline-col">
+          <h3 class="x-timeline-label">@CNABorgu</h3>
+          <a class="twitter-timeline" data-height="420" data-theme="dark" data-chrome="nofooter noborders transparent" data-tweet-limit="5" href="https://x.com/CNABorgu">CNN Türk Haberleri</a>
+        </div>
+        <div class="x-timeline-col">
+          <h3 class="x-timeline-label">@trthaber</h3>
+          <a class="twitter-timeline" data-height="420" data-theme="dark" data-chrome="nofooter noborders transparent" data-tweet-limit="5" href="https://x.com/trthaber">TRT Haber</a>
+        </div>
+      </div>
+
       <div class="news-tabs">
-        <button class="news-tab active" data-category="world">🌍 Dünya</button>
+        <button class="news-tab active" data-category="turkey">🇹🇷 Türkiye</button>
+        <button class="news-tab" data-category="world">🌍 Dünya</button>
         <button class="news-tab" data-category="ai">🤖 Yapay Zeka</button>
-        <button class="news-tab" data-category="turkey">🇹🇷 Türkiye</button>
       </div>
       <div id="newsGrid" class="news-grid">
         <div class="news-loading">Haberler yükleniyor...</div>
@@ -140,6 +161,8 @@
     </div>
 
   </main>
+
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
   <div class="name-gate-overlay" id="nameGateOverlay" hidden>
     <div class="name-gate-modal">
