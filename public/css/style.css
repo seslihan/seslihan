@@ -4675,6 +4675,8 @@ input[type="range"]::-moz-range-thumb {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(255,183,0,0.15);
 }
 .dash-hero .action-row {
   display: flex;
