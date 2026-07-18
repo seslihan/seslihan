@@ -2288,7 +2288,7 @@
     ambientState.volume = e.target.value / 100;
     $('ambientVolLabel').textContent = e.target.value + '%';
     if (ambientState.gainNode) ambientState.gainNode.gain.value = ambientState.volume;
-    if (ambientState.radioEl) ambientState.radioEl.volume = ambientState.volume;
+    if (typeof radioVolume === 'function') radioVolume(ambientState.volume);
   });
 
   // ---------- CANLI TV ----------
