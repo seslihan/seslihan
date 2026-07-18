@@ -9,7 +9,7 @@
 </head>
 <body class="home">
   <header class="app-header">
-    <a href="/" class="app-brand">
+    <a href="/" class="app-brand" data-spa>
       <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
     </a>
     <div class="app-header-actions">
@@ -35,39 +35,6 @@
   <div class="toast-host" id="toastHost"></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
-  <script>
-    const grid = document.getElementById('stockGrid');
-    const timeEl = document.getElementById('stockTime');
-
-    function fetchStock() {
-      grid.innerHTML = '<div class="stock-loading">Veriler yükleniyor...</div>';
-      fetch('/api/stock').then(r => r.json()).then(data => {
-        if (!data.items || data.items.length === 0) {
-          grid.innerHTML = '<div class="stock-loading">Veri bulunamadı</div>';
-          return;
-        }
-        grid.innerHTML = '';
-        data.items.forEach(item => {
-          const card = document.createElement('div');
-          const cls = item.chg > 0 ? 'stock-up' : item.chg < 0 ? 'stock-down' : 'stock-flat';
-          const arrow = item.chg > 0 ? '▲' : item.chg < 0 ? '▼' : '—';
-          const val = typeof item.val === 'number' ? item.val.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) : item.val;
-          card.className = 'stock-card ' + cls;
-          card.innerHTML = '<div class="stock-sym">' + item.sym + '</div><div class="stock-val">' + val + '</div><div class="stock-chg">' + arrow + ' ' + Math.abs(item.chg).toFixed(2) + '%</div>';
-          grid.appendChild(card);
-        });
-        if (data.time) {
-          const t = new Date(data.time);
-          timeEl.textContent = 'Son güncelleme: ' + t.toLocaleTimeString('tr-TR');
-        }
-      }).catch(() => {
-        grid.innerHTML = '<div class="stock-loading">Veriler yüklenemedi</div>';
-      });
-    }
-
-    fetchStock();
-    document.getElementById('refreshBtn').addEventListener('click', fetchStock);
-    setInterval(fetchStock, 15000);
-  </script>
+  <script src="/js/stock-page.js"></script>
 </body>
 </html>

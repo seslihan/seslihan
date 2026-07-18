@@ -1,4 +1,7 @@
-(() => {
+let _homeInit = false;
+window.pageInitHome = function () {
+  if (_homeInit) return;
+  _homeInit = true;
   const socket = io();
   const newMeetingBtn = document.getElementById('newMeetingBtn');
   const scheduleBtn = document.getElementById('scheduleBtn');
@@ -206,4 +209,4 @@
   setTimeout(() => {
     if (window.twttr && window.twttr.widgets) window.twttr.widgets.load();
   }, 2000);
-})();
+};

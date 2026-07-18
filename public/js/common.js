@@ -463,4 +463,61 @@
       if (vol) vol.addEventListener('input', () => { radioVolume(vol.value / 100); });
     });
   })();
+
+  // ---------- SPA ROUTER ----------
+  const PAGE_SCRIPTS = {
+    '/': { init: 'pageInitHome' },
+    '/tv.html': { init: 'pageInitTV' },
+    '/radio.html': { init: 'pageInitRadio' },
+    '/stock.html': { init: 'pageInitStock' },
+    '/whiteboard.html': { init: 'pageInitWhiteboard' }
+  };
+  let spaBusy = false;
+
+  function initPage(path) {
+    var cfg = PAGE_SCRIPTS[path];
+    if (cfg && cfg.init && typeof window[cfg.init] === 'function') {
+      window[cfg.init]();
+    }
+    if (path === '/' && window.twttr && window.twttr.widgets) {
+      window.twttr.widgets.load();
+    }
+  }
+
+  window.spaNavigate = function (path, push) {
+    if (spaBusy || path === location.pathname) return;
+    spaBusy = true;
+    fetch(path)
+      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(html => {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var newMain = doc.querySelector('main');
+        var oldMain = document.querySelector('main');
+        if (newMain && oldMain) oldMain.innerHTML = newMain.innerHTML;
+        var t = doc.querySelector('title');
+        if (t) document.title = t.textContent;
+        if (push) history.pushState({ p: path }, '', path);
+        window.scrollTo(0, 0);
+        setTimeout(() => initPage(path), 50);
+        spaBusy = false;
+      })
+      .catch(() => { spaBusy = false; location.href = path; });
+  };
+
+  document.addEventListener('click', e => {
+    var a = e.target.closest('a[data-spa]');
+    if (!a) return;
+    var href = a.getAttribute('href');
+    if (!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:')) return;
+    e.preventDefault();
+    window.spaNavigate(href, true);
+  });
+
+  window.addEventListener('popstate', () => {
+    window.spaNavigate(location.pathname, false);
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initPage(location.pathname);
+  });
 })();

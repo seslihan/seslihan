@@ -20,7 +20,7 @@
 </head>
 <body class="home">
   <header class="app-header">
-    <a href="/" class="app-brand">
+    <a href="/" class="app-brand" data-spa>
       <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
     </a>
     <div class="app-header-actions">
@@ -49,83 +49,6 @@
   <div class="toast-host" id="toastHost"></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
-  <script>
-    const canvas = document.getElementById('wbCanvas');
-    const ctx = canvas.getContext('2d');
-    const wrap = document.getElementById('wbWrap');
-    let drawing = false;
-    let tool = 'pen';
-    let history = [];
-
-    function resize() {
-      const rect = wrap.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      redraw();
-    }
-
-    function redraw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      history.forEach(step => {
-        ctx.beginPath();
-        ctx.strokeStyle = step.color;
-        ctx.lineWidth = step.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        if (step.tool === 'eraser') { ctx.globalCompositeOperation = 'destination-out'; }
-        else { ctx.globalCompositeOperation = 'source-over'; }
-        step.points.forEach((p, i) => {
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        });
-        ctx.stroke();
-      });
-      ctx.globalCompositeOperation = 'source-over';
-    }
-
-    function startStroke(e) {
-      drawing = true;
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      history.push({ tool, color: document.getElementById('wbColor').value, size: document.getElementById('wbSize').value, points: [{ x, y }] });
-    }
-
-    function drawStroke(e) {
-      if (!drawing) return;
-      e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      const last = history[history.length - 1];
-      last.points.push({ x, y });
-      redraw();
-    }
-
-    function endStroke() { drawing = false; }
-
-    canvas.addEventListener('mousedown', startStroke);
-    canvas.addEventListener('mousemove', drawStroke);
-    canvas.addEventListener('mouseup', endStroke);
-    canvas.addEventListener('mouseleave', endStroke);
-    canvas.addEventListener('touchstart', startStroke, { passive: false });
-    canvas.addEventListener('touchmove', drawStroke, { passive: false });
-    canvas.addEventListener('touchend', endStroke);
-
-    document.getElementById('wbPen').addEventListener('click', () => { tool = 'pen'; document.getElementById('wbPen').classList.add('active'); document.getElementById('wbEraser').classList.remove('active'); });
-    document.getElementById('wbEraser').addEventListener('click', () => { tool = 'eraser'; document.getElementById('wbEraser').classList.add('active'); document.getElementById('wbPen').classList.remove('active'); });
-    document.getElementById('wbSize').addEventListener('input', (e) => { document.getElementById('wbSizeLabel').textContent = e.target.value + 'px'; });
-    document.getElementById('wbUndo').addEventListener('click', () => { history.pop(); redraw(); });
-    document.getElementById('wbClear').addEventListener('click', () => { history = []; redraw(); });
-    document.getElementById('wbDownload').addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'seslihan-tahta-' + Date.now() + '.png';
-      link.href = canvas.toDataURL();
-      link.click();
-    });
-
-    window.addEventListener('resize', resize);
-    resize();
-  </script>
+  <script src="/js/whiteboard-page.js"></script>
 </body>
 </html>
