@@ -230,6 +230,21 @@ app.get('/api/stock', (req, res) => {
   }).catch(() => res.status(502).json({ error: 'Fetch failed' }));
 });
 
+app.get('/api/namaz', (req, res) => {
+  const locationId = 9541;
+  const url = `https://prayertimes.api.abdus.dev/api/diyanet/prayertimes?location_id=${locationId}`;
+  https.get(url, { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+    const chunks = [];
+    r.on('data', c => chunks.push(c));
+    r.on('end', () => {
+      try {
+        const data = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        res.json(data);
+      } catch { res.status(502).json({ error: 'Parse error' }); }
+    });
+  }).on('error', () => res.status(502).json({ error: 'Prayer times fetch failed' }));
+});
+
 app.get('/api/tv-rss/:cid', (req, res) => {
   const cid = req.params.cid;
   if (!cid || !cid.startsWith('UC') || cid.length !== 24) return res.status(400).json({ videoId: null });

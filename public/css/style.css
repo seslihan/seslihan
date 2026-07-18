@@ -2343,7 +2343,22 @@ body.post-body {
 .wb-doc-content img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 /* ---------- AMBIENT POPOVER ---------- */
-.ambient-popover { min-width: 220px !important; }
+.ambient-popover {
+  min-width: 220px !important;
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+}
+.ambient-popover::-webkit-scrollbar { width: 6px; }
+.ambient-popover::-webkit-scrollbar-track { background: transparent; }
+.ambient-popover::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 3px; }
+.popover-section-title {
+  display: block; width: 100%; padding: 6px 12px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-muted);
+  position: sticky; top: 0; z-index: 1;
+  background: var(--panel); border-bottom: 1px solid var(--line);
+}
 .ambient-type {
   display: block; width: 100%;
   padding: 8px 12px;
@@ -4592,6 +4607,34 @@ input[type="range"]::-moz-range-thumb {
   padding: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
+}
+.home-logo-side {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.2;
+}
+.home-logo-big {
+  width: 180px;
+  height: auto;
+}
+.home-logo-text {
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: 0.6;
+}
+  color: var(--text);
 }
 .home-dashboard {
   max-width: 1100px;
@@ -4600,6 +4643,8 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  position: relative;
+  z-index: 1;
 }
 .dash-row {
   display: flex;
@@ -4968,6 +5013,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* Tablet */
 @media (max-width: 1000px) {
+  .home-logo-side { display: none; }
   .home-dashboard { padding: 16px 16px 50px; }
   .dash-features { grid-template-columns: repeat(2, 1fr); }
   .dash-news-row { flex-direction: column; }
@@ -5064,6 +5110,74 @@ input[type="range"]::-moz-range-thumb {
   border-left: 1px solid #00ff4133;
 }
 
+/* === NAMAZ VAKITLERİ === */
+.dash-namaz {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.dash-namaz-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+.dash-namaz-icon { font-size: 14px; }
+.dash-namaz-title { color: var(--text-muted); letter-spacing: 1px; }
+.dash-namaz-next {
+  margin-left: auto;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 9px;
+  animation: livePulse 2s infinite;
+}
+.dash-namaz-times {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.dash-namaz-times::-webkit-scrollbar { display: none; }
+.namaz-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 14px;
+  min-width: 70px;
+  border-right: 1px solid var(--line);
+  transition: background 0.2s;
+}
+.namaz-item:last-child { border-right: none; }
+.namaz-item.active {
+  background: var(--accent-soft);
+  border-radius: 4px;
+}
+.namaz-item.passed { opacity: 0.4; }
+.namaz-label {
+  font-family: var(--font);
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+.namaz-value {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+}
+.namaz-item.active .namaz-value {
+  color: var(--accent);
+}
+
 /* === STANDALONE PAGES === */
 .standalone-page {
   max-width: 960px;
@@ -5146,6 +5260,35 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Radio Page */
+.radio-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.radio-filter-btn {
+  padding: 5px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.radio-filter-btn:hover {
+  background: var(--bg-3);
+  color: var(--text);
+}
+.radio-filter-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
 .radio-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

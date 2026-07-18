@@ -7,13 +7,10 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta property="og:title" content="Seslihan" />
   <meta property="og:image" content="/seslihanlogo2.png" />
-  <link rel="stylesheet" href="/css/style.css?v=7" />
+  <link rel="stylesheet" href="/css/style.css?v=9" />
 </head>
 <body class="home">
   <header class="app-header">
-    <a href="/" class="app-brand">
-      <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
-    </a>
     <div class="app-header-actions">
       <a href="/schedule.html" class="icon-btn" data-tooltip="Takvim" data-spa>
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -36,6 +33,10 @@
   </header>
 
   <main class="home-main">
+    <div class="home-logo-side">
+      <img src="/seslihanlogo2.png" alt="Seslihan" class="home-logo-big" />
+      <div class="home-logo-text">Seslihan</div>
+    </div>
     <div class="home-dashboard">
 
       <div class="dash-row">
@@ -72,6 +73,17 @@
           </div>
         </div>
         <span id="dashStockTime" class="dash-stock-time"></span>
+      </div>
+
+      <div class="dash-namaz" id="dashNamaz">
+        <div class="dash-namaz-header">
+          <span class="dash-namaz-icon">🕌</span>
+          <span class="dash-namaz-title">Namaz Vakitleri — İstanbul</span>
+          <span id="dashNamazNext" class="dash-namaz-next"></span>
+        </div>
+        <div id="dashNamazTimes" class="dash-namaz-times">
+          <span class="stock-loading-sm">Yükleniyor...</span>
+        </div>
       </div>
 
       <div class="dash-row dash-news-row">

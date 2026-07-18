@@ -216,6 +216,52 @@ window.pageInitHome = function () {
   fetchStock();
   _homeInterval = setInterval(fetchStock, 15000);
 
+  // Namaz Vakitleri
+  const dashNamazTimes = document.getElementById('dashNamazTimes');
+  const dashNamazNext = document.getElementById('dashNamazNext');
+  const prayerLabels = { imsak: 'İmsak', gunes: 'Güneş', ogle: 'Öğle', ikindi: 'İkindi', aksam: 'Akşam', yatsi: 'Yatsı' };
+  const prayerOrder = ['imsak', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'];
+
+  function fetchNamaz() {
+    fetch('/api/namaz').then(r => r.json()).then(data => {
+      if (!dashNamazTimes) return;
+      if (!data || !data.data) { dashNamazTimes.innerHTML = '<span class="stock-loading-sm">Namaz vakitleri alınamadı</span>'; return; }
+      const today = data.data.find(d => {
+        const dt = new Date(d.date);
+        return dt.toDateString() === new Date().toDateString();
+      }) || data.data[0];
+      if (!today || !today.timings) { dashNamazTimes.innerHTML = '<span class="stock-loading-sm">Veri bulunamadı</span>'; return; }
+      const now = new Date();
+      let nextFound = false;
+      let html = '';
+      prayerOrder.forEach(key => {
+        const time = today.timings[key];
+        if (!time) return;
+        const [h, m] = time.split(':').map(Number);
+        const prayerDate = new Date(now);
+        prayerDate.setHours(h, m, 0, 0);
+        const isPassed = now > prayerDate;
+        const isNext = !nextFound && !isPassed;
+        if (isNext) nextFound = true;
+        const cls = isNext ? 'active' : (isPassed ? 'passed' : '');
+        html += '<div class="namaz-item ' + cls + '"><span class="namaz-label">' + prayerLabels[key] + '</span><span class="namaz-value">' + time.substring(0, 5) + '</span></div>';
+      });
+      dashNamazTimes.innerHTML = html;
+      if (dashNamazNext) {
+        if (nextFound) {
+          const activeEl = dashNamazTimes.querySelector('.namaz-item.active .namaz-label');
+          dashNamazNext.textContent = 'Sonraki: ' + (activeEl ? activeEl.textContent : '');
+        } else {
+          dashNamazNext.textContent = 'Tüm vakitler geçti';
+        }
+      }
+    }).catch(() => {
+      if (dashNamazTimes) dashNamazTimes.innerHTML = '<span class="stock-loading-sm">Bağlantı hatası</span>';
+    });
+  }
+
+  fetchNamaz();
+
   // X/Twitter RSS Feed
   let currentXHandle = 'anadoluajansi';
   const xFeed = document.getElementById('xFeed');

@@ -1953,24 +1953,34 @@
   });
 
   // ---------- AMBIENT MUSIC + RADIO ----------
-  let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.25, type: 'supermarket', timers: [], radioEl: null };
+  let ambientState = { playing: false, nodes: [], gainNode: null, volume: 0.25, type: 'supermarket', timers: [] };
 
   const RADIO_STREAMS = {
     'radio-powerturk':  { name: 'PowerTürk FM',   url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.powerapp.com.tr/powerturk/mpeg/icecast.audio') },
     'radio-powerfm':    { name: 'Power FM',        url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.powerapp.com.tr/powerfm/mpeg/icecast.audio') },
-    'radio-ntv':        { name: 'NTV Radyo',       url: '/api/radio-proxy?url=' + encodeURIComponent('http://ntvrdwmp.radyotvonline.com/') },
+    'radio-powerpop':   { name: 'PowerPop',        url: '/api/radio-proxy?url=' + encodeURIComponent('http://powerpop.listenpowerapp.com/powerpop/mpeg/icecast.audio') },
+    'radio-rockfm':     { name: 'Rock FM',         url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.radyofenomen.com/rock/256/icecast.audio') },
     'radio-superfm':    { name: 'Süper FM',        url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/SUPER_FM_SC') },
     'radio-virgin':     { name: 'Virgin Radio',    url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO_SC') },
     'radio-joyturk':    { name: 'Joy Türk',        url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC') },
     'radio-kral':       { name: 'Kral Türk FM',    url: '/api/radio-proxy?url=' + encodeURIComponent('https://live.radyositesihazir.com/8032/stream') },
     'radio-radyo7':     { name: 'Radyo 7',         url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.250/;stream') },
+    'radio-alem':       { name: 'Alem FM',         url: '/api/radio-proxy?url=' + encodeURIComponent('https://turkmedya.radyotvonline.net/alemfmaac') },
+    'radio-viva':       { name: 'Radyo Viva',      url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.231/') },
     'radio-fenomen':    { name: 'Fenomen FM',      url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.radyofenomen.com/fenomen/128/icecast.audio') },
+    'radio-eksen':      { name: 'Radyo Eksen',     url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.230/') },
+    'radio-moda':       { name: 'Radyo Moda',      url: '/api/radio-proxy?url=' + encodeURIComponent('http://m.radyomoda.com.tr:8000/stream') },
+    'radio-light':      { name: 'Radyo Light',     url: '/api/radio-proxy?url=' + encodeURIComponent('https://yayin.radiolight.net:8005/live') },
+    'radio-seyrfm':     { name: 'Seyr FM',         url: '/api/radio-proxy?url=' + encodeURIComponent('https://seyrdijital.com/stream') },
+    'radio-metro':      { name: 'Metro FM',        url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/METRO_FM_SC') },
+    'radio-joyfm':      { name: 'JOY FM',          url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_FM_SC') },
+    'radio-slow':       { name: 'Slow Türk',       url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/SLOW_TURK_SC') },
+    'radio-ntv':        { name: 'NTV Radyo',       url: '/api/radio-proxy?url=' + encodeURIComponent('http://ntvrdwmp.radyotvonline.com/') },
+    'radio-sputnik':    { name: 'Radyo Sputnik',   url: '/api/radio-proxy?url=' + encodeURIComponent('https://icecast-rian.cdnvideo.ru/voicestm') },
     'radio-90lar':      { name: '90\'lar Radyo',   url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/166/') },
     'radio-altin':      { name: 'Altın Şarkılar',  url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/25/;') },
-    'radio-metro':      { name: 'Metro FM',        url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/METRO_FM_SC') },
     'radio-dinamocaffe':{ name: 'Dinamo Caffe',    url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/caffe-mp3') },
-    'radio-dinamosleep':{ name: 'Dinamo Sleep',    url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/sleep-mp3') },
-    'radio-sputnik':    { name: 'Radyo Sputnik',   url: '/api/radio-proxy?url=' + encodeURIComponent('https://icecast-rian.cdnvideo.ru/voicestm') }
+    'radio-dinamosleep':{ name: 'Dinamo Sleep',    url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/sleep-mp3') }
   };
 
   function clearAmbient() {
@@ -1979,33 +1989,17 @@
     ambientState.nodes.forEach(n => { try { n.stop(); } catch (_) {} });
     ambientState.nodes = [];
     if (ambientState.gainNode) { try { ambientState.gainNode.disconnect(); } catch (_) {} }
-    if (ambientState.radioEl) {
-      ambientState.radioEl.pause();
-      ambientState.radioEl.src = '';
-      ambientState.radioEl = null;
-    }
   }
 
   function startRadio(type) {
     const stream = RADIO_STREAMS[type];
     if (!stream) return;
     clearAmbient();
-    const audio = new Audio();
-    audio.src = stream.url;
-    audio.volume = ambientState.volume;
-    audio.preload = 'auto';
-    audio.play().catch(() => {
-      toast(stream.name + ' çalınamadı — tarayıcı Engellemiş olabilir', 'error');
-    });
-    audio.addEventListener('error', () => {
-      toast(stream.name + ' yayınına bağlanılamadı', 'error');
-    }, { once: true });
-    ambientState.radioEl = audio;
     ambientState.playing = true;
     ambientState.type = type;
     $('ambientBtn').style.color = 'var(--accent)';
     document.querySelectorAll('.ambient-type').forEach(b => b.classList.toggle('active', b.dataset.ambient === type));
-    toast('📻 ' + stream.name + ' canlı', 'success');
+    radioPlay(stream.url, stream.name, ambientState.volume);
   }
 
   function createAmbientGain() {
@@ -2242,6 +2236,7 @@
   function startAmbient(type) {
     if (RADIO_STREAMS[type]) { startRadio(type); return; }
     if (ambientState.playing) clearAmbient();
+    radioStop();
     ensureAudioContext();
     const ctx = state.audioCtx;
     if (!ctx) return;
@@ -2256,6 +2251,7 @@
   function stopAmbient() {
     ambientState.playing = false;
     clearAmbient();
+    radioStop();
     $('ambientBtn').style.color = '';
     toast('Arka plan müziği kapatıldı', 'info');
   }

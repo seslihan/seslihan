@@ -5,29 +5,66 @@ window.pageInitRadio = function () {
     { key: 'powerfm', name: 'Power FM', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.powerapp.com.tr/powerfm/mpeg/icecast.audio') },
     { key: 'superfm', name: 'Süper FM', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/SUPER_FM_SC') },
     { key: 'virgin', name: 'Virgin Radio', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO_SC') },
-    { key: 'joyturk', name: 'Joy Türk', genre: 'Slow', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC') },
+    { key: 'joyturk', name: 'Joy Türk', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC') },
+    { key: 'powerpop', name: 'PowerPop', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('http://powerpop.listenpowerapp.com/powerpop/mpeg/icecast.audio') },
+    { key: 'rockfm', name: 'Rock FM', genre: 'Rock', url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.radyofenomen.com/rock/256/icecast.audio') },
     { key: 'metro', name: 'Metro FM', genre: 'Yabancı', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/METRO_FM_SC') },
+    { key: 'joyfm', name: 'JOY FM', genre: 'Yabancı', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_FM_SC') },
+    { key: 'slow', name: 'Slow Türk', genre: 'Yabancı', url: '/api/radio-proxy?url=' + encodeURIComponent('https://playerservices.streamtheworld.com/api/livestream-redirect/SLOW_TURK_SC') },
     { key: 'fenomen', name: 'Fenomen FM', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.radyofenomen.com/fenomen/128/icecast.audio') },
     { key: 'kral', name: 'Kral Türk FM', genre: 'Türkçe', url: '/api/radio-proxy?url=' + encodeURIComponent('https://live.radyositesihazir.com/8032/stream') },
     { key: 'radyo7', name: 'Radyo 7', genre: 'Türkçe', url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.250/;stream') },
+    { key: 'alem', name: 'Alem FM', genre: 'Türkçe', url: '/api/radio-proxy?url=' + encodeURIComponent('https://turkmedya.radyotvonline.net/alemfmaac') },
+    { key: 'viva', name: 'Radyo Viva', genre: 'Türkçe', url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.231/') },
+    { key: 'eksen', name: 'Radyo Eksen', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.230/') },
+    { key: 'moda', name: 'Radyo Moda', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('http://m.radyomoda.com.tr:8000/stream') },
+    { key: 'light', name: 'Radyo Light', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('https://yayin.radiolight.net:8005/live') },
+    { key: 'seyrfm', name: 'Seyr FM', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('https://seyrdijital.com/stream') },
     { key: 'ntv', name: 'NTV Radyo', genre: 'Haber', url: '/api/radio-proxy?url=' + encodeURIComponent('http://ntvrdwmp.radyotvonline.com/') },
+    { key: 'sputnik', name: 'Radyo Sputnik', genre: 'Haber', url: '/api/radio-proxy?url=' + encodeURIComponent('https://icecast-rian.cdnvideo.ru/voicestm') },
     { key: '90lar', name: '90\'lar Radyo', genre: 'Nostalji', url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/166/') },
     { key: 'altin', name: 'Altın Şarkılar', genre: 'Nostalji', url: '/api/radio-proxy?url=' + encodeURIComponent('http://37.247.98.8/stream/25/;') },
     { key: 'dinamocaffe', name: 'Dinamo Caffe', genre: 'Lounge', url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/caffe-mp3') },
-    { key: 'dinamosleep', name: 'Dinamo Sleep', genre: 'Ambient', url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/sleep-mp3') },
-    { key: 'sputnik', name: 'Radyo Sputnik', genre: 'Haber', url: '/api/radio-proxy?url=' + encodeURIComponent('https://icecast-rian.cdnvideo.ru/voicestm') },
-    { key: 'viva', name: 'Radyo Viva', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.231/') },
-    { key: 'moda', name: 'Radyo Moda', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('http://m.radyomoda.com.tr:8000/stream') },
-    { key: 'eksen', name: 'Radyo Eksen', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('http://46.20.3.230/') },
-    { key: 'alem', name: 'Alem FM', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('https://turkmedya.radyotvonline.net/alemfmaac') },
-    { key: 'light', name: 'Radyo Light', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('https://yayin.radiolight.net:8005/live') },
-    { key: 'seyrfm', name: 'Seyr FM', genre: 'İstanbul', url: '/api/radio-proxy?url=' + encodeURIComponent('https://seyrdijital.com/stream') }
+    { key: 'dinamosleep', name: 'Dinamo Sleep', genre: 'Ambient', url: '/api/radio-proxy?url=' + encodeURIComponent('http://channels.dinamo.fm/sleep-mp3') }
   ];
 
   const grid = document.getElementById('radioGrid');
   if (!grid) return;
 
-  const genreColors = { Pop: '#ff6b6b', Slow: '#48dbfb', Haber: '#feca57', Nostalji: '#ff9ff3', Yabancı: '#54a0ff', Türkçe: '#00d2d3', Lounge: '#5f27cd', Ambient: '#01a3a4', 'İstanbul': '#e17055' };
+  const genreColors = { Pop: '#ff6b6b', Rock: '#e056e0', Slow: '#48dbfb', Haber: '#feca57', Nostalji: '#ff9ff3', Yabancı: '#54a0ff', Türkçe: '#00d2d3', 'İstanbul': '#e17055', Lounge: '#5f27cd', Ambient: '#01a3a4' };
+
+  const genreOrder = ['Pop', 'Rock', 'Türkçe', 'İstanbul', 'Yabancı', 'Haber', 'Nostalji', 'Lounge', 'Ambient'];
+
+  function renderGrid(filter) {
+    grid.innerHTML = '';
+    const filtered = filter ? stations.filter(s => s.genre === filter) : stations;
+    filtered.forEach(st => {
+      const card = document.createElement('div');
+      card.className = 'radio-card';
+      card.dataset.key = st.key;
+      card.dataset.genre = st.genre;
+      const gc = genreColors[st.genre] || '#888';
+      card.innerHTML = '<div class="radio-card-genre" style="color:' + gc + '">' + st.genre + '</div><div class="radio-card-name">' + st.name + '</div>';
+      card.addEventListener('click', () => {
+        const current = localStorage.getItem('bs-radio');
+        let isPlaying = false;
+        try { const rs = JSON.parse(current); isPlaying = rs && rs.playing && rs.key === st.key; } catch(_){}
+        if (isPlaying) {
+          radioStop();
+        } else {
+          radioPlay(st.url, st.name, 0.5);
+          try {
+            const rs = JSON.parse(localStorage.getItem('bs-radio') || '{}');
+            rs.key = st.key;
+            localStorage.setItem('bs-radio', JSON.stringify(rs));
+          } catch(_){}
+        }
+        highlightPlaying();
+      });
+      grid.appendChild(card);
+    });
+    highlightPlaying();
+  }
 
   function highlightPlaying() {
     grid.querySelectorAll('.radio-card').forEach(c => c.classList.remove('playing'));
@@ -43,31 +80,21 @@ window.pageInitRadio = function () {
     }
   }
 
-  grid.innerHTML = '';
-  stations.forEach(st => {
-    const card = document.createElement('div');
-    card.className = 'radio-card';
-    card.dataset.key = st.key;
-    const gc = genreColors[st.genre] || '#888';
-    card.innerHTML = '<div class="radio-card-genre" style="color:' + gc + '">' + st.genre + '</div><div class="radio-card-name">' + st.name + '</div>';
-    card.addEventListener('click', () => {
-      const current = localStorage.getItem('bs-radio');
-      let isPlaying = false;
-      try { const rs = JSON.parse(current); isPlaying = rs && rs.playing && rs.key === st.key; } catch(_){}
-      if (isPlaying) {
-        radioStop();
-      } else {
-        radioPlay(st.url, st.name, 0.5);
-        try {
-          const rs = JSON.parse(localStorage.getItem('bs-radio') || '{}');
-          rs.key = st.key;
-          localStorage.setItem('bs-radio', JSON.stringify(rs));
-        } catch(_){}
-      }
-      highlightPlaying();
+  const filterBar = document.getElementById('radioFilter');
+  if (filterBar) {
+    filterBar.innerHTML = '<button class="radio-filter-btn active" data-genre="">Tümü</button>';
+    genreOrder.forEach(g => {
+      const gc = genreColors[g] || '#888';
+      filterBar.innerHTML += '<button class="radio-filter-btn" data-genre="' + g + '" style="--gc:' + gc + '">' + g + '</button>';
     });
-    grid.appendChild(card);
-  });
+    filterBar.querySelectorAll('.radio-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBar.querySelectorAll('.radio-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderGrid(btn.dataset.genre || null);
+      });
+    });
+  }
 
-  highlightPlaying();
+  renderGrid();
 };
