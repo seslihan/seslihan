@@ -368,17 +368,14 @@ body.home {
     radial-gradient(ellipse at 30% 10%, rgba(196, 94, 44, 0.06) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 90%, rgba(212, 136, 60, 0.06) 0%, transparent 50%),
     linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
-  overflow: auto;
+  overflow: hidden;
 }
 
 .home-main {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
-
 .home-container {
 }
 
@@ -1911,7 +1908,6 @@ body.post-body {
   .ambient-type { padding: 7px 10px; font-size: 12px; }
   .ambient-volume-row { padding: 6px 10px; }
 
-  .home-main { padding: 16px 12px; }
   .hero-card { padding: 20px 16px; }
   .hero-card h1 { font-size: 20px; }
   .hero-card p { font-size: 13px; }
@@ -2116,11 +2112,11 @@ body.post-body {
 
 /* ---------- WATERMARK ---------- */
 .watermark-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
-.watermark-layer img { position: absolute; opacity: 0.07; mix-blend-mode: multiply; user-select: none; }
-[data-theme="dark"] .watermark-layer img { mix-blend-mode: screen; opacity: 0.05; }
+.watermark-layer img { position: absolute; opacity: 0.04; mix-blend-mode: multiply; user-select: none; }
+[data-theme="dark"] .watermark-layer img { mix-blend-mode: screen; opacity: 0.03; }
 .chat-watermark { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.chat-watermark img { position: absolute; opacity: 0.05; mix-blend-mode: multiply; user-select: none; }
-[data-theme="dark"] .chat-watermark img { mix-blend-mode: screen; opacity: 0.03; }
+.chat-watermark img { position: absolute; opacity: 0.03; mix-blend-mode: multiply; user-select: none; }
+[data-theme="dark"] .chat-watermark img { mix-blend-mode: screen; opacity: 0.02; }
 
 /* ---------- NAME GATE MODAL ---------- */
 .name-gate-overlay {
@@ -3496,14 +3492,13 @@ svg {
 
 /* --- 8-BIT SCROLLBAR --- */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 6px;
   background: var(--bg-2);
-  border-left: 2px solid var(--text);
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--line-2);
-  border: 2px solid var(--text);
+  border: 1px solid var(--text);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -4449,21 +4444,21 @@ input[type="range"]::-moz-range-thumb {
   overflow-x: hidden;
 }
 .home-dashboard {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 12px;
+  padding: 20px 24px 60px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 .dash-row {
   display: flex;
-  gap: 12px;
+  gap: 14px;
 }
 .dash-card {
   background: var(--panel);
   border: 2px solid var(--line);
-  padding: 12px;
+  padding: 14px;
   overflow: hidden;
 }
 .dash-card h1 {
@@ -4492,6 +4487,9 @@ input[type="range"]::-moz-range-thumb {
 /* Hero */
 .dash-hero {
   flex: 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 .dash-hero .action-row {
   display: flex;
@@ -4501,6 +4499,7 @@ input[type="range"]::-moz-range-thumb {
 .join-form {
   display: flex;
   gap: 8px;
+  margin-top: auto;
 }
 .join-form input {
   flex: 1;
@@ -4518,7 +4517,11 @@ input[type="range"]::-moz-range-thumb {
 .dash-meetings {
   flex: 1;
   min-width: 0;
+  max-height: 200px;
+  overflow-y: auto;
 }
+.dash-meetings::-webkit-scrollbar { width: 4px; }
+.dash-meetings::-webkit-scrollbar-thumb { background: var(--line-2); }
 .meeting-list {
   display: flex;
   flex-direction: column;
@@ -4551,11 +4554,11 @@ input[type="range"]::-moz-range-thumb {
 
 /* Features */
 .dash-features {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 .feat-card {
-  flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -4591,22 +4594,24 @@ input[type="range"]::-moz-range-thumb {
 /* News + X side by side */
 .dash-news-row {
   display: flex;
-  gap: 12px;
+  gap: 14px;
 }
 .dash-news {
   flex: 3;
   min-width: 0;
 }
 .dash-x {
-  flex: 2;
-  min-width: 0;
-  max-height: 420px;
+  flex: 1;
+  min-width: 220px;
+  max-width: 300px;
+  max-height: 440px;
   overflow-y: auto;
 }
 .dash-x::-webkit-scrollbar { width: 4px; }
 .dash-x::-webkit-scrollbar-thumb { background: var(--line-2); }
 .x-list {
-  min-height: 200px;
+  min-height: 100px;
+  overflow: hidden;
 }
 
 /* News tabs */
@@ -4641,7 +4646,7 @@ input[type="range"]::-moz-range-thumb {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
-  max-height: 300px;
+  max-height: 340px;
   overflow-y: auto;
 }
 .news-grid::-webkit-scrollbar { width: 4px; }
@@ -4657,6 +4662,7 @@ input[type="range"]::-moz-range-thumb {
   gap: 4px;
   transition: border-color 0.15s;
   overflow: hidden;
+  min-height: 80px;
 }
 .news-card:hover { border-color: var(--accent); }
 .news-card-source {
@@ -4671,6 +4677,10 @@ input[type="range"]::-moz-range-thumb {
   font-size: 8px;
   font-weight: 700;
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .news-card-desc {
   font-size: 9px;
@@ -4730,15 +4740,31 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
+/* Tablet */
+@media (max-width: 1000px) {
+  .home-dashboard { padding: 16px 16px 50px; }
+  .dash-features { grid-template-columns: repeat(2, 1fr); }
+  .dash-news-row { flex-direction: column; }
+  .dash-x { max-width: none; flex: none; max-height: 350px; }
+}
+
 /* Mobile */
 @media (max-width: 700px) {
+  .home-dashboard { padding: 12px 10px 40px; }
   .dash-row { flex-direction: column; }
-  .dash-news-row { flex-direction: column; }
-  .dash-features { flex-wrap: wrap; }
+  .dash-features { grid-template-columns: repeat(2, 1fr); }
   .feat-card { flex: 0 0 calc(50% - 4px); }
   .dash-hero .action-row { flex-direction: column; }
   .news-grid { grid-template-columns: 1fr; }
   .x-list { max-height: 300px; }
+  .dash-meetings { max-height: 150px; }
+}
+
+@media (max-width: 480px) {
+  .home-dashboard { padding: 10px 8px 30px; gap: 10px; }
+  .dash-card { padding: 10px; }
+  .dash-features { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .feat-card { padding: 8px; }
 }
 
 /* === HOME STOCK STRIP === */

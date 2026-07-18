@@ -49,13 +49,14 @@ window.pageInitHome = function () {
       meetingList.innerHTML = '<div class="meeting-list-empty">Henüz toplantı yok</div>';
       return;
     }
-    meetingList.innerHTML = '';
+      meetingList.innerHTML = '';
     list.forEach(m => {
       const item = document.createElement('div');
       item.className = 'meeting-item';
+      const dateStr = (m.scheduledAt || m.createdAt) ? formatDateTime(m.scheduledAt || m.createdAt) : '';
       item.innerHTML =
         '<div class="meeting-item-code">' + escapeHtml(m.code) + '</div>' +
-        '<div class="meeting-item-time">' + escapeHtml(m.title || 'Toplantı') + ' · ' + escapeHtml(formatDateTime(m.scheduledAt || m.createdAt)) + '</div>';
+        '<div class="meeting-item-time">' + escapeHtml(m.title || 'Toplantı') + (dateStr ? ' · ' + escapeHtml(dateStr) : '') + '</div>';
       item.addEventListener('click', () => {
         window.location.href = '/prejoin.html?code=' + encodeURIComponent(m.code);
       });
@@ -142,11 +143,14 @@ window.pageInitHome = function () {
           if (item.pubDate) {
             try {
               const d = new Date(item.pubDate);
-              const now = new Date();
-              const diffMin = Math.floor((now - d) / 60000);
-              if (diffMin < 60) timeStr = diffMin + ' dk';
-              else if (diffMin < 1440) timeStr = Math.floor(diffMin / 60) + ' saat';
-              else timeStr = d.toLocaleDateString('tr-TR');
+              if (!isNaN(d.getTime())) {
+                const now = new Date();
+                const diffMin = Math.floor((now - d) / 60000);
+                if (diffMin < 60) timeStr = diffMin + ' dk';
+                else if (diffMin < 1440) timeStr = Math.floor(diffMin / 60) + ' saat';
+                else if (diffMin < 0) timeStr = d.toLocaleDateString('tr-TR');
+                else timeStr = d.toLocaleDateString('tr-TR');
+              }
             } catch (e) {}
           }
           const title = stripHtml(item.title);
@@ -161,7 +165,7 @@ window.pageInitHome = function () {
         });
         if (data.time) {
           const t = new Date(data.time);
-          newsTime.textContent = t.toLocaleTimeString('tr-TR');
+          if (!isNaN(t.getTime())) newsTime.textContent = t.toLocaleTimeString('tr-TR');
         }
       })
       .catch(() => {
@@ -198,7 +202,7 @@ window.pageInitHome = function () {
       dashStockItems.innerHTML = html + html;
       if (data.time) {
         const t = new Date(data.time);
-        dashStockTime.textContent = t.toLocaleTimeString('tr-TR');
+        if (!isNaN(t.getTime())) dashStockTime.textContent = t.toLocaleTimeString('tr-TR');
       }
     }).catch(() => {});
   }
