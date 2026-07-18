@@ -231,7 +231,7 @@ app.get('/api/stock', (req, res) => {
 });
 
 app.get('/api/namaz', (req, res) => {
-  const locationId = 9541;
+  const locationId = req.query.location_id || 9541;
   const url = `https://prayertimes.api.abdus.dev/api/diyanet/prayertimes?location_id=${locationId}`;
   https.get(url, { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
     const chunks = [];
@@ -255,6 +255,45 @@ app.get('/api/namaz', (req, res) => {
       } catch { res.status(502).json({ error: 'Parse error' }); }
     });
   }).on('error', () => res.status(502).json({ error: 'Prayer times fetch failed' }));
+});
+
+const WISDOMS = [
+  { type: 'ayet', text: 'İnsanları hidayete eriştirmek senin görevin değildir. Allah dilediğini saptırır, dilediğini hidayete erdirir.', source: 'Yûnus, 10/99' },
+  { type: 'hadis', text: 'Sizden biriniz kendisi için istediğini, mümin kardeşi için de istemedikçe gerçekten iman etmiş olmaz.', source: 'Buhârî, İmân, 7' },
+  { type: 'ayet', text: 'Her zorluğun yanında bir kolaylık vardır. Evet, her zorluğun yanında bir kolaylık vardır.', source: 'İnşirâh, 94/5-6' },
+  { type: 'hadis', text: 'Müslüman, dilinden ve elinden Müslümanların güvende olduğu kimsedir.', source: 'Buhârî, İmân, 4' },
+  { type: 'ayet', text: 'Şüphesiz Allah, adaleti, iyiliği ve akrabaya yardım etmeyi emreder.', source: 'Nahl, 16/90' },
+  { type: 'hadis', text: 'Kolaylaştırınız, zorlaştırmayınız. Müjdeleyiniz, nefret ettirmeyiniz.', source: 'Buhârî, İlim, 12' },
+  { type: 'ayet', text: 'Allah, sabredenleri sever. Sabır, acı bir şeyin yudumlanması gibidir, sonu baldan tatlıdır.', source: 'Âl-i İmrân, 3/146' },
+  { type: 'hadis', text: 'Güzel söz sadakadır. Her iyi şey sadakadır.', source: 'Müslim, Birr, 56' },
+  { type: 'ayet', text: 'Kim Allah\'tan korkarsa, Allah ona bir çıkış yolu açar.', source: 'Talâk, 65/2-3' },
+  { type: 'hadis', text: 'Cennet annelerin ayakları altındadır.', source: 'Nesâî, Cennet, 3' },
+  { type: 'ayet', text: 'Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver.', source: 'Bakara, 2/201' },
+  { type: 'hadis', text: 'İnsanlara merhamet edene Allah merhamet eder.', source: 'Tirmizî, Kader, 15' },
+  { type: 'ayet', text: 'Doğrusu insana ancak çalıştığının karşılığı vardır.', source: 'Necm, 53/39' },
+  { type: 'hadis', text: 'Ameller niyetlere göredir. Herkese niyet ettiği şey vardır.', source: 'Buhârî, İkrah, 1' },
+  { type: 'ayet', text: 'Unutma ki, zafer sabredenlerin, zafer Allah\'a güvenenlerindir.', source: 'Âl-i İmrân, 3/160' },
+  { type: 'hadis', text: 'Temizlik imanın yarısıdır.', source: 'Müslim, Tahâret, 1' },
+  { type: 'ayet', text: 'İman edip salih amel işleyenlerin kalplerini Allah\'ın zikriyle teskin et.', source: 'Ra\'d, 13/28' },
+  { type: 'hadis', text: 'İnsanların en hayırlısı, insanlara en faydalı olandır.', source: 'Taberânî, Mu\'cemü\'l-Kebîr, 1/28' },
+  { type: 'ayet', text: 'Rabbiniz buyurdu ki: Bana dua edin, size cevap vereyim.', source: 'Mü\'minûn, 23/60' },
+  { type: 'hadis', text: 'Gülümsemeniz de bir sadakadır.', source: 'Tirmizî, Zühd, 35' },
+  { type: 'ayet', text: 'Biz insanı en güzel surette yarattık.', source: 'Tîn, 95/4-6' },
+  { type: 'hadis', text: 'Kıyamet gününde kulların Allah\'ın huzuruna çıkacakları ilk soru namazları hakkındadır.', source: 'Tirmizî, Salât, 1' },
+  { type: 'ayet', text: 'Sabret! Çünkü Allah\'ın vaadi gerçeğin ta kendisidir.', source: 'Kehf, 18/110' },
+  { type: 'hadis', text: 'İnsanların en olgun olanı, ahlakı en güzel olanıdır.', source: 'İbn Mâce, Zühd, 9' },
+  { type: 'ayet', text: 'Allah\'ın indinde en şerefliniz, en takva sahibi olanınızdır.', source: 'Hucurât, 49/13' },
+  { type: 'hadis', text: 'Mümin müminin aynasıdır.', source: 'Ebû Dâvûd, Edeb, 48' },
+  { type: 'ayet', text: 'Sizi yaratan, rızıklandıran, öldüren ve dirilten Allah\'tır.', source: 'En\'âm, 6/54' },
+  { type: 'hadis', text: 'Dua ibadetin özüdür.', source: 'Tirmizî, Du\'a, 1' },
+  { type: 'ayet', text: 'İman edenleri ve salih amel işleyenleri bağışlar.', source: 'Âl-i İmrân, 3/15' },
+  { type: 'hadis', text: 'İnsanların en akıllısı, ahireti için en çok çalışanıdır.', source: 'Taberânî, Mu\'cemü\'l-Evsat, 1/165' }
+];
+
+app.get('/api/wisdom', (req, res) => {
+  const hour = new Date().getHours();
+  const idx = hour % WISDOMS.length;
+  res.json(WISDOMS[idx]);
 });
 
 app.get('/api/tv-rss/:cid', (req, res) => {

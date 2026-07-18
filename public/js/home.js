@@ -219,11 +219,13 @@ window.pageInitHome = function () {
   // Namaz Vakitleri
   const dashNamazTimes = document.getElementById('dashNamazTimes');
   const dashNamazNext = document.getElementById('dashNamazNext');
+  const dashNamazLocation = document.getElementById('dashNamazLocation');
   const prayerLabels = { imsak: 'İmsak', gunes: 'Güneş', ogle: 'Öğle', ikindi: 'İkindi', aksam: 'Akşam', yatsi: 'Yatsı' };
   const prayerOrder = ['imsak', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'];
 
   function fetchNamaz() {
-    fetch('/api/namaz').then(r => r.json()).then(data => {
+    const locId = dashNamazLocation ? dashNamazLocation.value : '9541';
+    fetch('/api/namaz?location_id=' + locId).then(r => r.json()).then(data => {
       if (!dashNamazTimes) return;
       if (!data || !data.data) { dashNamazTimes.innerHTML = '<span class="stock-loading-sm">Namaz vakitleri alınamadı</span>'; return; }
       const today = data.data.find(d => {
@@ -260,7 +262,19 @@ window.pageInitHome = function () {
     });
   }
 
+  if (dashNamazLocation) dashNamazLocation.addEventListener('change', fetchNamaz);
   fetchNamaz();
+
+  // Ayet / Hadis / Kıssadan Hisse
+  function fetchWisdom() {
+    fetch('/api/wisdom').then(r => r.json()).then(data => {
+      const txt = document.getElementById('dashWisdomText');
+      const src = document.getElementById('dashWisdomSource');
+      if (txt && data.text) txt.textContent = data.text;
+      if (src && data.source) src.textContent = data.source;
+    }).catch(() => {});
+  }
+  fetchWisdom();
 
   // X/Twitter RSS Feed
   let currentXHandle = 'anadoluajansi';

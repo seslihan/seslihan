@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta property="og:title" content="Seslihan" />
   <meta property="og:image" content="/seslihanlogo2.png" />
-  <link rel="stylesheet" href="/css/style.css?v=9" />
+  <link rel="stylesheet" href="/css/style.css?v=10" />
 </head>
 <body class="home">
   <header class="app-header">
@@ -77,11 +77,23 @@
       <div class="dash-namaz" id="dashNamaz">
         <div class="dash-namaz-header">
           <span class="dash-namaz-icon">🕌</span>
-          <span class="dash-namaz-title">Namaz Vakitleri — İstanbul</span>
+          <span class="dash-namaz-title">Namaz Vakitleri</span>
+          <select id="dashNamazLocation" class="dash-namaz-select">
+            <option value="9541">İstanbul</option>
+            <option value="9541">Şişli</option>
+          </select>
           <span id="dashNamazNext" class="dash-namaz-next"></span>
         </div>
         <div id="dashNamazTimes" class="dash-namaz-times">
           <span class="stock-loading-sm">Yükleniyor...</span>
+        </div>
+      </div>
+
+      <div class="dash-wisdom" id="dashWisdom">
+        <div class="dash-wisdom-inner">
+          <span class="dash-wisdom-icon">📖</span>
+          <span class="dash-wisdom-text" id="dashWisdomText">Yükleniyor...</span>
+          <span class="dash-wisdom-source" id="dashWisdomSource"></span>
         </div>
       </div>
 
