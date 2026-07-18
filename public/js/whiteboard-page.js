@@ -1,3 +1,4 @@
+window.pageCleanupWhiteboard = function () {};
 window.pageInitWhiteboard = function () {
   const canvas = document.getElementById('wbCanvas');
   const ctx = canvas ? canvas.getContext('2d') : null;

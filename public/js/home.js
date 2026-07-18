@@ -1,7 +1,13 @@
 let _homeInit = false;
+let _homeInterval = null;
+
+window.pageCleanupHome = function () {
+  if (_homeInterval) { clearInterval(_homeInterval); _homeInterval = null; }
+};
+
 window.pageInitHome = function () {
-  if (_homeInit) return;
-  _homeInit = true;
+  pageCleanupHome();
+  _homeInit = false;
   const socket = io();
   const newMeetingBtn = document.getElementById('newMeetingBtn');
   const scheduleBtn = document.getElementById('scheduleBtn');
@@ -208,7 +214,7 @@ window.pageInitHome = function () {
   }
 
   fetchStock();
-  setInterval(fetchStock, 15000);
+  _homeInterval = setInterval(fetchStock, 15000);
 
   setTimeout(() => {
     if (window.twttr && window.twttr.widgets) window.twttr.widgets.load();

@@ -1,3 +1,6 @@
+window.pageCleanupStock = function () {
+  if (window._stockInterval) { clearInterval(window._stockInterval); window._stockInterval = null; }
+};
 window.pageInitStock = function () {
   const grid = document.getElementById('stockGrid');
   const timeEl = document.getElementById('stockTime');

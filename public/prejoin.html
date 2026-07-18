@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Toplantıya Katıl — Seslihan</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/css/style.css?v=4" />
+  <link rel="stylesheet" href="/css/style.css?v=8" />
 </head>
 <body class="prejoin-body">
   <header class="app-header">
@@ -13,7 +13,7 @@
       <img src="/seslihanlogo2.png" alt="Seslihan" class="logo-transparent" />
     </a>
     <div class="app-header-actions">
-      <a href="/" class="icon-btn" data-tooltip="Geri">
+      <a href="/" class="icon-btn" data-tooltip="Ana sayfaya dön" aria-label="Ana sayfaya dön" style="min-width:44px;min-height:44px;">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       </a>
     </div>
@@ -23,18 +23,27 @@
     <section class="preview-card">
       <div class="preview-video-wrap" id="previewWrap">
         <video id="previewVideo" autoplay playsinline muted></video>
+        <div class="preview-placeholder" id="previewPlaceholder">
+          <div class="avatar">?</div>
+          <div class="cam-off-label">Kamera kapalı</div>
+        </div>
         <div class="preview-overlay">
           <div id="micMeter" class="preview-mic-meter">
             <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
           </div>
         </div>
       </div>
+      <div class="preview-permission-warning" id="permissionWarning">
+        <div>⚠ Mikrofon/kamera izni reddedildi</div>
+        <div>Tarayıcı adres çubuğundaki kilit/kamera simgesine tıklayarak izinleri etkinleştirin</div>
+        <button id="retryPermissionBtn" type="button">İzinleri yeniden dene</button>
+      </div>
       <div class="preview-controls">
-        <button id="micToggle" class="ctrl" data-on="true" data-tooltip="Mikrofon">
+        <button id="micToggle" class="ctrl" data-on="true" data-tooltip="Mikrofon" aria-label="Mikrofon aç/kapat">
           <svg class="on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
           <svg class="off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
         </button>
-        <button id="camToggle" class="ctrl no-track" data-on="false" data-tooltip="Kamerayı aç">
+        <button id="camToggle" class="ctrl no-track" data-on="false" data-tooltip="Kamerayı aç" aria-label="Kamera aç/kapat">
           <svg class="on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
           <svg class="off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3l2-3h6l2 3h3a2 2 0 0 1 2 2v8"/></svg>
         </button>
@@ -52,22 +61,25 @@
 
       <div class="field">
         <label for="nameInput">Adınız</label>
-        <input id="nameInput" type="text" placeholder="Adınız" maxlength="32" />
+        <input id="nameInput" type="text" placeholder="Adınız" maxlength="30" aria-label="Adınız" autocomplete="name" />
+        <div class="field-error" id="nameError"></div>
       </div>
 
       <div class="field">
         <label for="micSelect">Mikrofon</label>
-        <select id="micSelect"></select>
+        <select id="micSelect" aria-label="Mikrofon seç"></select>
+        <div class="device-status" id="micStatus"></div>
       </div>
 
       <div class="field">
         <label for="camSelect">Kamera</label>
-        <select id="camSelect"></select>
+        <select id="camSelect" aria-label="Kamera seç"></select>
+        <div class="device-status" id="camStatus"></div>
       </div>
 
       <div class="field">
         <label for="speakerSelect">Hoparlör</label>
-        <select id="speakerSelect"></select>
+        <select id="speakerSelect" aria-label="Hoparlör seç"></select>
       </div>
 
       <div class="expandable-settings" id="expandableSettings">
@@ -108,8 +120,8 @@
         </div>
       </div>
 
-      <button id="joinBtn" class="btn primary large">
-        Toplantıya katıl
+      <button id="joinBtn" class="btn primary large" aria-label="Toplantıya katıl">
+        <span id="joinBtnText">Toplantıya katıl</span>
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </button>
     </section>

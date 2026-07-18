@@ -20,7 +20,14 @@
   const startMicOff = document.getElementById('startMicOff');
   const startCamOff = document.getElementById('startCamOff');
   const joinBtn = document.getElementById('joinBtn');
+  const joinBtnText = document.getElementById('joinBtnText');
   const micMeterBars = document.querySelectorAll('#micMeter .bar');
+  const permissionWarning = document.getElementById('permissionWarning');
+  const retryPermissionBtn = document.getElementById('retryPermissionBtn');
+  const nameError = document.getElementById('nameError');
+  const previewPlaceholder = document.getElementById('previewPlaceholder');
+  const micStatus = document.getElementById('micStatus');
+  const camStatus = document.getElementById('camStatus');
 
   const state = {
     stream: null,
@@ -29,7 +36,9 @@
     blur: false,
     audioCtx: null,
     audioAnalyser: null,
-    audioData: null
+    audioData: null,
+    micPermission: 'unknown',
+    camPermission: 'unknown'
   };
 
   if (settings.joinWithMicOff) { startMicOff.classList.add('on'); state.micOn = false; }
@@ -63,15 +72,82 @@
       }
       const s = await navigator.mediaDevices.getUserMedia(constraints);
       state.stream = s;
+      state.micPermission = 'granted';
+      state.camPermission = 'granted';
+      permissionWarning.classList.remove('visible');
       previewVideo.srcObject = s;
       updateControls();
       setupAudioMeter();
+      updateJoinButton();
     } catch (err) {
-      if (err.name === 'NotAllowedError') toast('Mikrofon/kamera izni reddedildi', 'error');
-      else if (err.name === 'NotFoundError') toast('Cihaz bulunamadı', 'error');
-      else toast('Medya hatası: ' + err.message, 'error');
+      if (err.name === 'NotAllowedError') {
+        if (err.message && err.message.includes('mic')) state.micPermission = 'denied';
+        else if (err.message && err.message.includes('cam')) state.camPermission = 'denied';
+        else { state.micPermission = 'denied'; state.camPermission = 'denied'; }
+        permissionWarning.classList.add('visible');
+        toast('Mikrofon/kamera izni reddedildi', 'error');
+      } else if (err.name === 'NotFoundError') {
+        toast('Cihaz bulunamadı', 'error');
+      } else {
+        toast('Medya hatası: ' + err.message, 'error');
+      }
+      updateControls();
+      updateJoinButton();
     }
     await loadDevices();
+    updateDeviceStatuses();
+  }
+
+  function updateDeviceStatuses() {
+    if (micStatus) {
+      const hasMic = state.stream && state.stream.getAudioTracks().length > 0;
+      if (state.micPermission === 'denied') {
+        micStatus.textContent = '⚠ İzin reddedildi';
+        micStatus.className = 'device-status error';
+      } else if (hasMic) {
+        micStatus.textContent = '✓ Mikrofon hazır';
+        micStatus.className = 'device-status ok';
+      } else {
+        micStatus.textContent = '';
+        micStatus.className = 'device-status';
+      }
+    }
+    if (camStatus) {
+      const hasCam = state.stream && state.stream.getVideoTracks().length > 0;
+      if (state.camPermission === 'denied') {
+        camStatus.textContent = '⚠ İzin reddedildi';
+        camStatus.className = 'device-status error';
+      } else if (hasCam) {
+        camStatus.textContent = '✓ Kamera hazır';
+        camStatus.className = 'device-status ok';
+      } else {
+        camStatus.textContent = '';
+        camStatus.className = 'device-status';
+      }
+    }
+  }
+
+  function updateJoinButton() {
+    if (!joinBtnText) return;
+    const hasMic = state.stream && state.stream.getAudioTracks().length > 0 && state.micOn;
+    const hasCam = state.stream && state.stream.getVideoTracks().length > 0 && state.camOn;
+    if (hasMic && hasCam) {
+      joinBtnText.textContent = 'Toplantıya katıl';
+    } else if (hasMic) {
+      joinBtnText.textContent = 'Toplantıya katıl (Kamera kapalı)';
+    } else if (hasCam) {
+      joinBtnText.textContent = 'Toplantıya katıl (Mikrofon kapalı)';
+    } else {
+      joinBtnText.textContent = 'Mikrofon ve kamera olmadan katıl';
+    }
+  }
+
+  if (retryPermissionBtn) {
+    retryPermissionBtn.addEventListener('click', () => {
+      state.micOn = true;
+      state.camOn = true;
+      startMedia();
+    });
   }
 
   async function loadDevices() {
@@ -101,19 +177,12 @@
       camToggle.dataset.on = 'false';
       camToggle.title = 'Kamerayı aç';
     }
-    const ph = document.getElementById('previewWrap');
-    let placeholder = ph.querySelector('.preview-placeholder');
-    if (!hasVideo || !state.stream.getVideoTracks()[0].enabled) {
-      if (!placeholder) {
-        placeholder = document.createElement('div');
-        placeholder.className = 'preview-placeholder';
-        placeholder.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg-3),var(--bg-2));pointer-events:none;';
-        placeholder.innerHTML = '<div class="avatar">' + escapeHtml((nameInput.value || '?').charAt(0).toUpperCase()) + '</div>';
-        ph.appendChild(placeholder);
-      }
-    } else if (placeholder) {
-      placeholder.remove();
+    if (previewPlaceholder) {
+      previewPlaceholder.style.display = (!hasVideo || !state.stream.getVideoTracks()[0].enabled) ? 'flex' : 'none';
+      var avatarEl = previewPlaceholder.querySelector('.avatar');
+      if (avatarEl) avatarEl.textContent = (nameInput.value || '?').charAt(0).toUpperCase();
     }
+    updateJoinButton();
   }
 
   function setupAudioMeter() {
@@ -435,8 +504,29 @@
 
   joinBtn.addEventListener('click', () => {
     const n = (nameInput.value || '').trim();
-    if (!n) { toast('Adınızı girin', 'error'); nameInput.focus(); return; }
+    if (!n) {
+      nameError.textContent = 'Adınızı girin';
+      nameInput.classList.add('error');
+      nameInput.focus();
+      return;
+    }
+    if (n.length < 2) {
+      nameError.textContent = 'En az 2 karakter girin';
+      nameInput.classList.add('error');
+      nameInput.focus();
+      return;
+    }
+    if (n.length > 30) {
+      nameError.textContent = 'En fazla 30 karakter girin';
+      nameInput.classList.add('error');
+      nameInput.focus();
+      return;
+    }
+    nameError.textContent = '';
+    nameInput.classList.remove('error');
     localStorage.setItem('bs-name', n);
+    joinBtn.disabled = true;
+    joinBtnText.textContent = 'Katılınıyor...';
     saveSettings({
       ...settings,
       joinWithMicOff: startMicOff.classList.contains('on'),
@@ -450,6 +540,11 @@
     const qs = new URLSearchParams({ code, name: n, mic: micOn ? '1' : '0', cam: camOn ? '1' : '0' });
     if (feature) qs.set('feature', feature);
     window.location.href = '/room.html?' + qs.toString();
+  });
+
+  nameInput.addEventListener('input', () => {
+    nameError.textContent = '';
+    nameInput.classList.remove('error');
   });
 
   startMedia();

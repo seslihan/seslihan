@@ -1,3 +1,4 @@
+window.pageCleanupTV = function () {};
 window.pageInitTV = function () {
   const channels = [
     { id: 'cnnturk', name: 'CNN Türk', handle: '@CNNTurk', cid: 'UCV6zcRug6Hqp1UX_FdyUeBg', color: '#e30a17' },

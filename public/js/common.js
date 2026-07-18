@@ -125,66 +125,6 @@
     }
   });
 
-  // ---------- SPA ROUTER ----------
-  (function initRouter() {
-    const mainEl = () => document.querySelector('main');
-    const PAGES = {
-      '/': '/index.html',
-      '/tv': '/tv.html',
-      '/radio': '/radio.html',
-      '/stock': '/stock.html',
-      '/whiteboard': '/whiteboard.html'
-    };
-    let loading = false;
-
-    function extractBody(html) {
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      return { main: doc.querySelector('main'), title: doc.querySelector('title') };
-    }
-
-    function loadPage(url, push) {
-      if (loading || url === location.pathname) return;
-      loading = true;
-      fetch(url, { headers: { 'X-Request': 'spa' } })
-        .then(r => r.ok ? r.text() : Promise.reject())
-        .then(html => {
-          const { main, title } = extractBody(html);
-          if (!main) { loading = false; return; }
-          const m = mainEl();
-          if (m) m.innerHTML = main.innerHTML;
-          if (title) document.title = title.textContent;
-          if (push) history.pushState({}, '', url);
-          window.scrollTo(0, 0);
-          runScripts();
-          loading = false;
-        })
-        .catch(() => { loading = false; window.location.href = url; });
-    }
-
-    function runScripts() {
-      document.querySelectorAll('main script[data-spa]').forEach(old => old.remove());
-      document.querySelectorAll('main [data-spa-src]').forEach(el => {
-        if (document.querySelector('script[data-spa][src="' + el.dataset.spaSrc + '"]')) return;
-        const s = document.createElement('script');
-        s.src = el.dataset.spaSrc;
-        s.setAttribute('data-spa', '1');
-        document.body.appendChild(s);
-      });
-    }
-
-    document.addEventListener('click', e => {
-      const a = e.target.closest('a[data-spa]');
-      if (!a) return;
-      const url = a.getAttribute('href');
-      if (!url || url.startsWith('http') || url.startsWith('#')) return;
-      e.preventDefault();
-      loadPage(url, true);
-    });
-
-    window.addEventListener('popstate', () => {
-      loadPage(location.pathname, false);
-    });
-  })();
   window.escapeHtml = function (s) {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   };
@@ -467,21 +407,54 @@
 
   // ---------- SPA ROUTER ----------
   const PAGE_SCRIPTS = {
-    '/': { init: 'pageInitHome' },
-    '/tv.html': { init: 'pageInitTV' },
-    '/radio.html': { init: 'pageInitRadio' },
-    '/stock.html': { init: 'pageInitStock' },
-    '/whiteboard.html': { init: 'pageInitWhiteboard' }
+    '/': { init: 'pageInitHome', cleanup: 'pageCleanupHome' },
+    '/tv.html': { init: 'pageInitTV', cleanup: 'pageCleanupTV' },
+    '/radio.html': { init: 'pageInitRadio', cleanup: 'pageCleanupRadio' },
+    '/stock.html': { init: 'pageInitStock', cleanup: 'pageCleanupStock' },
+    '/whiteboard.html': { init: 'pageInitWhiteboard', cleanup: 'pageCleanupWhiteboard' },
+    '/schedule.html': { init: null, cleanup: null }
   };
+
+  const loadedScripts = new Set();
   let spaBusy = false;
+  let lastPath = location.pathname;
+
+  function cleanupPage(path) {
+    var cfg = PAGE_SCRIPTS[path];
+    if (cfg && cfg.cleanup && typeof window[cfg.cleanup] === 'function') {
+      window[cfg.cleanup]();
+    }
+  }
+
+  function loadScriptsFromHtml(doc) {
+    var scripts = doc.querySelectorAll('script[src]');
+    var skip = ['socket.io.js', 'common.js'];
+    var promises = [];
+    scripts.forEach(function(s) {
+      var src = s.getAttribute('src');
+      if (!src || loadedScripts.has(src)) return;
+      if (skip.some(function(k) { return src.indexOf(k) !== -1; })) return;
+      loadedScripts.add(src);
+      var p = new Promise(function(resolve) {
+        var ns = document.createElement('script');
+        ns.src = src;
+        ns.onload = resolve;
+        ns.onerror = resolve;
+        document.body.appendChild(ns);
+      });
+      promises.push(p);
+    });
+    return Promise.all(promises);
+  }
 
   function initPage(path) {
-    var cfg = PAGE_SCRIPTS[path];
+    var cleanPath = path.split('?')[0].split('#')[0];
+    var cfg = PAGE_SCRIPTS[cleanPath];
     if (cfg && cfg.init && typeof window[cfg.init] === 'function') {
       window[cfg.init]();
     }
-    if (path === '/' && window.twttr && window.twttr.widgets) {
-      window.twttr.widgets.load();
+    if (cleanPath === '/' && window.twttr && window.twttr.widgets) {
+      setTimeout(function() { window.twttr.widgets.load(); }, 500);
     }
   }
 
@@ -489,8 +462,9 @@
     if (spaBusy || path === location.pathname) return;
     spaBusy = true;
     fetch(path)
-      .then(r => r.ok ? r.text() : Promise.reject())
-      .then(html => {
+      .then(function(r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function(html) {
+        cleanupPage(lastPath);
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var newMain = doc.querySelector('main');
         var oldMain = document.querySelector('main');
@@ -499,13 +473,16 @@
         if (t) document.title = t.textContent;
         if (push) history.pushState({ p: path }, '', path);
         window.scrollTo(0, 0);
-        setTimeout(() => initPage(path), 50);
-        spaBusy = false;
+        lastPath = path;
+        loadScriptsFromHtml(doc).then(function() {
+          setTimeout(function() { initPage(path); }, 30);
+          spaBusy = false;
+        });
       })
-      .catch(() => { spaBusy = false; location.href = path; });
+      .catch(function() { spaBusy = false; location.href = path; });
   };
 
-  document.addEventListener('click', e => {
+  document.addEventListener('click', function(e) {
     var a = e.target.closest('a[data-spa]');
     if (!a) return;
     var href = a.getAttribute('href');
@@ -514,11 +491,11 @@
     window.spaNavigate(href, true);
   });
 
-  window.addEventListener('popstate', () => {
+  window.addEventListener('popstate', function() {
     window.spaNavigate(location.pathname, false);
   });
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', function() {
     initPage(location.pathname);
   });
 })();

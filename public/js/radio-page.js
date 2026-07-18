@@ -1,3 +1,4 @@
+window.pageCleanupRadio = function () {};
 window.pageInitRadio = function () {
   const stations = [
     { key: 'powerturk', name: 'PowerTürk FM', genre: 'Pop', url: '/api/radio-proxy?url=' + encodeURIComponent('http://live.powerapp.com.tr/powerturk/mpeg/icecast.audio') },

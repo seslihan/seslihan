@@ -1613,14 +1613,16 @@
   $('toggleChat').addEventListener('click', toggleChatPanel);
   $('toggleChatBtn').addEventListener('click', toggleChatPanel);
   $('leaveBtn').addEventListener('click', () => {
-    window.location.href = '/post.html?code=' + state.roomCode + '&duration=' + Math.floor((Date.now() - state.meetStart) / 1000);
+    if (confirm('Toplantıdan ayrılmak istediğinize emin misiniz?')) {
+      window.location.href = '/post.html?code=' + state.roomCode + '&duration=' + Math.floor((Date.now() - state.meetStart) / 1000);
+    }
   });
   $('copyCode').addEventListener('click', () => {
     const link = window.location.origin + '/room.html?code=' + state.roomCode;
-    navigator.clipboard.writeText(link).then(() => toast('Bağlantı kopyalandı', 'info'));
+    navigator.clipboard.writeText(link).then(() => toast('Oda kodu kopyalandı ✓', 'success'));
   });
   $('roomCodeLabel').addEventListener('click', () => {
-    navigator.clipboard.writeText(state.roomCode).then(() => toast('Kod kopyalandı: ' + state.roomCode, 'info'));
+    navigator.clipboard.writeText(state.roomCode).then(() => toast('Oda kodu kopyalandı: ' + state.roomCode, 'success'));
   });
   $('roomCodeLabel').style.cursor = 'pointer';
 
