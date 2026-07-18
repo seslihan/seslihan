@@ -238,8 +238,20 @@ app.get('/api/namaz', (req, res) => {
     r.on('data', c => chunks.push(c));
     r.on('end', () => {
       try {
-        const data = JSON.parse(Buffer.concat(chunks).toString('utf8'));
-        res.json(data);
+        const raw = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        const items = Array.isArray(raw) ? raw : [];
+        const mapped = items.map(d => ({
+          date: d.date,
+          timings: {
+            imsak: d.fajr,
+            gunes: d.sun,
+            ogle: d.dhuhr,
+            ikindi: d.asr,
+            aksam: d.maghrib,
+            yatsi: d.isha
+          }
+        }));
+        res.json({ data: mapped });
       } catch { res.status(502).json({ error: 'Parse error' }); }
     });
   }).on('error', () => res.status(502).json({ error: 'Prayer times fetch failed' }));
