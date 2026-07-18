@@ -5019,70 +5019,82 @@ input[type="range"]::-moz-range-thumb {
   .stock-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* === GLOBAL RADIO BAR (persistent) === */
+/* === GLOBAL RADIO BAR (ghost pill) === */
 .global-radio-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 36px;
-  background: #111;
-  border-top: 2px solid #ff6b6b;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 24px;
+  background: rgba(17,17,17,0.8);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,107,107,0.25);
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
+  gap: 5px;
+  padding: 0 8px;
   z-index: 9999;
   font-family: 'Courier New', monospace;
-  font-size: 11px;
+  font-size: 9px;
+  color: #ff6b6b;
+  transition: opacity 0.4s;
+  opacity: 0.45;
 }
-.room-body .global-radio-bar { display: none; }
+.global-radio-bar:hover {
+  opacity: 1;
+  border-color: rgba(255,107,107,0.6);
+  background: rgba(17,17,17,0.92);
+}
+.room-body .global-radio-bar { display: none !important; }
 .global-radio-dot {
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #ff6b6b;
-  animation: radio-pulse 1s ease-in-out infinite;
+  animation: radio-pulse 1.2s ease-in-out infinite;
   flex-shrink: 0;
 }
 @keyframes radio-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50% { opacity: 0.25; }
 }
 .global-radio-label {
   color: #ff6b6b;
-  flex: 1;
+  max-width: 100px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .global-radio-vol {
-  width: 60px;
-  height: 3px;
+  width: 40px;
+  height: 2px;
   -webkit-appearance: none;
   appearance: none;
-  background: #333;
+  background: rgba(255,107,107,0.3);
   outline: none;
-  border-radius: 2px;
+  border-radius: 1px;
 }
 .global-radio-vol::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #ff6b6b;
   cursor: pointer;
 }
 .global-radio-stop {
   background: none;
-  border: 1px solid #ff6b6b;
+  border: none;
   color: #ff6b6b;
   font-family: 'Courier New', monospace;
-  font-size: 9px;
-  padding: 2px 8px;
+  font-size: 8px;
   cursor: pointer;
+  padding: 0 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
 .global-radio-stop:hover {
-  background: #ff6b6b;
-  color: #111;
+  opacity: 1;
 }
