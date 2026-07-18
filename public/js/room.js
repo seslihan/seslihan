@@ -2263,8 +2263,21 @@
     pop.hidden = !wasHidden;
     $('reactionsPopover').hidden = true;
     $('morePopover').hidden = true;
-    if (wasHidden && ambientState.playing) {
-      document.querySelectorAll('.ambient-type').forEach(b => b.classList.toggle('active', b.dataset.ambient === ambientState.type));
+    if (wasHidden) {
+      if (ambientState.playing) {
+        document.querySelectorAll('.ambient-type').forEach(b => b.classList.toggle('active', b.dataset.ambient === ambientState.type));
+      } else if (radioIsPlaying()) {
+        const st = JSON.parse(localStorage.getItem('bs-radio') || 'null');
+        if (st && st.key) {
+          document.querySelectorAll('.ambient-type').forEach(b => {
+            b.classList.toggle('active', b.dataset.ambient === 'radio-' + st.key);
+          });
+          ambientState.type = 'radio-' + st.key;
+          ambientState.playing = true;
+        }
+      } else {
+        document.querySelectorAll('.ambient-type').forEach(b => b.classList.remove('active'));
+      }
       $('ambientVolume').value = ambientState.volume * 100;
       $('ambientVolLabel').textContent = Math.round(ambientState.volume * 100) + '%';
     }
@@ -2272,6 +2285,13 @@
 
   document.querySelectorAll('.ambient-type').forEach(b => {
     b.addEventListener('click', () => {
+      const isRadio = RADIO_STREAMS[b.dataset.ambient];
+      const isActive = b.classList.contains('active');
+      if (isActive) {
+        stopAmbient();
+        document.querySelectorAll('.ambient-type').forEach(x => x.classList.remove('active'));
+        return;
+      }
       document.querySelectorAll('.ambient-type').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
       startAmbient(b.dataset.ambient);
