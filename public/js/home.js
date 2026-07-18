@@ -223,8 +223,25 @@ window.pageInitHome = function () {
   const prayerLabels = { imsak: 'İmsak', gunes: 'Güneş', ogle: 'Öğle', ikindi: 'İkindi', aksam: 'Akşam', yatsi: 'Yatsı' };
   const prayerOrder = ['imsak', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'];
 
+  function populateCities() {
+    if (!dashNamazLocation) return;
+    const saved = localStorage.getItem('bs-namaz-city') || '9541';
+    fetch('/api/iller').then(r => r.json()).then(cities => {
+      dashNamazLocation.innerHTML = '';
+      cities.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name.charAt(0) + c.name.slice(1).toLowerCase();
+        if (String(c.id) === saved) opt.selected = true;
+        dashNamazLocation.appendChild(opt);
+      });
+    }).catch(() => {});
+  }
+  populateCities();
+
   function fetchNamaz() {
     const locId = dashNamazLocation ? dashNamazLocation.value : '9541';
+    if (dashNamazLocation) localStorage.setItem('bs-namaz-city', locId);
     fetch('/api/namaz?location_id=' + locId).then(r => r.json()).then(data => {
       if (!dashNamazTimes) return;
       if (!data || !data.data) { dashNamazTimes.innerHTML = '<span class="stock-loading-sm">Namaz vakitleri alınamadı</span>'; return; }

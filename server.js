@@ -230,6 +230,29 @@ app.get('/api/stock', (req, res) => {
   }).catch(() => res.status(502).json({ error: 'Fetch failed' }));
 });
 
+const TURKEY_CITIES = [
+  ["ADANA",9146],["ADIYAMAN",9158],["AFYONKARAHİSAR",9167],["AĞRI",9185],["AKSARAY",9193],
+  ["AMASYA",9198],["ANKARA",9206],["ANTALYA",9225],["ARDAHAN",9238],["ARTVİN",9246],
+  ["AYDIN",9252],["BALIKESİR",9270],["BARTIN",9285],["BATMAN",9288],["BAYBURT",9295],
+  ["BİLECİK",9297],["BİNGÖL",9303],["BİTLİS",9311],["BOLU",9315],["BURDUR",9327],
+  ["BURSA",9335],["ÇANAKKALE",9352],["ÇANKIRI",9359],["ÇORUM",9370],["DENİZLİ",9392],
+  ["DİYARBAKIR",9402],["DÜZCE",9414],["EDİRNE",9419],["ELAZIĞ",9432],["ERZİNCAN",9440],
+  ["ERZURUM",9451],["ESKİŞEHİR",9470],["GAZİANTEP",9479],["GİRESUN",9494],["GÜMÜŞHANE",9501],
+  ["HAKKARİ",9507],["HATAY",9515],["IĞDIR",9522],["ISPARTA",9528],["İSTANBUL",9541],
+  ["İZMİR",9560],["KAHRAMANMARAŞ",9577],["KARABÜK",9581],["KARAMAN",9587],["KARS",9594],
+  ["KASTAMONU",9609],["KAYSERİ",9620],["KIRIKKALE",9635],["KIRKLARELİ",9638],["KIRŞEHİR",9646],
+  ["KİLİS",9629],["KOCAELİ",9654],["KONYA",9676],["KÜTAHYA",9689],["MALATYA",9703],
+  ["MANİSA",9716],["MARDİN",9726],["MERSİN",9737],["MUĞLA",9747],["MUŞ",9755],
+  ["NEVŞEHİR",9760],["NİĞDE",9766],["ORDU",9782],["OSMANİYE",9788],["RİZE",9799],
+  ["SAKARYA",9807],["SAMSUN",9819],["SİİRT",9839],["SİNOP",9847],["SİVAS",9868],
+  ["ŞANLIURFA",9831],["ŞIRNAK",9854],["TEKİRDAĞ",9879],["TOKAT",9887],["TRABZON",9905],
+  ["TUNCELİ",9914],["UŞAK",9919],["VAN",9930],["YALOVA",9935],["YOZGAT",9949],["ZONGULDAK",9955]
+];
+
+app.get('/api/iller', (req, res) => {
+  res.json(TURKEY_CITIES.map(([name, id]) => ({ name, id })));
+});
+
 app.get('/api/namaz', (req, res) => {
   const locationId = req.query.location_id || 9541;
   const url = `https://prayertimes.api.abdus.dev/api/diyanet/prayertimes?location_id=${locationId}`;
