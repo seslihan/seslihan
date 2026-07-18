@@ -453,9 +453,6 @@
     if (cfg && cfg.init && typeof window[cfg.init] === 'function') {
       window[cfg.init]();
     }
-    if (cleanPath === '/' && window.twttr && window.twttr.widgets) {
-      setTimeout(function() { window.twttr.widgets.load(); }, 500);
-    }
   }
 
   window.spaNavigate = function (path, push) {

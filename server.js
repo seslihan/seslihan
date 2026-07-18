@@ -308,6 +308,61 @@ app.get('/api/tv-live/:channelId', (req, res) => {
   }
 });
 
+// ---------- TWITTER RSS FEED ----------
+app.get('/api/twitter/:handle', (req, res) => {
+  const handle = req.params.handle.replace(/^@/, '');
+  if (!handle || !/^[A-Za-z0-9_]{1,15}$/.test(handle)) return res.status(400).json({ items: [] });
+
+  const RSS_SOURCES = [
+    `https://nitter.net/${handle}/rss`,
+    `https://nitter.privacydev.net/${handle}/rss`,
+    `https://rsshub.app/twitter/user/${handle}`
+  ];
+
+  function trySource(idx) {
+    if (idx >= RSS_SOURCES.length) return res.json({ items: [], source: 'none' });
+    const url = RSS_SOURCES[idx];
+    const mod = url.startsWith('https://rsshub') ? https : (url.startsWith('https://nitter.net') ? https : https);
+    mod.get(url, { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Accept': 'application/rss+xml, application/xml, text/xml, */*' } }, (r) => {
+      if (r.statusCode === 301 || r.statusCode === 302) {
+        const loc = r.headers.location;
+        if (loc) {
+          https.get(loc, { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r2) => {
+            collectRSS(r2, url, res, () => trySource(idx + 1));
+          }).on('error', () => trySource(idx + 1)).on('timeout', function() { this.destroy(); trySource(idx + 1); });
+          return;
+        }
+      }
+      collectRSS(r, url, res, () => trySource(idx + 1));
+    }).on('error', () => trySource(idx + 1)).on('timeout', function() { this.destroy(); trySource(idx + 1); });
+  }
+
+  function collectRSS(response, sourceUrl, res, fallback) {
+    const chunks = [];
+    response.on('data', c => chunks.push(c));
+    response.on('end', () => {
+      if (response.statusCode >= 400) return fallback();
+      const data = Buffer.concat(chunks).toString('utf8');
+      const items = [];
+      const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+      let match;
+      while ((match = itemRegex.exec(data)) !== null && items.length < 8) {
+        const block = match[1];
+        const title = (block.match(/<title[^>]*>([\s\S]*?)<\/title>/) || [])[1] || '';
+        const link = (block.match(/<link[^>]*>([\s\S]*?)<\/link>/) || [])[1] || '';
+        const pubDate = (block.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/) || [])[1] || '';
+        const desc = (block.match(/<description[^>]*>([\s\S]*?)<\/description>/) || [])[1] || '';
+        const cleanDesc = desc.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#x27;/g, "'").replace(/&quot;/g, '"').trim();
+        items.push({ title: title.replace(/<!\[CDATA\[|\]\]>/g, '').trim(), link: link.trim(), pubDate, desc: cleanDesc.substring(0, 280) });
+      }
+      res.json({ items, source: sourceUrl.split('/')[2], handle });
+    });
+    response.on('error', fallback);
+  }
+
+  trySource(0);
+});
+
 function safeUploadId(id) {
   return /^[a-zA-Z0-9_-]{4,40}$/.test(String(id || ''));
 }

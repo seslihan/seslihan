@@ -91,19 +91,22 @@
 
         <div class="dash-card dash-x">
           <div class="dash-card-header">
-            <h2>X Canlı Akış</h2>
+            <h2>X'ten Son Haberler</h2>
             <span class="live-badge"><span class="live-dot"></span>LIVE</span>
           </div>
-          <div class="x-list">
-            <a class="twitter-timeline" data-height="320" data-theme="dark" data-chrome="nofooter noborders transparent" data-tweet-limit="4" data-width="300" href="https://x.com/anadoluajansi">AA</a>
+          <div class="x-tabs" id="xTabs">
+            <button class="x-tab active" data-handle="anadoluajansi">AA</button>
+            <button class="x-tab" data-handle="CNNTurk">CNN</button>
+            <button class="x-tab" data-handle="trthaber">TRT</button>
+          </div>
+          <div id="xFeed" class="x-feed">
+            <div class="x-loading">Yükleniyor...</div>
           </div>
         </div>
       </div>
 
     </div>
   </main>
-
-  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
   <div class="name-gate-overlay" id="nameGateOverlay" hidden>
     <div class="name-gate-modal">

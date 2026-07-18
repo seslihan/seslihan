@@ -4759,9 +4759,84 @@ input[type="range"]::-moz-range-thumb {
 }
 .dash-x::-webkit-scrollbar { width: 4px; }
 .dash-x::-webkit-scrollbar-thumb { background: var(--line-2); }
-.x-list {
-  min-height: 100px;
+
+.x-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 8px;
+  border-bottom: 2px solid var(--line);
+}
+.x-tab {
+  flex: 1;
+  padding: 6px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.x-tab:hover { color: var(--text); }
+.x-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.x-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+.x-feed::-webkit-scrollbar { width: 4px; }
+.x-feed::-webkit-scrollbar-thumb { background: var(--line-2); }
+
+.x-loading {
+  font-family: var(--font);
+  font-size: 8px;
+  color: var(--muted);
+  text-align: center;
+  padding: 20px;
+}
+
+.x-tweet {
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s;
   overflow: hidden;
+  min-height: 50px;
+}
+.x-tweet:hover { border-color: var(--accent); }
+.x-tweet-text {
+  font-size: 9px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.x-tweet-time {
+  font-size: 7px;
+  color: var(--muted);
+  font-family: var(--font);
+}
+.x-tweet-empty {
+  font-family: var(--font);
+  font-size: 8px;
+  color: var(--muted);
+  text-align: center;
+  padding: 20px;
 }
 
 /* News tabs */
@@ -4896,8 +4971,7 @@ input[type="range"]::-moz-range-thumb {
   .home-dashboard { padding: 16px 16px 50px; }
   .dash-features { grid-template-columns: repeat(2, 1fr); }
   .dash-news-row { flex-direction: column; }
-  .dash-x { max-width: none; flex: none; max-height: 350px; }
-}
+  .dash-x { max-width: none; flex: none; max-height: 350px; }}
 
 /* Mobile */
 @media (max-width: 700px) {
@@ -4907,7 +4981,6 @@ input[type="range"]::-moz-range-thumb {
   .feat-card { flex: 0 0 calc(50% - 4px); }
   .dash-hero .action-row { flex-direction: column; }
   .news-grid { grid-template-columns: 1fr; }
-  .x-list { max-height: 300px; }
   .dash-meetings { max-height: 150px; }
 }
 

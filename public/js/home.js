@@ -216,7 +216,63 @@ window.pageInitHome = function () {
   fetchStock();
   _homeInterval = setInterval(fetchStock, 15000);
 
-  setTimeout(() => {
-    if (window.twttr && window.twttr.widgets) window.twttr.widgets.load();
-  }, 2000);
+  // X/Twitter RSS Feed
+  let currentXHandle = 'anadoluajansi';
+  const xFeed = document.getElementById('xFeed');
+  const xTabs = document.querySelectorAll('.x-tab');
+
+  function fetchXFeed(handle) {
+    currentXHandle = handle;
+    if (xFeed) xFeed.innerHTML = '<div class="x-loading">Yükleniyor...</div>';
+    fetch('/api/twitter/' + handle)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.items || data.items.length === 0) {
+          if (xFeed) xFeed.innerHTML = '<div class="x-tweet-empty">Gönderi bulunamadı</div>';
+          return;
+        }
+        if (!xFeed) return;
+        xFeed.innerHTML = '';
+        data.items.forEach(item => {
+          const card = document.createElement('a');
+          card.className = 'x-tweet';
+          card.href = item.link;
+          card.target = '_blank';
+          card.rel = 'noopener';
+          let timeStr = '';
+          if (item.pubDate) {
+            try {
+              const d = new Date(item.pubDate);
+              if (!isNaN(d.getTime())) {
+                const now = new Date();
+                const diffMin = Math.floor((now - d) / 60000);
+                if (diffMin < 60) timeStr = diffMin + ' dk';
+                else if (diffMin < 1440) timeStr = Math.floor(diffMin / 60) + ' saat';
+                else timeStr = d.toLocaleDateString('tr-TR');
+              }
+            } catch (e) {}
+          }
+          const text = item.desc || item.title || '';
+          let html = '';
+          if (text) html += '<div class="x-tweet-text">' + escapeHtml(text.substring(0, 280)) + '</div>';
+          if (timeStr) html += '<div class="x-tweet-time">@' + escapeHtml(handle) + ' · ' + timeStr + '</div>';
+          card.innerHTML = html;
+          xFeed.appendChild(card);
+        });
+      })
+      .catch(() => {
+        if (xFeed) xFeed.innerHTML = '<div class="x-tweet-empty">Bağlantı hatası</div>';
+      });
+  }
+
+  if (xTabs) {
+    xTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        xTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        fetchXFeed(tab.dataset.handle);
+      });
+    });
+  }
+  fetchXFeed('anadoluajansi');
 };
