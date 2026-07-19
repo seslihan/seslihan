@@ -550,7 +550,7 @@ io.on('connection', (socket) => {
     cb && cb({ code });
   });
 
-  socket.on('join-room', ({ roomCode: code, name, mic, cam, asGuest, requestedAt }, cb) => {
+  socket.on('join-room', ({ roomCode: code, name, mic, cam, asGuest, requestedAt, avatar }, cb) => {
     if (!code || !name) return cb && cb({ error: 'Eksik bilgi' });
     code = String(code).toUpperCase().trim();
     const room = getRoom(code);
@@ -579,7 +579,8 @@ io.on('connection', (socket) => {
       name: String(name).slice(0, 24) || 'Misafir',
       mic: mic !== false,
       cam: cam === true,
-      isGuest: !!asGuest
+      isGuest: !!asGuest,
+      avatar: String(avatar || '').slice(0, 20)
     };
     isHost = room.size === 0;
 

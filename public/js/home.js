@@ -25,6 +25,7 @@ window.pageInitHome = function () {
       nameGateResolve = resolve;
       nameInput.value = getUserName();
       nameOverlay.hidden = false;
+      renderAvatarPicker('avatarGrid');
       setTimeout(() => nameInput.focus(), 50);
     });
   }

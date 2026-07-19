@@ -5589,3 +5589,68 @@ input[type="range"]::-moz-range-thumb {
 .global-radio-stop:hover {
   opacity: 1;
 }
+
+/* === AVATAR PICKER === */
+.avatar-picker {
+  margin: 8px 0;
+}
+.avatar-picker-label {
+  display: block;
+  font-family: var(--font);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.avatar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.avatar-option {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  padding: 0;
+  position: relative;
+}
+.avatar-option:hover {
+  transform: scale(1.12);
+  border-color: var(--accent);
+}
+.avatar-option.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: scale(1.15);
+}
+.avatar-option.selected::after {
+  content: '✓';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 8px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.avatar-emoji {
+  font-size: 24px;
+  line-height: 1;
+}
+.placeholder .avatar .avatar-emoji {
+  font-size: 48px;
+}

@@ -47,6 +47,21 @@
   if (settings.noiseReduction === false) noiseToggle.classList.remove('on');
 
   nameInput.value = name || localStorage.getItem('bs-name') || getUser()?.name || '';
+  renderAvatarPicker('prejoinAvatarGrid', updatePreviewAvatar);
+
+  function updatePreviewAvatar() {
+    const avatarEl = previewPlaceholder ? previewPlaceholder.querySelector('.avatar') : null;
+    if (!avatarEl) return;
+    const av = getAvatar();
+    if (av) {
+      avatarEl.innerHTML = '<span class="avatar-emoji">' + av.emoji + '</span>';
+      avatarEl.style.background = av.bg;
+    } else {
+      avatarEl.textContent = (nameInput.value || '?').charAt(0).toUpperCase();
+      avatarEl.style.background = '';
+    }
+  }
+  updatePreviewAvatar();
 
   async function applyBlur(track) {
     if (!window.BrowserSupporter || !track) return;
@@ -180,7 +195,16 @@
     if (previewPlaceholder) {
       previewPlaceholder.style.display = (!hasVideo || !state.stream.getVideoTracks()[0].enabled) ? 'flex' : 'none';
       var avatarEl = previewPlaceholder.querySelector('.avatar');
-      if (avatarEl) avatarEl.textContent = (nameInput.value || '?').charAt(0).toUpperCase();
+      if (avatarEl) {
+        var av = getAvatar();
+        if (av) {
+          avatarEl.innerHTML = '<span class="avatar-emoji">' + av.emoji + '</span>';
+          avatarEl.style.background = av.bg;
+        } else {
+          avatarEl.textContent = (nameInput.value || '?').charAt(0).toUpperCase();
+          avatarEl.style.background = '';
+        }
+      }
     }
     updateJoinButton();
   }
@@ -545,6 +569,7 @@
   nameInput.addEventListener('input', () => {
     nameError.textContent = '';
     nameInput.classList.remove('error');
+    updatePreviewAvatar();
   });
 
   startMedia();

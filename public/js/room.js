@@ -190,7 +190,7 @@
   }
 
   // ---------- TILES ----------
-  function addVideoTile(uid, uname, isLocal) {
+  function addVideoTile(uid, uname, isLocal, avatarId) {
     if (document.getElementById('tile-' + uid)) return;
     const tile = document.createElement('div');
     tile.className = 'tile';
@@ -205,9 +205,12 @@
     video.playsInline = true;
     if (isLocal) video.muted = true;
 
+    const avatarData = avatarId ? AVATARS.find(a => a.id === avatarId) : null;
+    const avatarContent = avatarData ? '<span class="avatar-emoji">' + avatarData.emoji + '</span>' : escapeHtml((uname || '?').charAt(0).toUpperCase());
+    const avatarBg = avatarData ? ' style="background:' + avatarData.bg + '"' : '';
     const placeholder = document.createElement('div');
     placeholder.className = 'placeholder';
-    placeholder.innerHTML = '<div class="avatar">' + escapeHtml((uname || '?').charAt(0).toUpperCase()) + '</div><span class="cam-off-label">📷 Kapalı</span>';
+    placeholder.innerHTML = '<div class="avatar"' + avatarBg + '>' + avatarContent + '</div><span class="cam-off-label">📷 Kapalı</span>';
 
     const overlay = document.createElement('div');
     overlay.className = 'tile-overlay';
@@ -366,7 +369,7 @@
       joinGateSkipBtn.onclick = joinWithoutMic;
     }, 25000);
 
-    socket.emit('join-room', { roomCode: code, name, mic: state.micOn, cam: state.camOn, asGuest: !getUser() }, (res) => {
+    socket.emit('join-room', { roomCode: code, name, mic: state.micOn, cam: state.camOn, asGuest: !getUser(), avatar: getAvatarId() }, (res) => {
       clearTimeout(initTimeout);
       if (!res || !res.ok) {
         if (res && res.wait) {
@@ -385,7 +388,7 @@
       state.hostSettings = res.settings || state.hostSettings;
       $('roomCodeLabel').textContent = res.roomCode;
       $('userCount').textContent = res.peers.length + 1;
-      addVideoTile(state.you.id, state.you.name, true);
+      addVideoTile(state.you.id, state.you.name, true, getAvatarId());
       setRole(state.you.id, state.isHost);
       attachStreamToTile(state.you.id, state.localStream);
       updateMicButton();
@@ -413,7 +416,7 @@
     if (state.peers.has(peer.id)) return;
     const pc = new RTCPeerConnection(ICE_CONFIG);
     const polite = state.you.id > peer.id;
-    const peerState = { id: peer.id, name: peer.name, pc, polite, makingOffer: false, ignoreOffer: false, isHost: false, mic: peer.mic, cam: peer.cam, hand: false };
+    const peerState = { id: peer.id, name: peer.name, pc, polite, makingOffer: false, ignoreOffer: false, isHost: false, mic: peer.mic, cam: peer.cam, hand: false, avatar: peer.avatar || '' };
 
     if (state.localStream) {
       state.localStream.getTracks().forEach(t => {
@@ -481,7 +484,7 @@
     };
 
     state.peers.set(peer.id, peerState);
-    addVideoTile(peer.id, peer.name, false);
+    addVideoTile(peer.id, peer.name, false, peer.avatar);
     setIndicator(peer.id, peer.mic !== false);
     const camOn = peer.cam === true;
     const tile = document.getElementById('tile-' + peer.id);
@@ -1876,6 +1879,7 @@
     joinGateText.textContent = 'Toplantıya katılmak için adınızı girin';
     nameGate.hidden = false;
     nameGateInput.value = localStorage.getItem('bs-name') || '';
+    renderAvatarPicker('roomAvatarGrid');
     setTimeout(() => nameGateInput.focus(), 100);
     nameGateBtn.addEventListener('click', () => {
       const n = nameGateInput.value.trim();

@@ -48,6 +48,64 @@
   window.setUser = function (u) { localStorage.setItem(userKey, JSON.stringify(u)); };
   window.signOut = function () { localStorage.removeItem(userKey); };
 
+  // ---------- AVATARS (8-bit pixel art) ----------
+  const AVATARS = [
+    { id: 'robot',  emoji: '🤖', bg: '#2d5a27', label: 'Robot' },
+    { id: 'ninja',  emoji: '🥷', bg: '#1a1a2e', label: 'Ninja' },
+    { id: 'astronaut', emoji: '🧑‍🚀', bg: '#1a1a3e', label: 'Kozmonot' },
+    { id: 'knight', emoji: '⚔️', bg: '#5c3d2e', label: 'Şövalye' },
+    { id: 'wizard', emoji: '🧙', bg: '#3b1f6e', label: 'Büyücü' },
+    { id: 'pirate', emoji: '🏴‍☠️', bg: '#2e1a0e', label: 'Korsan' },
+    { id: 'alien',  emoji: '👽', bg: '#1a3e1a', label: 'Uzaylı' },
+    { id: 'ghost',  emoji: '👻', bg: '#3e3e3e', label: 'Hayalet' },
+    { id: 'cat',    emoji: '🐱', bg: '#5a3d0a', label: 'Kedi' },
+    { id: 'dog',    emoji: '🐶', bg: '#5a3d0a', label: 'Köpek' },
+    { id: 'penguin', emoji: '🐧', bg: '#0a2a4a', label: 'Penguen' },
+    { id: 'fox',    emoji: '🦊', bg: '#6e3a1a', label: 'Tilki' },
+    { id: 'lion',   emoji: '🦁', bg: '#6e4a0a', label: 'Aslan' },
+    { id: 'bear',   emoji: '🐻', bg: '#4a2a0a', label: 'Ayı' },
+    { id: 'dragon', emoji: '🐉', bg: '#1a2e3e', label: 'Ejderha' },
+    { id: 'skull',  emoji: '💀', bg: '#2e2e2e', label: 'Kuru kafa' },
+    { id: 'crown',  emoji: '👑', bg: '#4a3a0a', label: 'Kral' },
+    { id: 'fire',   emoji: '🔥', bg: '#4a1a0a', label: 'Ateş' },
+    { id: 'star',   emoji: '⭐', bg: '#3a3a0a', label: 'Yıldız' },
+    { id: 'ghost2', emoji: '🎃', bg: '#4a2a0a', label: 'Bal kabağı' }
+  ];
+  window.AVATARS = AVATARS;
+
+  window.getAvatarId = function () {
+    return localStorage.getItem('bs-avatar') || '';
+  };
+  window.getAvatar = function () {
+    const id = getAvatarId();
+    return AVATARS.find(a => a.id === id) || null;
+  };
+  window.saveAvatar = function (id) {
+    localStorage.setItem('bs-avatar', id);
+  };
+
+  window.renderAvatarPicker = function (containerId, onSelect) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const current = getAvatarId();
+    container.innerHTML = '';
+    AVATARS.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = 'avatar-option' + (a.id === current ? ' selected' : '');
+      btn.type = 'button';
+      btn.title = a.label;
+      btn.innerHTML = '<span class="avatar-emoji">' + a.emoji + '</span>';
+      btn.style.background = a.bg;
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        saveAvatar(a.id);
+        if (onSelect) onSelect(a);
+      });
+      container.appendChild(btn);
+    });
+  };
+
   // ---------- MEETINGS (localStorage) ----------
   const meetingsKey = 'bs-meetings';
   window.getMeetings = function () {
