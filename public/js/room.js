@@ -207,7 +207,7 @@
 
     const placeholder = document.createElement('div');
     placeholder.className = 'placeholder';
-    placeholder.innerHTML = '<div class="avatar">' + escapeHtml((uname || '?').charAt(0).toUpperCase()) + '</div>';
+    placeholder.innerHTML = '<div class="avatar">' + escapeHtml((uname || '?').charAt(0).toUpperCase()) + '</div><span class="cam-off-label">📷 Kapalı</span>';
 
     const overlay = document.createElement('div');
     overlay.className = 'tile-overlay';
