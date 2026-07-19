@@ -410,7 +410,7 @@ app.get('/api/justwatch', async (req, res) => {
     return res.json(justwatchCache.data);
   }
 
-  const query = `{ popularTitles(country: TR, first: 40, filter: {objectTypes: [${type}]}) { edges { node { id objectType content(country: TR, language: tr) { title originalReleaseYear shortDescription scoring { imdbScore } posterUrl(profile: S500) } offers(country: TR, platform: WEB) { monetizationType package { clearName technicalName } } } } } }`;
+  const query = `{ popularTitles(country: TR, first: 40, filter: {objectTypes: [${type}]}) { edges { node { id objectType content(country: TR, language: tr) { title originalReleaseYear shortDescription scoring { imdbScore } posterUrl } offers(country: TR, platform: WEB) { monetizationType package { clearName technicalName } } } } } }`;
 
   try {
     const body = JSON.stringify({ query });
@@ -442,12 +442,16 @@ app.get('/api/justwatch', async (req, res) => {
       const free = (n.offers || []).find(o => o.monetizationType === 'FREE' || o.monetizationType === 'ADS');
       const flatrate = (n.offers || []).filter(o => o.monetizationType === 'FLATRATE' || o.monetizationType === 'FLATRATE');
       const platforms = [...new Set(flatrate.map(o => o.package.clearName))];
+      let poster = '';
+      if (n.content.posterUrl) {
+        poster = 'https://images.justwatch.com' + n.content.posterUrl.replace('{profile}', 's718').replace('{format}', 'webp');
+      }
       return {
         id: n.id,
         title: n.content.title,
         year: n.content.originalReleaseYear,
         description: n.content.shortDescription || '',
-        poster: n.content.posterUrl || '',
+        poster,
         imdb: n.content.scoring ? n.content.scoring.imdbScore : null,
         free: free ? free.package.clearName : null,
         platforms,
