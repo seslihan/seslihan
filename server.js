@@ -402,8 +402,8 @@ app.get('/api/tv-live/:channelId', (req, res) => {
 
 // ---------- IPTV M3U PROXY ----------
 const IPTV_PLAYLISTS = [
-  { name: 'Türkiye TV', url: 'https://raw.githubusercontent.com/AhmadAlsaworw/iptv/main/tr.m3u' },
-  { name: 'Film & Dizi', url: 'https://raw.githubusercontent.com/AhmadAlsaworw/iptv/main/movie.m3u' }
+  { name: 'Türkiye TV', url: 'https://iptv-org.github.io/iptv/streams/tr.m3u' },
+  { name: 'Türkiye Kanalları', url: 'https://itasli.github.io/TURKTV/index.m3u' }
 ];
 
 const m3uCache = new Map();
@@ -414,8 +414,14 @@ function parseM3U(text) {
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith('#EXTINF:')) {
       const info = lines[i];
-      const url = lines[i + 1];
-      if (url && !url.startsWith('#')) {
+      let url = '';
+      for (let j = i + 1; j < lines.length; j++) {
+        if (lines[j] && !lines[j].startsWith('#')) {
+          url = lines[j];
+          break;
+        }
+      }
+      if (url) {
         const nameMatch = info.match(/,(.+)$/);
         const logoMatch = info.match(/tvg-logo="([^"]*)"/);
         const groupMatch = info.match(/group-title="([^"]*)"/);
