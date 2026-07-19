@@ -63,11 +63,13 @@ app.get('/api/config', (req, res) => {
 });
 
 const RADIO_WHITELIST = [
-  'radyotvonline.com', 'streamtheworld.com', 'radyositesihazir.com',
+  'radyotvonline.com', 'radyotvonline.net', 'streamtheworld.com', 'radyositesihazir.com',
   'powerapp.com.tr', 'listenpowerapp.com', 'powergroup.com.tr',
   'icecast', 'cdnvideo.ru', 'radyohizmeti.com',
   'channels.dinamo.fm', 'radyofenomen.com', 'radyono.com',
-  'liderhost.com.tr', 'anadolu.liderhost.com.tr'
+  'liderhost.com.tr', 'anadolu.liderhost.com.tr',
+  'radyomoda.com.tr', 'radiolight.net', 'seyrdijital.com',
+  '46.20.3.250', '46.20.3.231', '46.20.3.230', '37.247.98.8'
 ];
 
 app.get('/api/radio-proxy', (req, res) => {
@@ -76,6 +78,7 @@ app.get('/api/radio-proxy', (req, res) => {
   let parsed;
   try { parsed = new URL(url); } catch { return res.status(400).send('Invalid URL'); }
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return res.status(400).send('Bad protocol');
+  if (!RADIO_WHITELIST.some(d => parsed.hostname.includes(d))) return res.status(403).send('Domain not allowed');
 
   const fetchMod = parsed.protocol === 'https:' ? https : http;
   const proxyReq = fetchMod.get(url, { timeout: 8000 }, (proxyRes) => {
@@ -515,15 +518,15 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   res.json({ url: '/uploads/' + req.file.filename, name: req.file.originalname, size: req.file.size, mimetype: req.file.mimetype });
 });
 
+const rooms = new Map();
+const roomMeta = new Map();
+
 app.get('/api/room/:code', (req, res) => {
   const code = String(req.params.code || '').toUpperCase();
   const room = rooms.get(code);
   if (!room) return res.status(404).json({ exists: false });
   res.json({ exists: true, users: room.size, max: MAX_USERS_PER_ROOM, full: room.size >= MAX_USERS_PER_ROOM });
 });
-
-const rooms = new Map();
-const roomMeta = new Map();
 
 function getRoom(code) {
   if (!rooms.has(code)) rooms.set(code, new Map());

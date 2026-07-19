@@ -134,7 +134,7 @@
       });
 
       icsBtn.addEventListener('click', () => {
-        const code = (form._meeting && form._meeting.code) || 'XXXXX';
+        const code = (form._meeting && form._meeting.code) || form._code || 'XXXXX';
         const date = $('mDate').value;
         const time = $('mTime').value;
         if (!date || !time) { toast('Tarih ve saat girin', 'error'); return; }
