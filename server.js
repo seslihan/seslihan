@@ -402,7 +402,7 @@ app.get('/api/tv-live/:channelId', (req, res) => {
 
 // ---------- IPTV M3U PROXY ----------
 const IPTV_PLAYLISTS = [
-  { name: 'Türkiye TV', url: 'https://iptv-org.github.io/iptv/streams/tr.m3u' },
+  { name: 'Türkiye TV', url: 'https://raw.githubusercontent.com/iptv-org/iptv/master/streams/tr.m3u' },
   { name: 'Türkiye Kanalları', url: 'https://itasli.github.io/TURKTV/index.m3u' }
 ];
 
