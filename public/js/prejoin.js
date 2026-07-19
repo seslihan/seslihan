@@ -298,6 +298,10 @@
     document.getElementById('expandableSettings').classList.toggle('open');
   });
 
+  document.getElementById('avatarExpandBtn').addEventListener('click', () => {
+    document.getElementById('avatarExpandBtn').closest('.expandable-settings').classList.toggle('open');
+  });
+
   startMicOff.addEventListener('click', () => {
     startMicOff.classList.toggle('on');
     state.micOn = !startMicOff.classList.contains('on');
