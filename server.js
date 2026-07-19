@@ -400,6 +400,63 @@ app.get('/api/tv-live/:channelId', (req, res) => {
   }
 });
 
+// ---------- JUSTWATCH ----------
+const justwatchCache = { data: null, time: 0 };
+
+app.get('/api/justwatch', async (req, res) => {
+  const type = req.query.type === 'series' ? 'SHOW' : 'MOVIE';
+  const cacheKey = type;
+  if (justwatchCache.data && justwatchCache.cacheKey === cacheKey && Date.now() - justwatchCache.time < 600000) {
+    return res.json(justwatchCache.data);
+  }
+
+  const query = `{ popularTitles(country: TR, first: 40, filter: {objectTypes: [${type}]}) { edges { node { id objectType content(country: TR, language: tr) { title originalReleaseYear shortDescription scoring { imdbScore } posterUrl(profile: S500) } offers(country: TR, platform: WEB) { monetizationType package { clearName technicalName } } } } } }`;
+
+  try {
+    const data = await new Promise((resolve, reject) => {
+      https.post('https://apis.justwatch.com/graphql', JSON.stringify({ query }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        },
+        timeout: 15000
+      }, (r) => {
+        const chunks = [];
+        r.on('data', c => chunks.push(c));
+        r.on('end', () => {
+          try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))); }
+          catch (e) { reject(e); }
+        });
+      }).on('error', reject).on('timeout', function() { this.destroy(); reject(new Error('timeout')); });
+    });
+
+    const items = (data.data && data.data.popularTitles && data.data.popularTitles.edges || []).map(e => {
+      const n = e.node;
+      const free = (n.offers || []).find(o => o.monetizationType === 'FREE' || o.monetizationType === 'ADS');
+      const flatrate = (n.offers || []).filter(o => o.monetizationType === 'FLATRATE' || o.monetizationType === 'FLATRATE');
+      const platforms = [...new Set(flatrate.map(o => o.package.clearName))];
+      return {
+        id: n.id,
+        title: n.content.title,
+        year: n.content.originalReleaseYear,
+        description: n.content.shortDescription || '',
+        poster: n.content.posterUrl || '',
+        imdb: n.content.scoring ? n.content.scoring.imdbScore : null,
+        free: free ? free.package.clearName : null,
+        platforms,
+        type: n.objectType
+      };
+    });
+
+    justwatchCache.data = { items, type: type === 'SHOW' ? 'series' : 'movies' };
+    justwatchCache.time = Date.now();
+    justwatchCache.cacheKey = cacheKey;
+    res.json(justwatchCache.data);
+  } catch (e) {
+    res.status(502).json({ error: 'JustWatch alınamadı' });
+  }
+});
+
 // ---------- IPTV M3U PROXY ----------
 const IPTV_PLAYLISTS = [
   { name: 'Türkiye TV', url: 'https://raw.githubusercontent.com/iptv-org/iptv/master/streams/tr.m3u' },

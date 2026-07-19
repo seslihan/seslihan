@@ -37,6 +37,7 @@ window.pageInitTV = function () {
 
   let currentTab = 'live';
   let iptvItems = [];
+  let jwCache = {};
   let hlsInstance = null;
 
   const grid = document.getElementById('tvGrid');
@@ -76,6 +77,8 @@ window.pageInitTV = function () {
 
     if (tab === 'iptv') {
       loadIPTV();
+    } else if (tab === 'justwatch' || tab === 'jw-series') {
+      loadJustWatch(tab === 'jw-series' ? 'series' : 'movies');
     } else {
       const list = channels[tab] || [];
       const q = (searchInput.value || '').toLowerCase();
@@ -103,6 +106,58 @@ window.pageInitTV = function () {
       loading.hidden = true;
       grid.innerHTML = '<div class="tv-empty">IPTV listesi yüklenemedi</div>';
     });
+  }
+
+  function loadJustWatch(type) {
+    if (jwCache[type]) {
+      renderJW(jwCache[type]);
+      return;
+    }
+    loading.hidden = false;
+    grid.innerHTML = '';
+    fetch('/api/justwatch?type=' + type)
+      .then(r => r.json())
+      .then(data => {
+        loading.hidden = true;
+        jwCache[type] = data.items || [];
+        renderJW(jwCache[type]);
+      })
+      .catch(() => {
+        loading.hidden = true;
+        grid.innerHTML = '<div class="tv-empty">JustWatch yüklenemedi</div>';
+      });
+  }
+
+  function renderJW(items) {
+    grid.innerHTML = '';
+    const q = (searchInput.value || '').toLowerCase();
+    const filtered = q ? items.filter(i => i.title.toLowerCase().includes(q)) : items;
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div class="tv-empty">Sonuç bulunamadı</div>';
+      return;
+    }
+    filtered.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'tv-card jw-card';
+      const poster = item.poster ? '<img class="jw-poster" src="' + escapeHtml(item.poster) + '" loading="lazy" onerror="this.parentElement.removeChild(this)" />' : '<div class="jw-poster-placeholder">🎬</div>';
+      const imdb = item.imdb ? '<div class="jw-imdb">⭐ ' + item.imdb + '</div>' : '';
+      const year = item.year ? '<div class="jw-year">' + item.year + '</div>' : '';
+      const platforms = item.platforms.length > 0 ? '<div class="jw-platforms">' + item.platforms.slice(0, 3).map(p => '<span class="jw-platform-tag">' + escapeHtml(p) + '</span>').join('') + '</div>' : (item.free ? '<div class="jw-platforms"><span class="jw-platform-tag jw-free">✓ ' + escapeHtml(item.free) + '</span></div>' : '');
+      card.innerHTML = poster + '<div class="jw-info"><div class="jw-title">' + escapeHtml(item.title) + '</div>' + year + imdb + platforms + '</div>';
+      card.addEventListener('click', () => showJWDetail(item));
+      grid.appendChild(card);
+    });
+  }
+
+  function showJWDetail(item) {
+    player.hidden = false;
+    channelName.textContent = item.title + (item.year ? ' (' + item.year + ')' : '');
+    const poster = item.poster ? '<img src="' + escapeHtml(item.poster) + '" style="max-width:200px;border-radius:8px;float:left;margin-right:16px;margin-bottom:8px" />' : '';
+    const imdb = item.imdb ? '<div style="margin:8px 0"><b>IMDB:</b> ⭐ ' + item.imdb + '/10</div>' : '';
+    const desc = item.description ? '<div style="margin:8px 0;color:var(--muted,#888);font-size:13px;line-height:1.5;clear:both">' + escapeHtml(item.description) + '</div>' : '';
+    const freeTag = item.free ? '<div style="margin:4px 0"><span class="jw-platform-tag jw-free" style="font-size:13px">✓ Ücretsiz: ' + escapeHtml(item.free) + '</span></div>' : '';
+    const platTags = item.platforms.length > 0 ? '<div style="margin:8px 0"><b>İzlenebilir:</b><div class="jw-platforms" style="margin-top:4px">' + item.platforms.map(p => '<span class="jw-platform-tag">' + escapeHtml(p) + '</span>').join('') + '</div></div>' : '';
+    container.innerHTML = '<div class="jw-detail">' + poster + imdb + desc + freeTag + platTags + '<div style="clear:both"></div></div>';
   }
 
   function playChannel(ch) {
