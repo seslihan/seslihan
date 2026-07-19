@@ -426,6 +426,13 @@
       console.log('[WEBRTC] Received ' + ev.track.kind + ' track from ' + peer.name);
       let stream = peerState.remoteStream;
       if (!stream) { stream = new MediaStream(); peerState.remoteStream = stream; }
+      if (ev.track.kind === 'video') {
+        const oldTracks = stream.getVideoTracks();
+        oldTracks.forEach(t => { stream.removeTrack(t); t.stop(); });
+      } else if (ev.track.kind === 'audio') {
+        const oldTracks = stream.getAudioTracks();
+        oldTracks.forEach(t => { stream.removeTrack(t); t.stop(); });
+      }
       stream.addTrack(ev.track);
       attachStreamToTile(peer.id, stream);
       if (ev.track.kind === 'audio') setupRemoteAudioMeter(peer.id, stream);
@@ -447,11 +454,13 @@
     };
 
     pc.onnegotiationneeded = async () => {
+      if (peerState.makingOffer) return;
       try {
         peerState.makingOffer = true;
+        if (pc.signalingState !== 'stable') return;
         await pc.setLocalDescription(await pc.createOffer());
         socket.emit('signal', { to: peer.id, from: state.you.id, data: { type: 'offer', sdp: pc.localDescription } });
-      } catch (e) { console.error(e); } finally { peerState.makingOffer = false; }
+      } catch (e) { console.error('[WEBRTC] negotiation error:', e); } finally { peerState.makingOffer = false; }
     };
 
     pc.oniceconnectionstatechange = () => {
@@ -573,7 +582,11 @@
       if (data.type === 'offer') {
         const offerCollision = peer.makingOffer || peer.pc.signalingState !== 'stable';
         peer.ignoreOffer = !peer.polite && offerCollision;
-        if (peer.ignoreOffer) return;
+        if (peer.ignoreOffer) {
+          if (peer.polite) {
+            await peer.pc.setLocalDescription({ type: 'rollback' });
+          } else return;
+        }
         await peer.pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
         await peer.pc.setLocalDescription(await peer.pc.createAnswer());
         socket.emit('signal', { to: from, from: state.you.id, data: { type: 'answer', sdp: peer.pc.localDescription } });
@@ -582,6 +595,7 @@
           await peer.pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
         }
       } else if (data.type === 'ice') {
+        if (peer.pc.signalingState === 'closed') return;
         try { await peer.pc.addIceCandidate(new RTCIceCandidate(data.candidate)); }
         catch (e) { if (!peer.ignoreOffer) console.warn(e); }
       }
@@ -931,27 +945,44 @@
   $('toggleScreen').addEventListener('click', async () => {
     if (state.screenSharing) { stopScreenShare(); return; }
     try {
+      const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
       const ss = await navigator.mediaDevices.getDisplayMedia({
         video: {
-          cursor: 'always',
+          cursor: isFirefox ? 'motion' : 'always',
           width: { ideal: 1920 },
           height: { ideal: 1080 },
-          frameRate: { ideal: 30 }
+          frameRate: isFirefox ? { max: 30 } : { ideal: 30 }
         },
-        audio: true
+        audio: !isFirefox
       });
       const track = ss.getVideoTracks()[0];
       const screenAudioTracks = ss.getAudioTracks();
       state.screenStream = ss;
       state.screenSharing = true;
+
+      const renegotiate = async (p) => {
+        try {
+          if (p.pc.signalingState === 'stable') {
+            await p.pc.setLocalDescription(await p.pc.createOffer());
+            socket.emit('signal', { to: p.id, from: state.you.id, data: { type: 'offer', sdp: p.pc.localDescription } });
+          }
+        } catch (e) { console.warn('[SCREEN] renegotiation failed:', e); }
+      };
+
       state.peers.forEach(p => {
         const vSender = p.pc.getSenders().find(s => s.track && s.track.kind === 'video');
-        if (vSender) vSender.replaceTrack(track);
-        else { try { p.pc.addTrack(track, state.localStream); } catch (_) {} }
-        screenAudioTracks.forEach(sa => {
-          const aExists = p.pc.getSenders().some(s => s.track && s.track.kind === 'audio' && s.track !== state.localStream.getAudioTracks()[0]);
-          if (!aExists) { try { p.pc.addTrack(sa, state.localStream); } catch (_) {} }
-        });
+        if (vSender) {
+          vSender.replaceTrack(track).then(() => renegotiate(p)).catch(() => renegotiate(p));
+        } else {
+          try { p.pc.addTrack(track, state.localStream); } catch (_) {}
+          renegotiate(p);
+        }
+        if (!isFirefox) {
+          screenAudioTracks.forEach(sa => {
+            const aExists = p.pc.getSenders().some(s => s.track && s.track.kind === 'audio' && s.track !== state.localStream.getAudioTracks()[0]);
+            if (!aExists) { try { p.pc.addTrack(sa, state.localStream); } catch (_) {} }
+          });
+        }
       });
       $('presentVideo').srcObject = ss;
       $('presentStage').hidden = false;
@@ -972,8 +1003,6 @@
 
   $('stopScreenBtn').addEventListener('click', () => stopScreenShare());
 
-  $('stopScreenBtn').addEventListener('click', () => stopScreenShare());
-
   function stopScreenShare() {
     if (!state.screenStream) return;
     const screenAudioTracks = state.screenStream.getAudioTracks();
@@ -982,10 +1011,26 @@
     state.screenSharing = false;
     const camTrack = state.localStream && state.localStream.getVideoTracks()[0];
     if (camTrack) {
-      state.peers.forEach(p => { const s = p.pc.getSenders().find(s => s.track && s.track.kind === 'video'); if (s) s.replaceTrack(camTrack); });
+      state.peers.forEach(p => {
+        const s = p.pc.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (s) {
+          s.replaceTrack(camTrack).then(() => {
+            try {
+              if (p.pc.signalingState === 'stable') {
+                p.pc.setLocalDescription(p.pc.createOffer()).then(() => {
+                  socket.emit('signal', { to: p.id, from: state.you.id, data: { type: 'offer', sdp: p.pc.localDescription } });
+                });
+              }
+            } catch (_) {}
+          }).catch(() => {});
+        }
+      });
       attachStreamToTile(state.you.id, state.localStream);
     } else {
-      state.peers.forEach(p => { const ss = p.pc.getSenders().filter(s => s.track && s.track.kind === 'video'); ss.forEach(s => { try { p.pc.removeTrack(s); } catch (_) {} }); });
+      state.peers.forEach(p => {
+        const ss = p.pc.getSenders().filter(s => s.track && s.track.kind === 'video');
+        ss.forEach(s => { try { p.pc.removeTrack(s); } catch (_) {} });
+      });
     }
     screenAudioTracks.forEach(() => {
       state.peers.forEach(p => {
