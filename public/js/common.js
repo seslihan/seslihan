@@ -100,9 +100,68 @@
         container.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         saveAvatar(a.id);
+        updateProfileAvatar();
         if (onSelect) onSelect(a);
       });
       container.appendChild(btn);
+    });
+  };
+
+  // ---------- AVATAR PICKER MODAL ----------
+  window.updateProfileAvatar = function () {
+    const btn = document.getElementById('profileBtn');
+    if (!btn) return;
+    const av = getAvatar();
+    if (av) {
+      btn.innerHTML = '<span class="avatar-emoji">' + av.emoji + '</span>';
+      btn.style.background = av.bg;
+      btn.style.fontSize = '0';
+    } else {
+      const name = (getUser()?.name || localStorage.getItem('bs-name') || 'M');
+      btn.textContent = name.charAt(0).toUpperCase();
+      btn.style.background = '';
+      btn.style.fontSize = '';
+    }
+  };
+
+  window.openAvatarModal = function () {
+    let modal = document.getElementById('avatarModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'avatarModal';
+      modal.className = 'avatar-modal-overlay';
+      modal.innerHTML =
+        '<div class="avatar-modal">' +
+          '<div class="avatar-modal-header">' +
+            '<h3>Avatar seçin</h3>' +
+            '<button class="avatar-modal-close" id="avatarModalClose">&times;</button>' +
+          '</div>' +
+          '<div class="avatar-modal-grid" id="avatarModalGrid"></div>' +
+        '</div>';
+      document.body.appendChild(modal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.hidden = true; });
+      modal.querySelector('.avatar-modal-close').addEventListener('click', () => { modal.hidden = true; });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) modal.hidden = true; });
+    }
+    modal.hidden = false;
+    const grid = document.getElementById('avatarModalGrid');
+    const current = getAvatarId();
+    grid.innerHTML = '';
+    AVATARS.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = 'avatar-modal-item' + (a.id === current ? ' selected' : '');
+      btn.type = 'button';
+      btn.title = a.label;
+      btn.innerHTML = '<span class="avatar-emoji">' + a.emoji + '</span>';
+      btn.style.background = a.bg;
+      btn.addEventListener('click', () => {
+        saveAvatar(a.id);
+        grid.querySelectorAll('.avatar-modal-item').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateProfileAvatar();
+        modal.hidden = true;
+      });
+      grid.appendChild(btn);
     });
   };
 
@@ -148,6 +207,7 @@
 
   // ---------- PROFILE MENU ----------
   document.addEventListener('DOMContentLoaded', () => {
+    updateProfileAvatar();
     const btn = document.getElementById('profileBtn');
     const dd = document.getElementById('profileDropdown');
     if (btn && dd) {
@@ -156,12 +216,12 @@
       const emailEl = document.getElementById('profileEmail');
       const signOutBtn = document.getElementById('signOutBtn');
       const authBtn = document.getElementById('authBtn');
+      const avatarBtn = document.getElementById('avatarSelectBtn');
       if (user) {
         if (nameEl) nameEl.textContent = user.name;
         if (emailEl) emailEl.textContent = user.email;
         if (authBtn) authBtn.textContent = 'Profil';
         if (signOutBtn) signOutBtn.hidden = false;
-        if (btn) btn.textContent = (user.name || '?').charAt(0).toUpperCase();
       }
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -170,6 +230,7 @@
       document.addEventListener('click', (e) => {
         if (!dd.hidden && !dd.contains(e.target) && e.target !== btn) dd.hidden = true;
       });
+      if (avatarBtn) avatarBtn.addEventListener('click', () => { dd.hidden = true; openAvatarModal(); });
       if (authBtn) authBtn.addEventListener('click', () => {
         if (user) window.location.href = '/settings.html';
         else window.location.href = '/auth.html';
