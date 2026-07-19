@@ -5,15 +5,15 @@ window.pageInitTV = function () {
       { id: 'cnnturk',   name: 'CNN Türk',     cid: 'UCV6zcRug6Hqp1UX_FdyUeBg', color: '#e30a17' },
       { id: 'trthaber',  name: 'TRT Haber',    cid: 'UCBgTP2LOFVPmq15W-RH-WXA', color: '#003399' },
       { id: 'haberturk', name: 'Habertürk TV', cid: 'UCn6dNfiRE_Xunu7iMyvD7AA', color: '#e4002b' },
-      { id: 'ntv',       name: 'NTV',          cid: 'UCGMghpDmBAqhz2p7eLHX-eg', color: '#c8102e' },
+      { id: 'ntv',       name: 'NTV',          cid: 'UCyR7iLc73OW1kuW3qnvGVBQ', color: '#c8102e' },
       { id: 'showtv',    name: 'Show TV',      cid: 'UC9JMe_We017gYrRc7kZHgmg', color: '#0066cc' },
       { id: 'ahaber',    name: 'A Haber',      cid: 'UCKQhfw-lzz0uKnE1fY1PsAA', color: '#c8102e' },
       { id: 'tv8',       name: 'TV8',          cid: 'UCp4N3g1zcvp8WE2qJ_JKqBg', color: '#6c2dc7' },
       { id: '24tv',      name: '24 TV',        cid: 'UCN7VYCsI4Lx1-J4_BtjoWUA', color: '#003366' },
-      { id: 'trt1',      name: 'TRT 1',        cid: 'UCtM2BcaXwKc0duqk6U0l1VQ', color: '#c8102e' },
-      { id: 'kanald',    name: 'Kanal D',      cid: 'UCfPj5EXdOa4nFsH0Fn5YpWw', color: '#e30a17' },
-      { id: 'atv',       name: 'ATV',          cid: 'UCq-FG9Z1IRw6kSMk0bDPb5g', color: '#003399' },
-      { id: 'star',      name: 'Star TV',      cid: 'UCMkZ1-u8yKvVRR1pVfYc1Nw', color: '#0066cc' }
+      { id: 'trt1',      name: 'TRT 1',        cid: 'UCvFudBDDILdDljN4VIZ4Msw', color: '#c8102e' },
+      { id: 'kanald',    name: 'Kanal D',      cid: 'UCFoe1tg8MuHjRzmqXtV816A', color: '#e30a17' },
+      { id: 'atv',       name: 'ATV',          cid: 'UCUVZ7T_kwkxDOGFcDlFI-hg', color: '#003399' },
+      { id: 'star',      name: 'Star TV',      cid: 'UCnowC2m_NjWexnSRvMMYxSg', color: '#0066cc' }
     ],
     movies: [
       { id: 'tubi',      name: 'Tubi Movies',     cid: 'UC3gHkrgDuj-GVHFtUO9jNTg', color: '#fa382f' },
@@ -114,6 +114,8 @@ window.pageInitTV = function () {
 
     if (ch.url && (ch.url.includes('.m3u') || ch.url.includes('m3u8') || ch.url.includes('stream'))) {
       playHLS(ch.url);
+    } else if (ch.cid && currentTab === 'live') {
+      container.innerHTML = '<iframe src="https://www.youtube.com/embed/live_stream?channel=' + ch.cid + '&autoplay=1&mute=1" allow="autoplay;encrypted-media" allowfullscreen></iframe>';
     } else if (ch.cid) {
       fetch('/api/tv-rss/' + ch.cid)
         .then(r => r.json())
