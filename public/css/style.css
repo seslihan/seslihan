@@ -325,9 +325,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  min-width: 220px;
+  min-width: 240px;
   z-index: 200;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .profile-dropdown-header {
@@ -5296,6 +5296,42 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* TV Page */
+.tv-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.tv-tab {
+  padding: 6px 14px;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  font-family: var(--font);
+  font-size: 9px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text);
+}
+.tv-tab:hover { border-color: var(--accent); }
+.tv-tab.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.tv-search-wrap { margin-bottom: 12px; }
+.tv-search {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 9px;
+  outline: none;
+}
+.tv-search:focus { border-color: var(--accent); }
+.tv-search::placeholder { color: var(--muted); }
 .tv-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -5311,14 +5347,38 @@ input[type="range"]::-moz-range-thumb {
 .tv-card:hover {
   transform: translateY(-2px);
   border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
 }
 .tv-card-color { height: 4px; }
+.tv-card-logo {
+  width: 100%;
+  height: 60px;
+  object-fit: contain;
+  padding: 8px;
+  background: var(--bg);
+}
 .tv-card-name {
-  padding: 12px;
+  padding: 10px 12px;
   font-family: var(--font);
   font-size: 9px;
   text-transform: uppercase;
   text-align: center;
+}
+.tv-card-group {
+  padding: 0 12px 8px;
+  font-family: var(--font);
+  font-size: 7px;
+  color: var(--muted);
+  text-transform: uppercase;
+  text-align: center;
+}
+.tv-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  font-family: var(--font);
+  font-size: 10px;
+  color: var(--muted);
 }
 .tv-player {
   margin-top: 20px;
@@ -5346,6 +5406,13 @@ input[type="range"]::-moz-range-thumb {
   top: 0; left: 0;
   width: 100%; height: 100%;
   border: none;
+}
+.tv-player-wrap video {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: none;
+  object-fit: contain;
 }
 .tv-loading {
   position: absolute;

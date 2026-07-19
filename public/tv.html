@@ -24,9 +24,23 @@
   </header>
   <main class="home-main">
     <div class="standalone-page">
-      <h1 class="standalone-title">📺 CANLI TV</h1>
-      <p class="standalone-desc">Türk televizyon kanallarını canlı izleyin</p>
+      <h1 class="standalone-title">📺 CANLI TV & İPTV</h1>
+      <p class="standalone-desc">Canlı TV, film ve dizi kanallarını ücretsiz izleyin</p>
+
+      <div class="tv-tabs" id="tvTabs">
+        <button class="tv-tab active" data-tab="live">📺 Canlı TV</button>
+        <button class="tv-tab" data-tab="movies">🎬 Filmler</button>
+        <button class="tv-tab" data-tab="series">🎞️ Diziler</button>
+        <button class="tv-tab" data-tab="iptv">📡 IPTV</button>
+      </div>
+
+      <div id="tvSearch" class="tv-search-wrap">
+        <input id="tvSearchInput" type="text" placeholder="Kanal veya film ara..." class="tv-search" />
+      </div>
+
       <div id="tvGrid" class="tv-grid"></div>
+      <div id="tvLoading" class="tv-loading" hidden>Yükleniyor...</div>
+
       <div id="tvPlayer" class="tv-player" hidden>
         <div class="tv-player-header">
           <span id="tvChannelName" class="tv-channel-name"></span>
@@ -41,6 +55,7 @@
   <div class="toast-host" id="toastHost"></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
   <script src="/js/tv.js"></script>
 </body>
 </html>

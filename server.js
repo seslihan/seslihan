@@ -400,6 +400,100 @@ app.get('/api/tv-live/:channelId', (req, res) => {
   }
 });
 
+// ---------- IPTV M3U PROXY ----------
+const IPTV_PLAYLISTS = [
+  { name: 'Türkiye TV', url: 'https://raw.githubusercontent.com/AhmadAlsaworw/iptv/main/tr.m3u' },
+  { name: 'Film & Dizi', url: 'https://raw.githubusercontent.com/AhmadAlsaworw/iptv/main/movie.m3u' }
+];
+
+const m3uCache = new Map();
+
+function parseM3U(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const items = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('#EXTINF:')) {
+      const info = lines[i];
+      const url = lines[i + 1];
+      if (url && !url.startsWith('#')) {
+        const nameMatch = info.match(/,(.+)$/);
+        const logoMatch = info.match(/tvg-logo="([^"]*)"/);
+        const groupMatch = info.match(/group-title="([^"]*)"/);
+        items.push({
+          name: nameMatch ? nameMatch[1].trim() : 'Bilinmeyen',
+          url: url,
+          logo: logoMatch ? logoMatch[1] : '',
+          group: groupMatch ? groupMatch[1] : ''
+        });
+      }
+    }
+  }
+  return items;
+}
+
+app.get('/api/iptv', async (req, res) => {
+  const playlistIdx = parseInt(req.query.list) || 0;
+  const playlist = IPTV_PLAYLISTS[playlistIdx];
+  if (!playlist) return res.status(400).json({ error: 'Invalid playlist' });
+
+  const cacheKey = playlist.url;
+  const cached = m3uCache.get(cacheKey);
+  if (cached && Date.now() - cached.time < 300000) {
+    return res.json({ items: cached.items, source: playlist.name });
+  }
+
+  try {
+    const data = await new Promise((resolve, reject) => {
+      https.get(playlist.url, { timeout: 10000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+        if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+          https.get(r.headers.location, { timeout: 10000 }, (r2) => {
+            const chunks = [];
+            r2.on('data', c => chunks.push(c));
+            r2.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+          }).on('error', reject);
+          return;
+        }
+        const chunks = [];
+        r.on('data', c => chunks.push(c));
+        r.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+      }).on('error', reject).on('timeout', function() { this.destroy(); reject(new Error('timeout')); });
+    });
+    const items = parseM3U(data);
+    m3uCache.set(cacheKey, { items, time: Date.now() });
+    res.json({ items, source: playlist.name });
+  } catch (e) {
+    res.status(502).json({ error: 'IPTV playlist alınamadı' });
+  }
+});
+
+app.get('/api/iptv/proxy', (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).send('Missing url');
+  let parsed;
+  try { parsed = new URL(url); } catch { return res.status(400).send('Invalid URL'); }
+  if (!['http:', 'https:'].includes(parsed.protocol)) return res.status(400).send('Bad protocol');
+
+  const mod = parsed.protocol === 'https:' ? https : http;
+  const proxyReq = mod.get(url, { timeout: 10000 }, (proxyRes) => {
+    if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
+      const redirect = new URL(proxyRes.headers.location, url);
+      const redirMod = redirect.protocol === 'https:' ? https : http;
+      redirMod.get(redirect.href, { timeout: 10000 }, (redirRes) => {
+        const ct = redirRes.headers['content-type'] || 'application/octet-stream';
+        res.writeHead(redirRes.statusCode, { 'Content-Type': ct, 'Access-Control-Allow-Origin': '*' });
+        redirRes.pipe(res);
+      }).on('error', () => res.status(502).send('Redirect error'));
+      return;
+    }
+    const ct = proxyRes.headers['content-type'] || 'application/octet-stream';
+    res.writeHead(proxyRes.statusCode, { 'Content-Type': ct, 'Access-Control-Allow-Origin': '*' });
+    proxyRes.pipe(res);
+  });
+  proxyReq.on('error', () => res.status(502).send('Upstream error'));
+  proxyReq.on('timeout', () => { proxyReq.destroy(); res.status(504).send('Timeout'); });
+  req.on('close', () => proxyReq.destroy());
+});
+
 // ---------- TWITTER RSS FEED ----------
 app.get('/api/twitter/:handle', (req, res) => {
   const handle = req.params.handle.replace(/^@/, '');
