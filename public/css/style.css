@@ -233,7 +233,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 
 .app-brand img, .logo-transparent {
-  height: 32px;
+  height: 38px;
   width: auto;
   mix-blend-mode: multiply;
 }
@@ -2066,7 +2066,7 @@ body.post-body {
   .side-card { display: none; }
   .meeting-list { max-height: 150px; }
   .app-header { padding: 2px 12px; min-height: 44px; }
-  .app-header .app-brand img { height: 24px; }
+  .app-header .app-brand img { height: 28px; }
   .app-header-actions { gap: 4px; }
 
   .prejoin-container { padding: 16px 12px; }
