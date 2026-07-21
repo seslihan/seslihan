@@ -428,7 +428,7 @@ function dizipalFetch(path) {
 
 function parseDizipalCards(html) {
   const items = [];
-  const cardRe = /<li class="content-card">([\s\S]*?)<\/li>/g;
+  const cardRe = /<(?:li|article) class="content-card">([\s\S]*?)<\/(?:li|article)>/g;
   let m;
   while ((m = cardRe.exec(html)) !== null) {
     const block = m[1];
