@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Seslihan — Radyo</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/css/style.css?v=11" />
+  <link rel="stylesheet" href="/css/style.css?v=16" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5164131970192412" crossorigin="anonymous"></script>
 </head>
 <body class="home">
   <header class="app-header">
@@ -23,11 +24,33 @@
     </div>
   </header>
   <main class="home-main">
-    <div class="standalone-page">
-      <h1 class="standalone-title">📻 RADYO</h1>
-      <p class="standalone-desc">25 radyo istasyonunu canlı dinleyin</p>
-      <div id="radioFilter" class="radio-filter-bar"></div>
-      <div id="radioGrid" class="radio-grid"></div>
+    <div class="standalone-page wide">
+      <div class="radio-hero">
+        <h1 class="radio-hero-title">📻 RADYO</h1>
+        <p class="radio-hero-desc">Canlı radyo istasyonlarını dinleyin</p>
+        <div class="radio-hero-count">
+          <span class="radio-hero-count-dot"></span>
+          <span id="radioStationCount">25 İstasyon</span>
+        </div>
+      </div>
+      <div id="radioFilter" class="radio-filter-bar" role="tablist" aria-label="Kategori filtreleri"></div>
+      <div id="radioGrid" class="radio-grid" role="list"></div>
+    </div>
+    <div id="radioMiniPlayer" class="radio-mini-player" role="region" aria-label="Radyo oynatıcı">
+      <div id="miniPlayBtn" class="radio-mini-btn" role="button" aria-label="Oynat/Duraklat" tabindex="0">
+        <svg id="miniPlayIcon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        <svg id="miniPauseIcon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" hidden><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+      </div>
+      <div class="radio-mini-player-info">
+        <div id="miniGenre" class="radio-mini-player-genre"></div>
+        <div id="miniName" class="radio-mini-player-name"></div>
+      </div>
+      <div class="radio-mini-player-controls">
+        <input id="miniVolume" class="radio-mini-volume" type="range" min="0" max="100" value="50" aria-label="Ses seviyesi" />
+        <button id="miniClose" class="radio-mini-close" aria-label="Kapat">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
   </main>
   <div class="toast-host" id="toastHost"></div>

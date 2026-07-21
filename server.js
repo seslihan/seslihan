@@ -406,23 +406,31 @@ const DIZIPAL_BASE = 'https://dizipal2087.com';
 
 function dizipalFetch(path) {
   return new Promise((resolve, reject) => {
-    https.get(DIZIPAL_BASE + path, {
-      timeout: 15000,
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', 'Accept-Language': 'tr-TR,tr;q=0.9' }
-    }, (r) => {
-      if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
-        const loc = r.headers.location.startsWith('http') ? r.headers.location : DIZIPAL_BASE + r.headers.location;
-        https.get(loc, { timeout: 15000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r2) => {
-          const chunks = [];
-          r2.on('data', c => chunks.push(c));
-          r2.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-        }).on('error', reject);
-        return;
-      }
-      const chunks = [];
-      r.on('data', c => chunks.push(c));
-      r.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    }).on('error', reject);
+    const timer = setTimeout(() => reject(new Error('dizipal timeout')), 20000);
+    function doFetch(url) {
+      https.get(url, {
+        timeout: 15000,
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', 'Accept-Language': 'tr-TR,tr;q=0.9' }
+      }, (r) => {
+        if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+          const loc = r.headers.location.startsWith('http') ? r.headers.location : DIZIPAL_BASE + r.headers.location;
+          r.resume();
+          doFetch(loc);
+          return;
+        }
+        if (r.statusCode !== 200) {
+          r.resume();
+          clearTimeout(timer);
+          reject(new Error('dizipal status ' + r.statusCode));
+          return;
+        }
+        const chunks = [];
+        r.on('data', c => chunks.push(c));
+        r.on('end', () => { clearTimeout(timer); resolve(Buffer.concat(chunks).toString('utf8')); });
+        r.on('error', (e) => { clearTimeout(timer); reject(e); });
+      }).on('error', (e) => { clearTimeout(timer); reject(e); }).on('timeout', function() { this.destroy(); clearTimeout(timer); reject(new Error('dizipal socket timeout')); });
+    }
+    doFetch(DIZIPAL_BASE + path);
   });
 }
 
@@ -1021,6 +1029,9 @@ setInterval(() => {
     });
   }
 }, 30 * 60 * 1000);
+
+process.on('uncaughtException', (e) => { console.error('Uncaught:', e.message); });
+process.on('unhandledRejection', (e) => { console.error('Unhandled:', e && e.message ? e.message : e); });
 
 server.listen(PORT, () => {
   console.log('Sunucu calisiyor: http://localhost:' + PORT);

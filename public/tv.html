@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Seslihan — Canlı TV</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/css/style.css?v=13" />
+  <link rel="stylesheet" href="/css/style.css?v=15" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5164131970192412" crossorigin="anonymous"></script>
 </head>
 <body class="home">
   <header class="app-header">
@@ -27,6 +28,18 @@
       <h1 class="standalone-title">📺 CANLI TV & İPTV</h1>
       <p class="standalone-desc">Canlı TV, film ve dizi kanallarını ücretsiz izleyin</p>
 
+      <div id="tvPlayer" class="tv-player" hidden>
+        <div class="tv-player-header">
+          <span id="tvChannelName" class="tv-channel-name"></span>
+          <button id="tvClose" class="btn small">✕ Kapat</button>
+        </div>
+        <div class="tv-player-wrap">
+          <div id="tvPlayerContainer"></div>
+        </div>
+      </div>
+
+      <div id="tvDetail" class="tv-detail-box" hidden></div>
+
       <div class="tv-tabs" id="tvTabs">
         <button class="tv-tab active" data-tab="live">📺 Canlı TV</button>
         <button class="tv-tab" data-tab="iptv">📡 IPTV</button>
@@ -40,18 +53,8 @@
         <input id="tvSearchInput" type="text" placeholder="Kanal veya film ara..." class="tv-search" />
       </div>
 
+      <div id="tvLoading" class="tv-loading-text" hidden>Yükleniyor...</div>
       <div id="tvGrid" class="tv-grid"></div>
-      <div id="tvLoading" class="tv-loading" hidden>Yükleniyor...</div>
-
-      <div id="tvPlayer" class="tv-player" hidden>
-        <div class="tv-player-header">
-          <span id="tvChannelName" class="tv-channel-name"></span>
-          <button id="tvClose" class="btn small">✕ Kapat</button>
-        </div>
-        <div class="tv-player-wrap">
-          <div id="tvPlayerContainer"></div>
-        </div>
-      </div>
     </div>
   </main>
   <div class="toast-host" id="toastHost"></div>
