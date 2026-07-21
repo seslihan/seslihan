@@ -400,71 +400,155 @@ app.get('/api/tv-live/:channelId', (req, res) => {
   }
 });
 
-// ---------- JUSTWATCH ----------
-const justwatchCache = { data: null, time: 0 };
+// ---------- DIZIPAL SCRAPER ----------
+const dizipalCache = {};
+const DIZIPAL_BASE = 'https://dizipal2087.com';
 
-app.get('/api/justwatch', async (req, res) => {
-  const type = req.query.type === 'series' ? 'SHOW' : 'MOVIE';
+function dizipalFetch(path) {
+  return new Promise((resolve, reject) => {
+    https.get(DIZIPAL_BASE + path, {
+      timeout: 15000,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', 'Accept-Language': 'tr-TR,tr;q=0.9' }
+    }, (r) => {
+      if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+        const loc = r.headers.location.startsWith('http') ? r.headers.location : DIZIPAL_BASE + r.headers.location;
+        https.get(loc, { timeout: 15000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r2) => {
+          const chunks = [];
+          r2.on('data', c => chunks.push(c));
+          r2.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+        }).on('error', reject);
+        return;
+      }
+      const chunks = [];
+      r.on('data', c => chunks.push(c));
+      r.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    }).on('error', reject);
+  });
+}
+
+function parseDizipalCards(html) {
+  const items = [];
+  const cardRe = /<li class="content-card">([\s\S]*?)<\/li>/g;
+  let m;
+  while ((m = cardRe.exec(html)) !== null) {
+    const block = m[1];
+    const hrefM = block.match(/href="([^"]*?)"/);
+    const titleM = block.match(/<h3 class="card-title">(.*?)<\/h3>/);
+    const posterM = block.match(/data-src="([^"]*?)"/);
+    const ratingM = block.match(/<span class="card-rating"><i[^>]*><\/i>\s*([\d.]+)/);
+    const yearM = block.match(/<span class="card-year">([\d]+)<\/span>/);
+    const typeM = block.match(/<span class="card-badge type">(.*?)<\/span>/);
+    if (titleM) {
+      items.push({
+        title: titleM[1].replace(/&#039;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '"'),
+        url: hrefM ? hrefM[1] : '',
+        poster: posterM ? posterM[1] : '',
+        rating: ratingM ? ratingM[1] : null,
+        year: yearM ? yearM[1] : null,
+        type: typeM ? typeM[1] : 'Film'
+      });
+    }
+  }
+  return items;
+}
+
+function parseDizipalTrending(html) {
+  const items = [];
+  // Try top10-item pattern (from /trend page)
+  const top10Re = /<a href="([^"]*?)" class="top10-item">([\s\S]*?)<\/a>/g;
+  let m;
+  while ((m = top10Re.exec(html)) !== null) {
+    const block = m[2];
+    const titleM = block.match(/<h3 class="top10-title-text">(.*?)<\/h3>/);
+    const posterM = block.match(/data-src="([^"]*?)"/);
+    const badgeM = block.match(/<span class="top10-badge[^"]*">(.*?)<\/span>/);
+    const rankM = block.match(/<span>(\d+)<\/span>/);
+    const ratingM = block.match(/<span class="top10-rating"><i[^>]*><\/i>\s*([\d.]+)/);
+    const yearM = block.match(/<span class="top10-year">([\d]+)<\/span>/);
+    if (titleM) {
+      items.push({
+        title: titleM[1].replace(/&#039;/g, "'").replace(/&amp;/g, "&"),
+        url: m[1],
+        poster: posterM ? posterM[1] : '',
+        type: badgeM ? badgeM[1] : 'Dizi',
+        rank: rankM ? parseInt(rankM[1]) : items.length + 1,
+        rating: ratingM ? ratingM[1] : null,
+        year: yearM ? yearM[1] : null
+      });
+    }
+  }
+  // Fallback: try trending-item pattern (from homepage)
+  if (items.length === 0) {
+    const trendRe = /<a href="([^"]*?)" class="trending-item"[^>]*>([\s\S]*?)<\/a>/g;
+    while ((m = trendRe.exec(html)) !== null) {
+      const block = m[2];
+      const titleM = block.match(/<h3 class="trending-title">(.*?)<\/h3>/);
+      const posterM = block.match(/data-src="([^"]*?)"/);
+      const badgeM = block.match(/<span class="trending-badge">(.*?)<\/span>/);
+      const rankM = block.match(/<span class="rank-number[^"]*">(\d+)<\/span>/);
+      if (titleM) {
+        items.push({
+          title: titleM[1].replace(/&#039;/g, "'").replace(/&amp;/g, "&"),
+          url: m[1],
+          poster: posterM ? posterM[1] : '',
+          type: badgeM ? badgeM[1] : 'Dizi',
+          rank: rankM ? parseInt(rankM[1]) : items.length + 1,
+          rating: null,
+          year: null
+        });
+      }
+    }
+  }
+  return items;
+}
+
+const DIZIPAL_PAGES = {
+  'trend-movies': '/trend',
+  'trend-series': '/trend',
+  'movies': '/filmler',
+  'series': '/diziler'
+};
+
+app.get('/api/dizipal', async (req, res) => {
+  const type = req.query.type || 'trend-movies';
   const cacheKey = type;
-  if (justwatchCache.data && justwatchCache.cacheKey === cacheKey && Date.now() - justwatchCache.time < 600000) {
-    return res.json(justwatchCache.data);
+  const TTL = 1800000;
+  if (dizipalCache[cacheKey] && Date.now() - dizipalCache[cacheKey].time < TTL) {
+    return res.json(dizipalCache[cacheKey].data);
   }
 
-  const query = `{ popularTitles(country: TR, first: 40, filter: {objectTypes: [${type}]}) { edges { node { id objectType content(country: TR, language: tr) { title originalReleaseYear shortDescription scoring { imdbScore } posterUrl } offers(country: TR, platform: WEB) { monetizationType package { clearName technicalName } } } } } }`;
-
   try {
-    const body = JSON.stringify({ query });
-    const data = await new Promise((resolve, reject) => {
-      const req = https.request('https://apis.justwatch.com/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(body),
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        },
-        timeout: 15000
-      }, (r) => {
-        const chunks = [];
-        r.on('data', c => chunks.push(c));
-        r.on('end', () => {
-          try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))); }
-          catch (e) { reject(e); }
-        });
-      });
-      req.on('error', reject);
-      req.on('timeout', function() { req.destroy(); reject(new Error('timeout')); });
-      req.write(body);
-      req.end();
-    });
-
-    const items = (data.data && data.data.popularTitles && data.data.popularTitles.edges || []).map(e => {
-      const n = e.node;
-      const free = (n.offers || []).find(o => o.monetizationType === 'FREE' || o.monetizationType === 'ADS');
-      const flatrate = (n.offers || []).filter(o => o.monetizationType === 'FLATRATE' || o.monetizationType === 'FLATRATE');
-      const platforms = [...new Set(flatrate.map(o => o.package.clearName))];
-      let poster = '';
-      if (n.content.posterUrl) {
-        poster = 'https://images.justwatch.com' + n.content.posterUrl.replace('{profile}', 's718').replace('{format}', 'webp');
-      }
-      return {
-        id: n.id,
-        title: n.content.title,
-        year: n.content.originalReleaseYear,
-        description: n.content.shortDescription || '',
-        poster,
-        imdb: n.content.scoring ? n.content.scoring.imdbScore : null,
-        free: free ? free.package.clearName : null,
-        platforms,
-        type: n.objectType
-      };
-    });
-
-    justwatchCache.data = { items, type: type === 'SHOW' ? 'series' : 'movies' };
-    justwatchCache.time = Date.now();
-    justwatchCache.cacheKey = cacheKey;
-    res.json(justwatchCache.data);
+    const html = await dizipalFetch(DIZIPAL_PAGES[type] || '/trend');
+    let items = [];
+    if (type === 'trend-movies' || type === 'trend-series') {
+      const trending = parseDizipalTrending(html);
+      items = trending.filter(i => type === 'trend-movies' ? i.type === 'Film' : i.type === 'Dizi').map(i => ({
+        title: i.title, poster: i.poster, url: i.url, type: i.type, rank: i.rank, rating: i.rating || null, year: i.year || null
+      }));
+      if (items.length === 0) items = trending.map(i => ({
+        title: i.title, poster: i.poster, url: i.url, type: i.type, rank: i.rank, rating: i.rating || null, year: i.year || null
+      }));
+    } else {
+      items = parseDizipalCards(html).map(i => ({
+        title: i.title, poster: i.poster, url: i.url, type: i.type, rating: i.rating, year: i.year, rank: 0
+      }));
+    }
+    dizipalCache[cacheKey] = { data: { items, type }, time: Date.now() };
+    res.json({ items, type });
   } catch (e) {
-    res.status(502).json({ error: 'JustWatch alınamadı' });
+    res.status(502).json({ error: 'Dizipal alınamadı', details: e.message });
+  }
+});
+
+app.get('/api/dizipal/search', async (req, res) => {
+  const q = req.query.q;
+  if (!q) return res.json({ items: [] });
+  try {
+    const html = await dizipalFetch('/arama?q=' + encodeURIComponent(q));
+    const items = parseDizipalCards(html);
+    res.json({ items });
+  } catch (e) {
+    res.status(502).json({ error: 'Arama başarısız' });
   }
 });
 

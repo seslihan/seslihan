@@ -14,30 +14,12 @@ window.pageInitTV = function () {
       { id: 'kanald',    name: 'Kanal D',      cid: 'UCFoe1tg8MuHjRzmqXtV816A', color: '#e30a17' },
       { id: 'atv',       name: 'ATV',          cid: 'UCUVZ7T_kwkxDOGFcDlFI-hg', color: '#003399' },
       { id: 'star',      name: 'Star TV',      cid: 'UCnowC2m_NjWexnSRvMMYxSg', color: '#0066cc' }
-    ],
-    movies: [
-      { id: 'tubi',      name: 'Tubi Movies',     cid: 'UC3gHkrgDuj-GVHFtUO9jNTg', color: '#fa382f' },
-      { id: 'crackle',   name: 'Crackle',         cid: 'UCkLTA9y7KdLVkSE7JgR0c1A', color: '#f5c518' },
-      { id: 'popcorn',   name: 'Popcorn Flix',    cid: 'UC1aG8g2VwqZp3LFqTvG7Csg', color: '#ff6600' },
-      { id: 'filmrise',  name: 'FilmRise',        cid: 'UC3yA80-LEYTz75K0wrtUuYg', color: '#0099ff' },
-      { id: 'plex',      name: 'Plex Free Movies', cid: 'UCsfpYDGCP1h773V0qz2v0eg', color: '#e5a00d' },
-      { id: 'freevee',   name: 'Freevee',         cid: 'UC1KqayDAid0zZu1738YtYUg', color: '#00a8e1' },
-      { id: 'mometu',    name: 'Momenteu',        cid: 'UCGdFLrB31A8zswV1pMKaI1g', color: '#ff0066' },
-      { id: 'movies1',   name: 'Classic Movies',  cid: 'UCgB4HdMiVbS_0Ez0Ej9fTig', color: '#9966cc' }
-    ],
-    series: [
-      { id: 'rivet',     name: 'Rivet',           cid: 'UCk8k4c3S7vC6w8k9v0aG4xA', color: '#00cc88' },
-      { id: 'darkmatters', name: 'Dark Matters',  cid: 'UC4SvJrKR37aOG2d9u3aYQDw', color: '#333333' },
-      { id: 'watchmojo', name: 'WatchMojo',       cid: 'UC_qaHt3X5kVv-5lKv2RdBdA', color: '#ff3366' },
-      { id: 'fandom',    name: 'Fandom',          cid: 'UCkMeMfd1mBQ1FGCds8FJfQg', color: '#ff9900' },
-      { id: 'looper',    name: 'Looper',          cid: 'UCaiH1en79Fy8mz3F2z8BcQg', color: '#0066ff' },
-      { id: 'insider',   name: 'Insider Series',  cid: 'UC3K2d3H3b5R1g4Z3X7vJ5Ww', color: '#000000' }
     ]
   };
 
   let currentTab = 'live';
   let iptvItems = [];
-  let jwCache = {};
+  let dpCache = {};
   let hlsInstance = null;
 
   const grid = document.getElementById('tvGrid');
@@ -74,11 +56,13 @@ window.pageInitTV = function () {
     player.hidden = true;
     container.innerHTML = '';
     if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+    const isPoster = tab === 'trend-movies' || tab === 'trend-series' || tab === 'movies' || tab === 'series';
+    grid.classList.toggle('poster-grid', isPoster);
 
     if (tab === 'iptv') {
       loadIPTV();
-    } else if (tab === 'justwatch' || tab === 'jw-series') {
-      loadJustWatch(tab === 'jw-series' ? 'series' : 'movies');
+    } else if (tab === 'trend-movies' || tab === 'trend-series' || tab === 'movies' || tab === 'series') {
+      loadDizipal(tab);
     } else {
       const list = channels[tab] || [];
       const q = (searchInput.value || '').toLowerCase();
@@ -108,27 +92,27 @@ window.pageInitTV = function () {
     });
   }
 
-  function loadJustWatch(type) {
-    if (jwCache[type]) {
-      renderJW(jwCache[type]);
+  function loadDizipal(type) {
+    if (dpCache[type]) {
+      renderDP(dpCache[type]);
       return;
     }
     loading.hidden = false;
     grid.innerHTML = '';
-    fetch('/api/justwatch?type=' + type)
+    fetch('/api/dizipal?type=' + type)
       .then(r => r.json())
       .then(data => {
         loading.hidden = true;
-        jwCache[type] = data.items || [];
-        renderJW(jwCache[type]);
+        dpCache[type] = data.items || [];
+        renderDP(dpCache[type]);
       })
       .catch(() => {
         loading.hidden = true;
-        grid.innerHTML = '<div class="tv-empty">JustWatch yüklenemedi</div>';
+        grid.innerHTML = '<div class="tv-empty">Dizipal yüklenemedi</div>';
       });
   }
 
-  function renderJW(items) {
+  function renderDP(items) {
     grid.innerHTML = '';
     const q = (searchInput.value || '').toLowerCase();
     const filtered = q ? items.filter(i => i.title.toLowerCase().includes(q)) : items;
@@ -138,26 +122,28 @@ window.pageInitTV = function () {
     }
     filtered.forEach(item => {
       const card = document.createElement('div');
-      card.className = 'tv-card jw-card';
-      const poster = item.poster ? '<img class="jw-poster" src="' + escapeHtml(item.poster) + '" loading="lazy" onerror="this.parentElement.removeChild(this)" />' : '<div class="jw-poster-placeholder">🎬</div>';
-      const imdb = item.imdb ? '<div class="jw-imdb">⭐ ' + item.imdb + '</div>' : '';
-      const year = item.year ? '<div class="jw-year">' + item.year + '</div>' : '';
-      const platforms = item.platforms.length > 0 ? '<div class="jw-platforms">' + item.platforms.slice(0, 3).map(p => '<span class="jw-platform-tag">' + escapeHtml(p) + '</span>').join('') + '</div>' : (item.free ? '<div class="jw-platforms"><span class="jw-platform-tag jw-free">✓ ' + escapeHtml(item.free) + '</span></div>' : '');
-      card.innerHTML = poster + '<div class="jw-info"><div class="jw-title">' + escapeHtml(item.title) + '</div>' + year + imdb + platforms + '</div>';
-      card.addEventListener('click', () => showJWDetail(item));
+      card.className = 'tv-card dp-card';
+      const poster = item.poster ? '<img class="dp-poster" src="' + escapeHtml(item.poster) + '" loading="lazy" onerror="this.outerHTML=\'<div class=dp-poster-placeholder>🎬</div>\'" />' : '<div class="dp-poster-placeholder">🎬</div>';
+      const rankBadge = item.rank ? '<div class="dp-rank-badge">' + item.rank + '</div>' : '';
+      const typeBadge = '<div class="dp-type-badge">' + escapeHtml(item.type || 'Film') + '</div>';
+      const rating = item.rating ? '<span class="dp-rating">⭐ ' + escapeHtml(item.rating) + '</span>' : '';
+      const year = item.year ? '<span class="dp-year">' + escapeHtml(item.year) + '</span>' : '';
+      const meta = (rating || year) ? '<div class="dp-meta">' + rating + year + '</div>' : '';
+      card.innerHTML = rankBadge + typeBadge + poster + '<div class="dp-info"><div class="dp-title">' + escapeHtml(item.title) + '</div>' + meta + '</div>';
+      card.addEventListener('click', () => showDPDetail(item));
       grid.appendChild(card);
     });
   }
 
-  function showJWDetail(item) {
+  function showDPDetail(item) {
     player.hidden = false;
     channelName.textContent = item.title + (item.year ? ' (' + item.year + ')' : '');
     const poster = item.poster ? '<img src="' + escapeHtml(item.poster) + '" style="max-width:200px;border-radius:8px;float:left;margin-right:16px;margin-bottom:8px" />' : '';
-    const imdb = item.imdb ? '<div style="margin:8px 0"><b>IMDB:</b> ⭐ ' + item.imdb + '/10</div>' : '';
-    const desc = item.description ? '<div style="margin:8px 0;color:var(--muted,#888);font-size:13px;line-height:1.5;clear:both">' + escapeHtml(item.description) + '</div>' : '';
-    const freeTag = item.free ? '<div style="margin:4px 0"><span class="jw-platform-tag jw-free" style="font-size:13px">✓ Ücretsiz: ' + escapeHtml(item.free) + '</span></div>' : '';
-    const platTags = item.platforms.length > 0 ? '<div style="margin:8px 0"><b>İzlenebilir:</b><div class="jw-platforms" style="margin-top:4px">' + item.platforms.map(p => '<span class="jw-platform-tag">' + escapeHtml(p) + '</span>').join('') + '</div></div>' : '';
-    container.innerHTML = '<div class="jw-detail">' + poster + imdb + desc + freeTag + platTags + '<div style="clear:both"></div></div>';
+    const rating = item.rating ? '<div style="margin:8px 0"><b>Puan:</b> ⭐ ' + escapeHtml(item.rating) + '/10</div>' : '';
+    const year = item.year ? '<div style="margin:4px 0;font-size:12px;color:var(--muted)">Yıl: ' + escapeHtml(item.year) + '</div>' : '';
+    const typeTag = item.type ? '<div style="margin:4px 0"><span style="padding:3px 8px;background:rgba(255,107,0,0.2);color:var(--accent);border-radius:4px;font-size:10px">' + escapeHtml(item.type) + '</span></div>' : '';
+    const watchLink = item.url ? '<a href="' + escapeHtml(item.url) + '" target="_blank" class="dp-detail-link">▶ Dizipal\'de İzle</a>' : '';
+    container.innerHTML = '<div class="dp-detail">' + poster + rating + year + typeTag + '<div style="clear:both"></div>' + watchLink + '</div>';
   }
 
   function playChannel(ch) {
@@ -237,7 +223,17 @@ window.pageInitTV = function () {
   let searchTimeout;
   searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => showTab(currentTab), 300);
+    searchTimeout = setTimeout(() => {
+      if (currentTab === 'iptv') {
+        const q = (searchInput.value || '').toLowerCase();
+        const filtered = q ? iptvItems.filter(c => c.name.toLowerCase().includes(q) || (c.group || '').toLowerCase().includes(q)) : iptvItems;
+        renderGrid(filtered);
+      } else if (dpCache[currentTab]) {
+        renderDP(dpCache[currentTab]);
+      } else {
+        showTab(currentTab);
+      }
+    }, 300);
   });
 
   document.getElementById('tvClose').addEventListener('click', () => {
